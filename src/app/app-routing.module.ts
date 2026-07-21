@@ -1,0 +1,43 @@
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
+
+const routes: Routes = [
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { 
+    path: '', 
+    loadChildren: () => import('./features/auth/auth.module').then(m => m.AuthModule) 
+  },
+  { 
+    path: 'dashboard', 
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/dashboard/dashboard.module').then(m => m.DashboardModule) 
+  },
+  { 
+    path: 'products', 
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/products/products.module').then(m => m.ProductsModule) 
+  },
+  { 
+    path: 'categories', 
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/categories/categories.module').then(m => m.CategoriesModule) 
+  },
+  { 
+    path: 'stock', 
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/stock/stock.module').then(m => m.StockModule) 
+  },
+  { 
+    path: 'profile', 
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/profile/profile.module').then(m => m.ProfileModule) 
+  },
+  { path: '**', redirectTo: 'dashboard' }
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }

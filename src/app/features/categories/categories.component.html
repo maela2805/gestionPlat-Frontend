@@ -1,0 +1,66 @@
+<div class="categories-page">
+  <app-navbar 
+    title="Gestion des Catégories" 
+    subtitle="Organisez vos plats et ingrédients par familles et sous-catégories"
+  ></app-navbar>
+
+  <div class="layout-grid">
+    <!-- Add Category Card -->
+    <div class="form-card">
+      <h3>➕ Ajouter une Catégorie</h3>
+      <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()" class="cat-form">
+        <div class="form-group">
+          <label>Nom de la catégorie *</label>
+          <input type="text" formControlName="name" placeholder="ex: Entrées Chaudes" />
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea formControlName="description" rows="2" placeholder="Courte description..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Catégorie Parente (facultatif)</label>
+          <select formControlName="parentCategoryId">
+            <option [value]="null">-- Aucune (Catégorie Racine) --</option>
+            <option *ngFor="let c of categories()" [value]="c.id">{{ c.name }}</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="categoryForm.invalid || isSaving()">
+          {{ isSaving() ? 'Enregistrement...' : 'Créer la Catégorie' }}
+        </button>
+      </form>
+    </div>
+
+    <!-- Categories Tree / List -->
+    <div class="tree-card">
+      <h3>📁 Arborescence des Catégories</h3>
+
+      <div *ngIf="rootCategories().length === 0" class="empty-state">
+        Aucune catégorie créée pour le moment.
+      </div>
+
+      <div class="category-tree">
+        <div *ngFor="let root of rootCategories()" class="tree-node">
+          <div class="node-header">
+            <span class="node-icon">📂</span>
+            <div class="node-info">
+              <span class="node-title">{{ root.name }}</span>
+              <span *ngIf="root.description" class="node-desc">{{ root.description }}</span>
+            </div>
+            <span class="node-badge">Racine</span>
+          </div>
+
+          <!-- Sub categories -->
+          <div *ngIf="root.subCategories && root.subCategories.length > 0" class="sub-tree">
+            <div *ngFor="let sub of root.subCategories" class="sub-node">
+              <span class="sub-icon">└─ 📄</span>
+              <span class="sub-title">{{ sub.name }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,36 @@
+<div class="image-upload-wrapper">
+  <label class="form-label">{{ label }} <span *ngIf="optional" class="text-muted">(Facultatif)</span></label>
+  
+  <div class="preview-box" [class.is-loading]="isUploading()">
+    <img [src]="imageUrl() | defaultImage" alt="Aperçu photo" class="preview-img" />
+    
+    <div *ngIf="isUploading()" class="spinner-overlay">
+      <div class="spinner"></div>
+      <span>Envoi vers Cloudinary...</span>
+    </div>
+
+    <div *ngIf="imageUrl() && !isUploading()" class="actions-overlay">
+      <button type="button" class="btn-clear" (click)="removeImage()" title="Supprimer la photo">
+        ✕ Retirer la photo
+      </button>
+    </div>
+  </div>
+
+  <div class="upload-dropzone">
+    <input 
+      type="file" 
+      #fileInput 
+      accept="image/*" 
+      (change)="onFileSelected($event)" 
+      style="display: none" 
+    />
+    <button type="button" class="btn-upload" (click)="fileInput.click()" [disabled]="isUploading()">
+      📷 {{ imageUrl() ? 'Changer de photo' : 'Ajouter une photo' }}
+    </button>
+    <p class="upload-hint">Formats acceptés: JPG, PNG, WEBP (Max 5Mo)</p>
+  </div>
+
+  <div *ngIf="uploadError()" class="error-badge">
+    ⚠️ {{ uploadError() }}
+  </div>
+</div>

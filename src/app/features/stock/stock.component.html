@@ -1,0 +1,146 @@
+<div class="stock-page">
+  <app-navbar 
+    title="Mouvements de Stock" 
+    subtitle="Enregistrez vos réapprovisionnements et suivez l'historique complet"
+  ></app-navbar>
+
+  <!-- Tabs Header -->
+  <div class="tabs-header">
+    <button 
+      type="button" 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'adjust'"
+      (click)="activeTab.set('adjust')"
+    >
+      ✏️ Ajuster un Stock
+    </button>
+
+    <button 
+      type="button" 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'history'"
+      (click)="activeTab.set('history')"
+    >
+      📜 Historique des Mouvements
+    </button>
+  </div>
+
+  <!-- Tab 1: Adjustment Form -->
+  <div *ngIf="activeTab() === 'adjust'" class="adjust-container">
+    <div class="form-card">
+      <h3>📦 Formulaire d'Ajustement de Stock</h3>
+      
+      <form [formGroup]="adjustForm" (ngSubmit)="submitAdjustment()" class="adjust-form">
+        <div class="form-group">
+          <label>Sélectionner le Produit / Plat *</label>
+          <select formControlName="productId">
+            <option [value]="null" disabled>-- Choisir un produit --</option>
+            <option *ngFor="let p of products()" [value]="p.id">
+              {{ p.name }} (Stock actuel: {{ p.stock }}) - REF: {{ p.reference }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type de mouvement *</label>
+            <select formControlName="type">
+              <option value="ENTREE">🟢 ENTRÉE (Ajout au stock)</option>
+              <option value="SORTIE">🔴 SORTIE (Retrait du stock)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Quantité *</label>
+            <input type="number" formControlName="quantity" min="1" placeholder="ex: 10" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Motif de l'ajustement *</label>
+          <select formControlName="reason">
+            <option value="REAPPROVISIONNEMENT">Réapprovisionnement (Stock initial / Réception)</option>
+            <option value="VENTE">Vente / Plat servi</option>
+            <option value="PERTE">Perte / Ingrédient périmé</option>
+            <option value="AJUSTEMENT">Ajustement d'inventaire</option>
+            <option value="RETOUR_FOURNISSEUR">Retour Fournisseur</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Note / Remarque (facultatif)</label>
+          <textarea formControlName="note" rows="2" placeholder="Ajoutez un commentaire explicatif..."></textarea>
+        </div>
+
+        <div *ngIf="successMessage()" class="alert-success">
+          ✅ {{ successMessage() }}
+        </div>
+
+        <div *ngIf="errorMessage()" class="alert-error">
+          ⚠️ {{ errorMessage() }}
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="adjustForm.invalid || isSaving()">
+          {{ isSaving() ? 'Enregistrement...' : 'Valider l\'Ajustement de Stock' }}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tab 2: History Table -->
+  <div *ngIf="activeTab() === 'history'" class="history-container">
+    <div class="table-card">
+      <div class="table-filters">
+        <input 
+          type="text" 
+          placeholder="Filtrer par nom de produit..." 
+          [value]="historySearch()" 
+          (input)="updateHistorySearch($event)"
+          class="filter-input"
+        />
+        <select [value]="historyTypeFilter()" (change)="updateHistoryType($event)" class="filter-select">
+          <option value="">Tous les types</option>
+          <option value="ENTREE">🟢 ENTRÉES uniquement</option>
+          <option value="SORTIE">🔴 SORTIES uniquement</option>
+        </select>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date & Heure</th>
+            <th>Produit</th>
+            <th>Type</th>
+            <th>Quantité</th>
+            <th>Motif</th>
+            <th>Utilisateur</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let m of filteredMovements()">
+            <td><small>{{ m.createdAt | date:'dd/MM/yyyy HH:mm' }}</small></td>
+            <td>
+              <div class="product-cell">
+                <img [src]="m.product.imageUrl | defaultImage" [alt]="m.product.name" class="mini-img" />
+                <span class="font-bold">{{ m.product.name }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="type-pill" [class.entree]="m.type === 'ENTREE'" [class.sortie]="m.type === 'SORTIE'">
+                {{ m.type === 'ENTREE' ? '🟢 ENTRÉE' : '🔴 SORTIE' }}
+              </span>
+            </td>
+            <td class="font-bold">{{ m.quantity }}</td>
+            <td><span class="reason-badge">{{ m.reason }}</span></td>
+            <td><small>{{ m.userEmail || 'système' }}</small></td>
+            <td><small class="text-muted">{{ m.note || '-' }}</small></td>
+          </tr>
+          <tr *ngIf="filteredMovements().length === 0">
+            <td colspan="7" class="text-center py-4">Aucun mouvement enregistré</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

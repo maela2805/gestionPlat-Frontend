@@ -1,0 +1,125 @@
+.categories-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1.5rem;
+}
+@media (max-width: 850px) {
+  .layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.form-card, .tree-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+.form-card h3, .tree-card h3 {
+  margin: 0 0 1.25rem 0;
+  color: #fff;
+  font-size: 1.1rem;
+}
+.cat-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.form-group label {
+  font-size: 0.85rem;
+  color: #d0d0e0;
+  font-weight: 600;
+}
+.form-group input, .form-group select, .form-group textarea {
+  background: rgba(15, 15, 20, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 0.9rem;
+  outline: none;
+}
+.btn-submit {
+  background: linear-gradient(135deg, #FF6B35 0%, #E85520 100%);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  color: #8a8a9e;
+}
+.category-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.tree-node {
+  background: rgba(15, 15, 20, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1rem;
+}
+.node-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.node-icon {
+  font-size: 1.3rem;
+}
+.node-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.node-title {
+  font-weight: 700;
+  color: #fff;
+  font-size: 1rem;
+}
+.node-desc {
+  font-size: 0.8rem;
+  color: #8a8a9e;
+}
+.node-badge {
+  font-size: 0.7rem;
+  background: rgba(255, 209, 102, 0.15);
+  color: #FFD166;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+.sub-tree {
+  margin-top: 0.75rem;
+  margin-left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-left: 0.75rem;
+  border-left: 2px dashed rgba(255, 255, 255, 0.1);
+}
+.sub-node {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #d0d0e0;
+}
+.sub-icon {
+  color: #8a8a9e;
+}

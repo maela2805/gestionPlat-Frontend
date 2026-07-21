@@ -1,0 +1,86 @@
+<div class="dashboard-page">
+  <app-navbar 
+    title="Tableau de bord" 
+    subtitle="Vue d'ensemble de votre stock, plats et alertes"
+  ></app-navbar>
+
+  <!-- KPI Grid -->
+  <div class="kpi-grid">
+    <app-stat-card 
+      title="Total Produits" 
+      [value]="products().length" 
+      icon="🍲"
+      variant="primary"
+    ></app-stat-card>
+
+    <app-stat-card 
+      title="Alertes Stock Critique" 
+      [value]="criticalProducts().length" 
+      icon="⚠️"
+      variant="warning"
+      [badge]="criticalProducts().length > 0 ? 'Urgent' : 'Normal'"
+    ></app-stat-card>
+
+    <app-stat-card 
+      title="Quantité Totale en Stock" 
+      [value]="totalStockQuantity()" 
+      icon="📦"
+    ></app-stat-card>
+
+    <app-stat-card 
+      title="Mouvements Récents" 
+      [value]="movements().length" 
+      icon="📈"
+    ></app-stat-card>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <h3 class="chart-title">📊 Top 5 Produits par Quantité en Stock</h3>
+      <div class="canvas-container">
+        <canvas #barChart></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3 class="chart-title">🍩 Répartition des Mouvements (Entrées vs Sorties)</h3>
+      <div class="canvas-container">
+        <canvas #donutChart></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Critical Stock Alerts Table -->
+  <div class="alerts-section">
+    <div class="section-header">
+      <div class="section-title">
+        <span class="pulse-icon">🚨</span>
+        <h3>Produits en Alerte de Stock (Seuil critique atteint)</h3>
+      </div>
+      <a routerLink="/products" class="btn-link">Voir tous les produits →</a>
+    </div>
+
+    <div *ngIf="criticalProducts().length === 0" class="empty-state">
+      <span>✅</span> Aucun produit n'est actuellement en alerte de stock. Tout est sous contrôle !
+    </div>
+
+    <div *ngIf="criticalProducts().length > 0" class="alerts-grid">
+      <div *ngFor="let p of criticalProducts()" class="alert-item-card">
+        <img [src]="p.imageUrl | defaultImage" [alt]="p.name" class="item-img" />
+        <div class="item-info">
+          <span class="item-ref">Ref: {{ p.reference }}</span>
+          <h4 class="item-name">{{ p.name }}</h4>
+          <span class="item-category">{{ p.category?.name || 'Non catégorisé' }}</span>
+        </div>
+        <div class="item-stock-status">
+          <span class="stock-count warning">{{ p.stock }} en stock</span>
+          <span class="stock-threshold">Seuil d'alerte: {{ p.alertThreshold }}</span>
+        </div>
+        <a [routerLink]="['/stock']" [queryParams]="{ productId: p.id }" class="btn-adjust">
+          Reapprovisionner
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,220 @@
+<div class="products-page">
+  <app-navbar 
+    title="Gestion des Produits & Plats" 
+    subtitle="Consultez, ajoutez et gérez vos plats et leurs photos"
+  ></app-navbar>
+
+  <!-- Action Bar & Filters -->
+  <div class="action-bar">
+    <div class="filters-group">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          placeholder="Rechercher par nom ou référence..." 
+          [value]="searchTerm()"
+          (input)="updateSearch($event)"
+        />
+      </div>
+
+      <select [value]="selectedCategoryId() || ''" (change)="updateCategoryFilter($event)" class="select-filter">
+        <option value="">Toutes les catégories</option>
+        <option *ngFor="let cat of categories()" [value]="cat.id">{{ cat.name }}</option>
+      </select>
+
+      <button 
+        type="button" 
+        class="btn-toggle-filter" 
+        [class.active]="filterAlertOnly()"
+        (click)="toggleAlertFilter()"
+      >
+        ⚠️ Alertes stock uniquement
+      </button>
+    </div>
+
+    <div class="view-and-add">
+      <div class="view-toggle">
+        <button 
+          type="button" 
+          [class.active]="viewMode() === 'grid'" 
+          (click)="viewMode.set('grid')"
+          title="Vue Grille"
+        >
+          🖼️ Grille
+        </button>
+        <button 
+          type="button" 
+          [class.active]="viewMode() === 'table'" 
+          (click)="viewMode.set('table')"
+          title="Vue Tableau"
+        >
+          📋 Tableau
+        </button>
+      </div>
+
+      <button type="button" class="btn-primary" (click)="openCreateModal()">
+        ➕ Nouveau Produit
+      </button>
+    </div>
+  </div>
+
+  <!-- Grid View -->
+  <div *ngIf="viewMode() === 'grid'" class="products-grid">
+    <div *ngFor="let p of filteredProducts()" class="product-card">
+      <div class="card-image-wrapper">
+        <img [src]="p.imageUrl | defaultImage" [alt]="p.name" class="product-img" />
+        <span *ngIf="p.stock <= p.alertThreshold" class="badge-alert">Stock critique</span>
+        <span class="category-pill">{{ p.category?.name || 'Général' }}</span>
+      </div>
+
+      <div class="card-content">
+        <span class="ref-code">REF: {{ p.reference }}</span>
+        <h3 class="product-name">{{ p.name }}</h3>
+        <p *ngIf="p.description" class="product-desc">{{ p.description }}</p>
+
+        <div class="price-stock-row">
+          <div class="price-group">
+            <span class="price-label">Prix Vente</span>
+            <span class="price-val">{{ p.sellPrice | fcfa }}</span>
+          </div>
+          <div class="stock-group">
+            <span class="stock-label">Stock</span>
+            <span class="stock-val" [class.danger]="p.stock <= p.alertThreshold">{{ p.stock }}</span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button type="button" class="btn-icon btn-edit" (click)="openEditModal(p)">✏️ Modifier</button>
+          <button type="button" class="btn-icon btn-delete" (click)="deleteProduct(p)">🗑️ Supprimer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table View -->
+  <div *ngIf="viewMode() === 'table'" class="table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Photo</th>
+          <th>Référence</th>
+          <th>Nom du plat</th>
+          <th>Catégorie</th>
+          <th>Prix Achat</th>
+          <th>Prix Vente</th>
+          <th>Stock</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of filteredProducts()">
+          <td>
+            <img [src]="p.imageUrl | defaultImage" [alt]="p.name" class="table-img" />
+          </td>
+          <td><code>{{ p.reference }}</code></td>
+          <td class="font-bold">{{ p.name }}</td>
+          <td>{{ p.category?.name || '-' }}</td>
+          <td>{{ p.buyPrice | fcfa }}</td>
+          <td class="font-bold text-accent">{{ p.sellPrice | fcfa }}</td>
+          <td>
+            <span class="stock-badge" [class.alert]="p.stock <= p.alertThreshold">
+              {{ p.stock }} (seuil: {{ p.alertThreshold }})
+            </span>
+          </td>
+          <td>
+            <div class="row-actions">
+              <button type="button" class="btn-sm btn-edit" (click)="openEditModal(p)">✏️</button>
+              <button type="button" class="btn-sm btn-delete" (click)="deleteProduct(p)">🗑️</button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredProducts().length === 0">
+          <td colspan="8" class="text-center py-4">Aucun produit trouvé</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Create / Edit Modal -->
+  <div *ngIf="showModal()" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>{{ editingProduct() ? 'Modifier le Produit' : 'Créer un Nouveau Produit' }}</h3>
+        <button type="button" class="btn-close" (click)="closeModal()">✕</button>
+      </div>
+
+      <form [formGroup]="productForm" (ngSubmit)="saveProduct()" class="modal-body">
+        <!-- Cloudinary Image Upload Component -->
+        <app-image-upload 
+          label="Photo de l'article"
+          [optional]="true"
+          [currentUrl]="productForm.get('imageUrl')?.value"
+          (imageUploaded)="onImageUploaded($event)"
+        ></app-image-upload>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Référence *</label>
+            <input type="text" formControlName="reference" placeholder="ex: PLAT-001" [readOnly]="!!editingProduct()" />
+          </div>
+          <div class="form-group">
+            <label>Nom du produit / plat *</label>
+            <input type="text" formControlName="name" placeholder="ex: Poulet Yassa Traiteur" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea formControlName="description" rows="2" placeholder="Description courte du plat..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Prix d'achat *</label>
+            <input type="number" formControlName="buyPrice" placeholder="0" />
+          </div>
+          <div class="form-group">
+            <label>Prix de vente *</label>
+            <input type="number" formControlName="sellPrice" placeholder="0" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" *ngIf="!editingProduct()">
+            <label>Stock Initial</label>
+            <input type="number" formControlName="initialStock" placeholder="0" />
+          </div>
+          <div class="form-group">
+            <label>Seuil d'Alerte Stock</label>
+            <input type="number" formControlName="alertThreshold" placeholder="5" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Catégorie</label>
+            <select formControlName="categoryId">
+              <option [value]="null">-- Aucune catégorie --</option>
+              <option *ngFor="let cat of categories()" [value]="cat.id">{{ cat.name }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Code-barres (facultatif)</label>
+            <input type="text" formControlName="barcode" placeholder="123456789..." />
+          </div>
+        </div>
+
+        <div *ngIf="formError()" class="alert-error">
+          ⚠️ {{ formError() }}
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeModal()">Annuler</button>
+          <button type="submit" class="btn-save" [disabled]="productForm.invalid || isSaving()">
+            {{ isSaving() ? 'Enregistrement...' : 'Enregistrer le Produit' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

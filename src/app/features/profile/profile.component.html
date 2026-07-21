@@ -1,0 +1,41 @@
+<div class="profile-page">
+  <app-navbar 
+    title="Mon Profil" 
+    subtitle="Informations de votre compte utilisateur"
+  ></app-navbar>
+
+  <div class="profile-card" *ngIf="user()">
+    <div class="profile-header">
+      <div class="avatar-large">{{ getInitials() }}</div>
+      <div class="user-meta">
+        <h2>{{ user()?.firstName }} {{ user()?.lastName }}</h2>
+        <span class="user-email">{{ user()?.email }}</span>
+        <span class="role-badge">{{ user()?.role?.name || 'ADMIN' }}</span>
+      </div>
+    </div>
+
+    <div class="profile-details">
+      <div class="detail-item">
+        <span class="detail-label">Prénom</span>
+        <span class="detail-val">{{ user()?.firstName || 'Non renseigné' }}</span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">Nom</span>
+        <span class="detail-val">{{ user()?.lastName || 'Non renseigné' }}</span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">Adresse Email</span>
+        <span class="detail-val">{{ user()?.email }}</span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">Statut du compte</span>
+        <span class="detail-val text-success">
+          {{ user()?.active ? '✅ Actif' : '❌ Inactif' }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
