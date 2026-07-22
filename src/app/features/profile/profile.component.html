@@ -1,44 +1,142 @@
 <div class="profile-page">
+  <!-- Page Header -->
   <div class="page-header-block">
     <div>
       <div class="breadcrumb">
         <span>GE</span> <span class="breadcrumb-separator">></span> <span class="breadcrumb-item active">Mon Profil</span>
       </div>
-      <h1 class="page-title">Mon Profil Utilisateur</h1>
+      <h1 class="page-title">Profil Utilisateur</h1>
     </div>
   </div>
 
-  <div class="profile-card" *ngIf="user()">
-    <div class="profile-header">
-      <div class="avatar-large">{{ getInitials() }}</div>
-      <div class="user-meta">
-        <h2>{{ user()?.firstName }} {{ user()?.lastName }}</h2>
-        <span class="user-email">{{ user()?.email }}</span>
-        <span class="role-badge">{{ user()?.roleName || user()?.role?.name || user()?.role || 'SUPER_ADMIN' }}</span>
+  <div class="profile-container" *ngIf="user()">
+    <!-- Top Hero Card with Gradient Cover -->
+    <div class="profile-hero-card">
+      <div class="profile-cover"></div>
+      <div class="profile-hero-content">
+        <div class="avatar-wrapper">
+          <div class="avatar-large">{{ getInitials() }}</div>
+          <span class="online-indicator" title="Compte Actif"></span>
+        </div>
+        <div class="user-hero-info">
+          <div class="title-row">
+            <h2>{{ user()?.firstName || 'Utilisateur' }} {{ user()?.lastName || '' }}</h2>
+            <span class="status-badge" [class.active]="user()?.active">
+              <span class="dot"></span> {{ user()?.active ? 'Compte Actif' : 'Inactif' }}
+            </span>
+          </div>
+          <p class="user-email-text">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            {{ user()?.email }}
+          </p>
+          <div class="role-chip">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            {{ getRoleLabel() }}
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="profile-details">
-      <div class="detail-item">
-        <span class="detail-label">Prénom</span>
-        <span class="detail-val">{{ user()?.firstName || 'Non renseigné' }}</span>
+    <!-- Quick Stats Grid -->
+    <div class="profile-stats-grid">
+      <div class="stat-box">
+        <div class="stat-icon blue">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="stat-details">
+          <span class="stat-label">Rôle Attribué</span>
+          <strong class="stat-value">{{ getRoleLabel() }}</strong>
+        </div>
       </div>
 
-      <div class="detail-item">
-        <span class="detail-label">Nom</span>
-        <span class="detail-val">{{ user()?.lastName || 'Non renseigné' }}</span>
+      <div class="stat-box">
+        <div class="stat-icon green">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="stat-details">
+          <span class="stat-label">Statut Sécurité</span>
+          <strong class="stat-value text-success">Authentifié JWT</strong>
+        </div>
       </div>
 
-      <div class="detail-item">
-        <span class="detail-label">Adresse Email</span>
-        <span class="detail-val">{{ user()?.email }}</span>
+      <div class="stat-box">
+        <div class="stat-icon purple">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        </div>
+        <div class="stat-details">
+          <span class="stat-label">Établissement</span>
+          <strong class="stat-value">KIKI TRAITEUR</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Info Cards Layout -->
+    <div class="profile-info-grid">
+      <!-- Left Column: Personal Information -->
+      <div class="info-card">
+        <div class="card-header">
+          <div class="header-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <h3>Informations Personnelles</h3>
+        </div>
+
+        <div class="info-list">
+          <div class="info-row">
+            <span class="info-label">Prénom</span>
+            <span class="info-value">{{ user()?.firstName || 'Non renseigné' }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Nom de famille</span>
+            <span class="info-value">{{ user()?.lastName || 'Non renseigné' }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Adresse Email</span>
+            <span class="info-value highlight">{{ user()?.email }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Identifiant Utilisateur</span>
+            <span class="info-value code">#{{ user()?.id || '1' }}</span>
+          </div>
+        </div>
       </div>
 
-      <div class="detail-item">
-        <span class="detail-label">Statut du compte</span>
-        <span class="detail-val text-success">
-          {{ user()?.active ? '✅ Actif' : '❌ Inactif' }}
-        </span>
+      <!-- Right Column: System & Security Info -->
+      <div class="info-card">
+        <div class="card-header">
+          <div class="header-icon purple">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3>Sécurité & Droits d'Accès</h3>
+        </div>
+
+        <div class="info-list">
+          <div class="info-row">
+            <span class="info-label">Niveau d'Autorisation</span>
+            <span class="role-pill">{{ getRoleLabel() }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Méthode de Connexion</span>
+            <span class="info-value">Token JWT (Stateless)</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Cryptage des données</span>
+            <span class="info-value">BCrypt Hash (Sécurisé)</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Gestion du compte</span>
+            <button class="btn-logout-small" (click)="logout()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Se Déconnecter
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
