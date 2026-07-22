@@ -1,23 +1,20 @@
-.app-layout {
+.app-container {
   min-height: 100vh;
-  background-color: #0F0F14;
-  color: #E0E0E6;
+  position: relative;
+  display: flex;
 
   &.authenticated {
-    display: flex;
-    .main-content {
+    .main-wrapper {
       margin-left: 260px;
       width: calc(100% - 260px);
-      padding: 2rem;
       min-height: 100vh;
       box-sizing: border-box;
     }
   }
 
-  &:not(.authenticated) {
-    .main-content {
-      width: 100%;
-      min-height: 100vh;
-    }
+  .main-wrapper.full-width {
+    margin-left: 0;
+    width: 100%;
+    min-height: 100vh;
   }
 }

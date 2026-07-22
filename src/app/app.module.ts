@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -16,14 +16,14 @@ import { errorInterceptor } from './core/interceptors/error.interceptor';
   ],
   imports: [
     BrowserModule,
-    HttpClientModule,
     AppRoutingModule,
     CoreModule,
     SharedModule
   ],
   providers: [
-    { provide: HTTP_INTERCEPTORS, useValue: jwtInterceptor, multi: true },
-    { provide: HTTP_INTERCEPTORS, useValue: errorInterceptor, multi: true }
+    provideHttpClient(
+      withInterceptors([jwtInterceptor, errorInterceptor])
+    )
   ],
   bootstrap: [AppComponent]
 })

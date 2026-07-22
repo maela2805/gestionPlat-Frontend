@@ -1,50 +1,72 @@
 <div class="dashboard-page">
-  <app-navbar 
-    title="Tableau de bord" 
-    subtitle="Vue d'ensemble de votre stock, plats et alertes"
-  ></app-navbar>
+  <div class="page-header-block">
+    <div>
+      <div class="breadcrumb">
+        <span>GE</span> <span class="breadcrumb-separator">></span> <span class="breadcrumb-item active">Tableau de bord</span>
+      </div>
+      <h1 class="page-title">Tableau de Bord Principal</h1>
+    </div>
+  </div>
 
-  <!-- KPI Grid -->
-  <div class="kpi-grid">
-    <app-stat-card 
-      title="Total Produits" 
-      [value]="products().length" 
-      icon="🍲"
-      variant="primary"
-    ></app-stat-card>
+  <!-- Quick Stat Cards -->
+  <div class="card-grid">
+    <div class="stat-card">
+      <div class="stat-info">
+        <h3>Total Produits</h3>
+        <div class="stat-value">{{ products().length }}</div>
+        <div class="stat-trend up">Catalogue actif</div>
+      </div>
+      <div class="stat-icon-wrapper success">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/></svg>
+      </div>
+    </div>
 
-    <app-stat-card 
-      title="Alertes Stock Critique" 
-      [value]="criticalProducts().length" 
-      icon="⚠️"
-      variant="warning"
-      [badge]="criticalProducts().length > 0 ? 'Urgent' : 'Normal'"
-    ></app-stat-card>
+    <div class="stat-card">
+      <div class="stat-info">
+        <h3>Mouvements Enregistrés</h3>
+        <div class="stat-value">{{ movements().length }}</div>
+        <div class="stat-trend up">Historique à jour</div>
+      </div>
+      <div class="stat-icon-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+      </div>
+    </div>
 
-    <app-stat-card 
-      title="Quantité Totale en Stock" 
-      [value]="totalStockQuantity()" 
-      icon="📦"
-    ></app-stat-card>
+    <div class="stat-card">
+      <div class="stat-info">
+        <h3>Quantité Totale Stock</h3>
+        <div class="stat-value">{{ totalStockQuantity() }}</div>
+        <div class="stat-trend">Unités en réserve</div>
+      </div>
+      <div class="stat-icon-wrapper warning">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect width="4" height="7" x="7" y="10" rx="1"/><rect width="4" height="12" x="15" y="5" rx="1"/></svg>
+      </div>
+    </div>
 
-    <app-stat-card 
-      title="Mouvements Récents" 
-      [value]="movements().length" 
-      icon="📈"
-    ></app-stat-card>
+    <div class="stat-card">
+      <div class="stat-info">
+        <h3>Alertes Stock Critique</h3>
+        <div class="stat-value">{{ criticalProducts().length }}</div>
+        <div class="stat-trend down" *ngIf="criticalProducts().length > 0">Seuil alerte atteint</div>
+        <div class="stat-trend up" *ngIf="criticalProducts().length === 0">Stock optimal</div>
+      </div>
+      <div class="stat-icon-wrapper danger">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+      </div>
+    </div>
   </div>
 
   <!-- Charts Row -->
   <div class="charts-row">
     <div class="chart-card">
-      <h3 class="chart-title">📊 Top 5 Produits par Quantité en Stock</h3>
+      <h3 class="chart-title">📊 Top Produits par Quantité en Stock</h3>
       <div class="canvas-container">
         <canvas #barChart></canvas>
       </div>
     </div>
 
     <div class="chart-card">
-      <h3 class="chart-title">🍩 Répartition des Mouvements (Entrées vs Sorties)</h3>
+      <h3 class="chart-title">🍩 Répartition des Mouvements</h3>
       <div class="canvas-container">
         <canvas #donutChart></canvas>
       </div>
@@ -56,7 +78,7 @@
     <div class="section-header">
       <div class="section-title">
         <span class="pulse-icon">🚨</span>
-        <h3>Produits en Alerte de Stock (Seuil critique atteint)</h3>
+        <h3>Produits en Alerte de Stock</h3>
       </div>
       <a routerLink="/products" class="btn-link">Voir tous les produits →</a>
     </div>
@@ -75,10 +97,10 @@
         </div>
         <div class="item-stock-status">
           <span class="stock-count warning">{{ p.stock }} en stock</span>
-          <span class="stock-threshold">Seuil d'alerte: {{ p.alertThreshold }}</span>
+          <span class="stock-threshold">Seuil: {{ p.alertThreshold }}</span>
         </div>
         <a [routerLink]="['/stock']" [queryParams]="{ productId: p.id }" class="btn-adjust">
-          Reapprovisionner
+          Réapprovisionner
         </a>
       </div>
     </div>

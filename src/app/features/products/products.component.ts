@@ -91,6 +91,11 @@ export class ProductsComponent implements OnInit {
     this.selectedCategoryId.set(val ? Number(val) : null);
   }
 
+  updateAlertFilterSelect(event: Event): void {
+    const val = (event.target as HTMLSelectElement).value;
+    this.filterAlertOnly.set(val === 'alert');
+  }
+
   toggleAlertFilter(): void {
     this.filterAlertOnly.set(!this.filterAlertOnly());
   }
@@ -101,7 +106,10 @@ export class ProductsComponent implements OnInit {
 
   openCreateModal(): void {
     this.editingProduct.set(null);
+    const count = this.products().length + 1;
+    const autoRef = 'PROD-' + count.toString().padStart(5, '0');
     this.productForm.reset({
+      reference: autoRef,
       buyPrice: 0,
       sellPrice: 0,
       initialStock: 0,
@@ -162,6 +170,7 @@ export class ProductsComponent implements OnInit {
           this.isSaving.set(false);
           this.closeModal();
           this.loadProducts();
+          this.loadCategories();
         },
         error: (err) => {
           this.isSaving.set(false);
@@ -174,6 +183,7 @@ export class ProductsComponent implements OnInit {
           this.isSaving.set(false);
           this.closeModal();
           this.loadProducts();
+          this.loadCategories();
         },
         error: (err) => {
           this.isSaving.set(false);
@@ -186,7 +196,7 @@ export class ProductsComponent implements OnInit {
   deleteProduct(p: Product): void {
     if (confirm(`Voulez-vous vraiment supprimer "${p.name}" ?`)) {
       this.productService.deleteProduct(p.id).subscribe({
-        next: () => this.loadProducts(),
+        next: () => { this.loadProducts(); this.loadCategories(); },
         error: (err) => alert(err.message || 'Impossible de supprimer ce produit')
       });
     }

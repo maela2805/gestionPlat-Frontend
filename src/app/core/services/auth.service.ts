@@ -22,9 +22,10 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, credentials).pipe(
       tap(response => {
-        if (response.token) {
-          this.saveToken(response.token);
-          this.fetchProfile().subscribe();
+        const token = response.accessToken || response.token;
+        if (token) {
+          this.saveToken(token);
+          this.fetchProfile().subscribe({ error: () => {} });
         }
       })
     );
@@ -33,9 +34,10 @@ export class AuthService {
   register(userData: RegisterRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/register`, userData).pipe(
       tap(response => {
-        if (response.token) {
-          this.saveToken(response.token);
-          this.fetchProfile().subscribe();
+        const token = response.accessToken || response.token;
+        if (token) {
+          this.saveToken(token);
+          this.fetchProfile().subscribe({ error: () => {} });
         }
       })
     );

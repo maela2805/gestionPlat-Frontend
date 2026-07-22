@@ -1,50 +1,64 @@
-<aside class="sidebar-container">
-  <div class="sidebar-brand">
-    <div class="brand-logo">🍳</div>
-    <div class="brand-text">
-      <h2>KIKI TRAITEUR</h2>
-      <span class="brand-sub">Gestion Plat & Stock</span>
-    </div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">GE</div>
+    <span class="sidebar-logo-text">GestionInc.</span>
   </div>
 
-  <nav class="sidebar-nav">
-    <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
-      <span class="nav-icon">📊</span>
-      <span class="nav-label">Tableau de bord</span>
-    </a>
+  <ul class="sidebar-menu">
+    <li class="menu-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+      <a routerLink="/dashboard" class="menu-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+        <span>Tableau de bord</span>
+      </a>
+    </li>
 
-    <a routerLink="/products" routerLinkActive="active" class="nav-item">
-      <span class="nav-icon">🍲</span>
-      <span class="nav-label">Produits & Plats</span>
-    </a>
+    <li class="menu-divider"></li>
 
-    <a routerLink="/categories" routerLinkActive="active" class="nav-item">
-      <span class="nav-icon">📁</span>
-      <span class="nav-label">Catégories</span>
-    </a>
+    <li class="menu-item has-submenu" [class.open]="isStockSubmenuOpen()">
+      <a (click)="toggleStockSubmenu($event)" class="menu-link" style="cursor: pointer;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/></svg>
+        <span>Stock / Inventaire</span>
+        <span class="submenu-toggle">{{ isStockSubmenuOpen() ? '-' : '+' }}</span>
+      </a>
+      <ul class="submenu" [style.display]="isStockSubmenuOpen() ? 'flex' : 'none'">
+        <li class="submenu-item" routerLinkActive="active">
+          <a routerLink="/products" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px; width: 100%;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+            <span>Liste des produits</span>
+          </a>
+        </li>
+        <li class="submenu-item" routerLinkActive="active">
+          <a routerLink="/stock" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px; width: 100%;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+            <span>Historique mouvements</span>
+          </a>
+        </li>
+        <li class="submenu-item" routerLinkActive="active">
+          <a routerLink="/categories" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px; width: 100%;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L8.6 3.3A2 2 0 0 0 6.9 2.5H4a2 2 0 0 0-2 2v13.5A1.5 1.5 0 0 0 3.5 19.5h1"/></svg>
+            <span>Catégories</span>
+          </a>
+        </li>
+      </ul>
+    </li>
 
-    <a routerLink="/stock" routerLinkActive="active" class="nav-item">
-      <span class="nav-icon">📦</span>
-      <span class="nav-label">Mouvements Stock</span>
-    </a>
+    <li class="menu-item" routerLinkActive="active">
+      <a routerLink="/users" class="menu-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Personnel / RH</span>
+      </a>
+    </li>
 
-    <a routerLink="/profile" routerLinkActive="active" class="nav-item">
-      <span class="nav-icon">👤</span>
-      <span class="nav-label">Mon Profil</span>
-    </a>
-  </nav>
+    <li class="menu-item" routerLinkActive="active">
+      <a routerLink="/profile" class="menu-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Mon Profil</span>
+      </a>
+    </li>
+  </ul>
 
   <div class="sidebar-footer">
-    <div class="user-pill" *ngIf="user()">
-      <div class="avatar">{{ getInitials() }}</div>
-      <div class="user-info">
-        <span class="user-name">{{ user()?.firstName || user()?.email }}</span>
-        <span class="user-role">{{ user()?.role?.name || 'ADMIN' }}</span>
-      </div>
-    </div>
-
-    <button class="btn-logout" (click)="logout()" title="Se déconnecter">
-      🚪 <span>Déconnexion</span>
-    </button>
+    <div>GE v1.0.0 (Prototype)</div>
+    <div>CONFIDENTIEL - 776759494</div>
   </div>
 </aside>

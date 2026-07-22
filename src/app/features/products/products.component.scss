@@ -286,17 +286,25 @@
 }
 .form-group label {
   font-size: 0.85rem;
-  color: #d0d0e0;
+  color: #0b1a30;
   font-weight: 600;
 }
-.form-group input, .form-group select, .form-group textarea {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  padding: 10px 14px;
-  color: #fff;
-  font-size: 0.9rem;
-  outline: none;
+.form-group input, .form-group select, .form-group textarea, .form-control {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  border-radius: 6px !important;
+  padding: 9px 12px !important;
+  color: #0b1a30 !important;
+  caret-color: #1890ff !important;
+  font-family: 'Outfit', 'Inter', -apple-system, sans-serif !important;
+  font-size: 13.5px !important;
+  outline: none !important;
+}
+
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus, .form-control:focus {
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.15) !important;
+  background: #ffffff !important;
 }
 .modal-footer {
   display: flex;

@@ -40,13 +40,59 @@ export class ImageUploadComponent {
       next: (secureUrl: string) => {
         this.imageUrl.set(secureUrl);
         this.isUploading.set(false);
+        this.uploadError.set(null);
         this.imageUploaded.emit(secureUrl);
       },
       error: (err: any) => {
-        console.error('Cloudinary upload error:', err);
-        this.isUploading.set(false);
-        this.uploadError.set('Échec de l\'envoi vers Cloudinary. Vérifiez votre connexion.');
+        console.warn('Cloudinary error, fallback to compressed local Base64:', err);
+        this.compressImage(file)
+          .then(compressedUrl => {
+            this.imageUrl.set(compressedUrl);
+            this.isUploading.set(false);
+            this.uploadError.set(null);
+            this.imageUploaded.emit(compressedUrl);
+          })
+          .catch(() => {
+            this.isUploading.set(false);
+            this.uploadError.set('Échec du traitement de l\'image.');
+          });
       }
+    });
+  }
+
+  private compressImage(file: File, maxWidth = 800, maxHeight = 800, quality = 0.7): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth || height > maxHeight) {
+          if (width / height > maxWidth / maxHeight) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Canvas context error'));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+        URL.revokeObjectURL(img.src);
+        resolve(compressedDataUrl);
+      };
+      img.onerror = err => reject(err);
     });
   }
 

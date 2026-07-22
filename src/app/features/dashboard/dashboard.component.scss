@@ -2,144 +2,191 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  padding: 2rem;
 }
+
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.25rem;
+  gap: 1.5rem;
 }
+
 .charts-row {
   display: grid;
   grid-template-columns: 3fr 2fr;
   gap: 1.5rem;
 }
+
 @media (max-width: 900px) {
   .charts-row {
     grid-template-columns: 1fr;
   }
 }
+
 .chart-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
   border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
   padding: 1.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
 }
+
 .chart-title {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  color: #fff;
+  color: #0b1a30;
   margin: 0 0 1.25rem 0;
 }
+
 .canvas-container {
   position: relative;
-  height: 240px;
+  height: 250px;
   width: 100%;
 }
+
 .alerts-section {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: #ffffff;
   border-radius: 16px;
+  border: 1px solid rgba(255, 77, 79, 0.2);
+  box-shadow: 0 4px 16px rgba(255, 77, 79, 0.04);
   padding: 1.5rem;
 }
+
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.25rem;
 }
+
 .section-title {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
+
 .section-title h3 {
   margin: 0;
   font-size: 1.1rem;
-  color: #ffffff;
+  color: #0b1a30;
   font-weight: 700;
 }
+
 .btn-link {
-  color: #FFD166;
+  color: #1890ff;
   text-decoration: none;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 600;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
+
 .empty-state {
   padding: 2rem;
   text-align: center;
-  background: rgba(16, 185, 129, 0.05);
-  border: 1px dashed rgba(16, 185, 129, 0.2);
+  background: rgba(82, 196, 26, 0.06);
+  border: 1px dashed rgba(82, 196, 26, 0.3);
   border-radius: 12px;
-  color: #34d399;
-  font-weight: 500;
+  color: #389e0d;
+  font-weight: 600;
 }
+
 .alerts-grid {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
+
 .alert-item-card {
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: rgba(15, 15, 20, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
   border-radius: 12px;
   padding: 0.85rem 1.25rem;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #ffffff;
+    border-color: #1890ff;
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1);
+  }
 }
+
 .item-img {
   width: 50px;
   height: 50px;
   border-radius: 10px;
   object-fit: cover;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #e8e8e8;
 }
+
 .item-info {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
+
 .item-ref {
   font-size: 0.75rem;
-  color: #8a8a9e;
+  color: #8c8c8c;
 }
+
 .item-name {
   margin: 0;
   font-size: 0.95rem;
   font-weight: 700;
-  color: #fff;
+  color: #0b1a30;
 }
+
 .item-category {
   font-size: 0.8rem;
-  color: #FFD166;
+  color: #1890ff;
+  font-weight: 600;
 }
+
 .item-stock-status {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
 }
+
 .stock-count {
   font-weight: 800;
   font-size: 1rem;
-  color: #f87171;
+
+  &.warning {
+    color: #ff4d4f;
+  }
 }
+
 .stock-threshold {
   font-size: 0.75rem;
-  color: #8a8a9e;
+  color: #8c8c8c;
 }
+
 .btn-adjust {
-  background: rgba(255, 107, 53, 0.15);
-  color: #FF6B35;
-  border: 1px solid rgba(255, 107, 53, 0.3);
+  background: rgba(24, 144, 255, 0.08);
+  color: #1890ff;
+  border: 1px solid rgba(24, 144, 255, 0.3);
   padding: 8px 14px;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   text-decoration: none;
-  transition: background 0.2s;
-}
-.btn-adjust:hover {
-  background: rgba(255, 107, 53, 0.3);
+  transition: all 0.2s;
+
+  &:hover {
+    background: #1890ff;
+    color: white;
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+  }
 }

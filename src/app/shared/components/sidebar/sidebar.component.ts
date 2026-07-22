@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -9,10 +9,19 @@ import { AuthService } from '../../../core/services/auth.service';
 export class SidebarComponent {
   private authService = inject(AuthService);
   user = this.authService.currentUser;
+  isStockSubmenuOpen = signal<boolean>(true);
+
+  toggleStockSubmenu(event?: Event): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    this.isStockSubmenuOpen.update(v => !v);
+  }
 
   getInitials(): string {
     const u = this.user();
-    if (!u) return 'KT';
+    if (!u) return 'MK';
     if (u.firstName && u.lastName) {
       return (u.firstName[0] + u.lastName[0]).toUpperCase();
     }

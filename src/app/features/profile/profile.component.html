@@ -1,8 +1,12 @@
 <div class="profile-page">
-  <app-navbar 
-    title="Mon Profil" 
-    subtitle="Informations de votre compte utilisateur"
-  ></app-navbar>
+  <div class="page-header-block">
+    <div>
+      <div class="breadcrumb">
+        <span>GE</span> <span class="breadcrumb-separator">></span> <span class="breadcrumb-item active">Mon Profil</span>
+      </div>
+      <h1 class="page-title">Mon Profil Utilisateur</h1>
+    </div>
+  </div>
 
   <div class="profile-card" *ngIf="user()">
     <div class="profile-header">
@@ -10,7 +14,7 @@
       <div class="user-meta">
         <h2>{{ user()?.firstName }} {{ user()?.lastName }}</h2>
         <span class="user-email">{{ user()?.email }}</span>
-        <span class="role-badge">{{ user()?.role?.name || 'ADMIN' }}</span>
+        <span class="role-badge">{{ user()?.roleName || user()?.role?.name || user()?.role || 'SUPER_ADMIN' }}</span>
       </div>
     </div>
 

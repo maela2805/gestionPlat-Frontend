@@ -24,19 +24,44 @@ export class StockComponent implements OnInit {
 
   historySearch = signal<string>('');
   historyTypeFilter = signal<string>('');
+  authorFilter = signal<string>('');
+  showModal = signal<boolean>(false);
 
   filteredMovements = computed(() => {
     let list = this.movements();
     const search = this.historySearch().toLowerCase().trim();
     if (search) {
-      list = list.filter(m => m.product.name.toLowerCase().includes(search));
+      list = list.filter(m => 
+        m.product.name.toLowerCase().includes(search) || 
+        m.product.reference.toLowerCase().includes(search) ||
+        (m.note && m.note.toLowerCase().includes(search))
+      );
     }
     const type = this.historyTypeFilter();
     if (type) {
       list = list.filter(m => m.type === type);
     }
+    const author = this.authorFilter();
+    if (author) {
+      list = list.filter(m => m.userEmail && m.userEmail.toLowerCase().includes(author.toLowerCase()));
+    }
     return list;
   });
+
+  openAdjustmentModal(): void {
+    this.adjustForm.reset({ type: 'ENTREE', quantity: 1, reason: 'REAPPROVISIONNEMENT' });
+    this.successMessage.set(null);
+    this.errorMessage.set(null);
+    this.showModal.set(true);
+  }
+
+  closeModal(): void {
+    this.showModal.set(false);
+  }
+
+  updateAuthorFilter(e: Event): void {
+    this.authorFilter.set((e.target as HTMLSelectElement).value);
+  }
 
   constructor(
     private productService: ProductService,
@@ -102,6 +127,7 @@ export class StockComponent implements OnInit {
         this.isSaving.set(false);
         this.successMessage.set('Ajustement de stock enregistré avec succès !');
         this.adjustForm.reset({ type: 'ENTREE', quantity: 1, reason: 'REAPPROVISIONNEMENT' });
+        this.closeModal();
         this.loadProducts();
         this.loadMovements();
       },

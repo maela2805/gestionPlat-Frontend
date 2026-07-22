@@ -1,6 +1,9 @@
-<div class="app-layout" [class.authenticated]="isAuthenticated()">
+<div class="app-container" [class.authenticated]="isAuthenticated()">
   <app-sidebar *ngIf="isAuthenticated()"></app-sidebar>
-  <main class="main-content">
-    <router-outlet></router-outlet>
-  </main>
+  <div class="main-wrapper" [class.full-width]="!isAuthenticated()">
+    <app-navbar *ngIf="isAuthenticated()"></app-navbar>
+    <main class="page-container">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
 </div>
