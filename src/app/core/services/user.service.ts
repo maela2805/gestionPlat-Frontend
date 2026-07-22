@@ -8,7 +8,7 @@ import { UserSystem, SystemRole, UserCreateRequest, UserUpdateRequest } from '..
   providedIn: 'root'
 })
 export class UserService {
-  private readonly baseUrl = `${environment.apiUrl}/users`;
+  private readonly baseUrl = `${environment.apiUrl}/api/users`;
 
   constructor(private http: HttpClient) {}
 

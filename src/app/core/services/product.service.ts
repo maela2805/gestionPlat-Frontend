@@ -8,7 +8,7 @@ import { Product, ProductRequest, StockAdjustmentRequest } from '../models/produ
   providedIn: 'root'
 })
 export class ProductService {
-  private readonly baseUrl = `${environment.apiUrl}/stock/products`;
+  private readonly baseUrl = `${environment.apiUrl}/api/stock/products`;
 
   constructor(private http: HttpClient) {}
 

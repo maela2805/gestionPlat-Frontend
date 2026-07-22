@@ -20,7 +20,7 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) {}
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
-  return this.http.post<AuthResponse>(`${environment.apiUrl}/api/auth/register`, credentials).pipe(
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/api/auth/login`, credentials).pipe(
       tap(response => {
         const token = response.accessToken || response.token;
         if (token) {
@@ -32,7 +32,7 @@ export class AuthService {
   }
 
   register(userData: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/register`, userData).pipe(
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/api/auth/register`, userData).pipe(
       tap(response => {
         const token = response.accessToken || response.token;
         if (token) {

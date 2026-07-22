@@ -8,7 +8,7 @@ import { Category } from '../models/category.model';
   providedIn: 'root'
 })
 export class CategoryService {
-  private readonly baseUrl = `${environment.apiUrl}/stock/categories`;
+  private readonly baseUrl = `${environment.apiUrl}/api/stock/categories`;
 
   constructor(private http: HttpClient) {}
 

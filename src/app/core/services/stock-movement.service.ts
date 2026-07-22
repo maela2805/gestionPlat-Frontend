@@ -8,7 +8,7 @@ import { StockMovement } from '../models/stock-movement.model';
   providedIn: 'root'
 })
 export class StockMovementService {
-  private readonly baseUrl = `${environment.apiUrl}/stock/movements`;
+  private readonly baseUrl = `${environment.apiUrl}/api/stock/movements`;
 
   constructor(private http: HttpClient) {}
 
