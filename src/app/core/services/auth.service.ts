@@ -20,7 +20,7 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) {}
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, credentials).pipe(
+  return this.http.post<AuthResponse>(`${environment.apiUrl}/api/auth/register`, credentials).pipe(
       tap(response => {
         const token = response.accessToken || response.token;
         if (token) {
@@ -44,7 +44,7 @@ export class AuthService {
   }
 
   fetchProfile(): Observable<User> {
-    return this.http.get<User>(`${environment.apiUrl}/auth/me`).pipe(
+    return this.http.get<User>(`${environment.apiUrl}/api/auth/me`).pipe(
       tap(user => {
         this.currentUser.set(user);
         localStorage.setItem(this.USER_KEY, JSON.stringify(user));
