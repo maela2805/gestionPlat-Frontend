@@ -1,5 +1,5 @@
 <div class="users-page" style="width: 100%;">
-  <!-- Page Header Block (Matching prototype screenshot) -->
+  <!-- Page Header Block -->
   <div class="page-header-block">
     <div>
       <div class="breadcrumb">
@@ -15,7 +15,7 @@
     </div>
   </div>
 
-  <!-- Filter Row (Matching prototype screenshot) -->
+  <!-- Filter Row -->
   <div class="filter-row" style="margin-bottom: 24px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
     <div class="search-wrapper" style="position: relative; width: 360px;">
       <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #8c8c8c;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -41,72 +41,123 @@
     </div>
   </div>
 
-  <!-- Panel Card for 100% Width Table (Matching prototype screenshot) -->
+  <!-- Panel Card for 100% Width Table -->
   <div class="panel-card" style="padding: 0; width: 100%; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04); border-radius: 12px; background: white; border: 1px solid rgba(0,0,0,0.06); overflow: hidden;">
     <div class="table-responsive" style="width: 100%; overflow-x: auto;">
       <table class="table-custom" style="width: 100%; border-collapse: collapse; min-width: 100%;">
         <thead>
           <tr style="background: rgba(0,0,0,0.02); border-bottom: 1px solid rgba(0,0,0,0.06);">
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">UTILISATEUR</th>
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">RÔLE SYSTEME</th>
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">STATUT COMPTE</th>
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">INCRIPTION</th>
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase; text-align: right;">ACTIONS</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">UTILISATEUR</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">RÔLE SYSTEME</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">STATUT COMPTE</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">INSCRIPTION</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase; text-align: right;">ACTIONS</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let u of filteredUsers()" style="border-bottom: 1px solid rgba(0,0,0,0.04); transition: background 0.2s;">
-            <td style="padding: 14px 20px;">
+          <!-- Compact Row Padding: 8px 16px -->
+          <tr *ngFor="let u of paginatedUsers()" style="border-bottom: 1px solid rgba(0,0,0,0.04); transition: background 0.2s;">
+            <td style="padding: 8px 16px;">
               <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #1890ff 0%, #0050b3 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #1890ff 0%, #0050b3 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; flex-shrink: 0;">
                   {{ getInitials(u) }}
                 </div>
                 <div style="display: flex; flex-direction: column;">
-                  <span style="font-weight: 700; color: #0b1a30; font-size: 14px;">{{ u.firstName ? (u.firstName + ' ' + u.lastName) : 'Utilisateur' }}</span>
-                  <span style="font-size: 12px; color: #8c8c8c;">{{ u.email }}</span>
+                  <span style="font-weight: 700; color: #0b1a30; font-size: 13px;">{{ u.firstName ? (u.firstName + ' ' + u.lastName) : 'Utilisateur' }}</span>
+                  <span style="font-size: 11.5px; color: #8c8c8c;">{{ u.email }}</span>
                 </div>
               </div>
             </td>
-            <td style="padding: 14px 20px;">
+            <td style="padding: 8px 16px;">
               <span class="badge" 
                 [style.background]="u.roleName === 'ROLE_SUPER_ADMIN' ? 'rgba(255, 77, 79, 0.15)' : u.roleName === 'ROLE_ADMIN' ? 'rgba(250, 173, 20, 0.15)' : u.roleName === 'ROLE_MANAGER' ? 'rgba(24, 144, 255, 0.15)' : 'rgba(82, 196, 26, 0.15)'"
                 [style.color]="u.roleName === 'ROLE_SUPER_ADMIN' ? '#ff4d4f' : u.roleName === 'ROLE_ADMIN' ? '#faad14' : u.roleName === 'ROLE_MANAGER' ? '#1890ff' : '#52c41a'"
-                style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center;">
+                style="padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center;">
                 {{ u.roleName }}
               </span>
             </td>
-            <td style="padding: 14px 20px;">
+            <td style="padding: 8px 16px;">
               <span 
                 (click)="toggleStatus(u)"
                 title="Cliquer pour changer le statut"
-                style="cursor: pointer; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"
+                style="cursor: pointer; padding: 2px 8px; border-radius: 12px; font-size: 11.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"
                 [style.background]="u.active ? 'rgba(82, 196, 26, 0.15)' : 'rgba(0, 0, 0, 0.06)'"
                 [style.color]="u.active ? '#52c41a' : '#8c8c8c'"
               >
                 {{ u.active ? '✅ Actif' : '❌ Inactif' }}
               </span>
             </td>
-            <td style="padding: 14px 20px; font-size: 13px; color: #595959;">
+            <td style="padding: 8px 16px; font-size: 12.5px; color: #595959;">
               {{ u.createdAt ? (u.createdAt | date:'dd/MM/yyyy') : '-' }}
             </td>
-            <td style="padding: 14px 20px; text-align: right;">
-              <div style="display: inline-flex; gap: 8px;">
-                <button type="button" class="btn btn-secondary btn-sm" (click)="openEditModal(u)" title="Changer le rôle / Modifier" style="padding: 5px 10px; font-size: 12px;">
+            <td style="padding: 8px 16px; text-align: right;">
+              <div style="display: inline-flex; gap: 6px;">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="openEditModal(u)" title="Changer le rôle / Modifier" style="padding: 4px 8px; font-size: 11.5px;">
                   ✏️ Rôle / Profil
                 </button>
-                <button type="button" class="btn btn-danger btn-sm" (click)="deleteUser(u)" title="Supprimer le compte" style="padding: 5px 10px; font-size: 12px; background: rgba(255, 77, 79, 0.1); color: #ff4d4f; border: 1px solid rgba(255, 77, 79, 0.2);">
+                <button type="button" class="btn btn-danger btn-sm" (click)="deleteUser(u)" title="Supprimer le compte" style="padding: 4px 8px; font-size: 11.5px; background: rgba(255, 77, 79, 0.1); color: #ff4d4f; border: 1px solid rgba(255, 77, 79, 0.2);">
                   🗑️
                 </button>
               </div>
             </td>
           </tr>
           <tr *ngIf="filteredUsers().length === 0">
-            <td colspan="5" style="padding: 40px 20px; text-align: center; color: #8c8c8c; font-style: italic; font-size: 14px;">
-              Aucun utilisateur trouvé. Cliquez sur "Nouvel Utilisateur" pour en ajouter un.
+            <td colspan="5" style="padding: 30px 20px; text-align: center; color: #8c8c8c; font-style: italic; font-size: 13px;">
+              Aucun utilisateur trouvé.
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Pagination Controls Footer -->
+    <div class="pagination-footer" style="padding: 12px 20px; border-top: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: #fafafa;">
+      <div style="font-size: 12.5px; color: #595959; font-weight: 500; white-space: nowrap;">
+        Affichage de <strong>{{ paginatedUsers().length }}</strong> sur <strong>{{ filteredUsers().length }}</strong> utilisateurs
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: nowrap;">
+        <!-- Items per page selector with non-breaking text -->
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #595959; white-space: nowrap;">
+          <span style="white-space: nowrap;">Lignes par page&nbsp;:</span>
+          <select [value]="itemsPerPage()" (change)="updateItemsPerPage($event)" style="padding: 4px 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px; font-size: 12px; outline: none; background: white; cursor: pointer; white-space: nowrap;">
+            <option [value]="4">4</option>
+            <option [value]="8">8</option>
+            <option [value]="10">10</option>
+            <option [value]="20">20</option>
+            <option [value]="50">50</option>
+          </select>
+        </div>
+
+        <!-- Page buttons -->
+        <div style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
+          <button 
+            type="button" 
+            (click)="prevPage()" 
+            [disabled]="currentPage() === 1" 
+            style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; background: white; color: #0b1a30; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+            [style.opacity]="currentPage() === 1 ? '0.5' : '1'"
+            [style.cursor]="currentPage() === 1 ? 'not-allowed' : 'pointer'"
+          >
+            ‹ Précédent
+          </button>
+
+          <span style="font-size: 12.5px; font-weight: 600; color: #0b1a30; padding: 0 8px; white-space: nowrap;">
+            Page {{ currentPage() }} / {{ totalPages() }}
+          </span>
+
+          <button 
+            type="button" 
+            (click)="nextPage()" 
+            [disabled]="currentPage() >= totalPages()" 
+            style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; background: white; color: #0b1a30; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+            [style.opacity]="currentPage() >= totalPages() ? '0.5' : '1'"
+            [style.cursor]="currentPage() >= totalPages() ? 'not-allowed' : 'pointer'"
+          >
+            Suivant ›
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 

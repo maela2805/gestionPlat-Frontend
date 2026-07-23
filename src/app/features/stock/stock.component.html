@@ -112,15 +112,15 @@
 
     <!-- Pagination Controls Footer -->
     <div class="pagination-footer" style="padding: 12px 20px; border-top: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: #fafafa;">
-      <div style="font-size: 12.5px; color: #595959; font-weight: 500;">
+      <div style="font-size: 12.5px; color: #595959; font-weight: 500; white-space: nowrap;">
         Affichage de <strong>{{ paginatedMovements().length }}</strong> sur <strong>{{ filteredMovements().length }}</strong> mouvements
       </div>
 
-      <div style="display: flex; align-items: center; gap: 16px;">
-        <!-- Items per page selector -->
-        <div style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #595959;">
-          <span>Lignes par page :</span>
-          <select [value]="itemsPerPage()" (change)="updateItemsPerPage($event)" style="padding: 4px 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px; font-size: 12px; outline: none; background: white; cursor: pointer;">
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: nowrap;">
+        <!-- Items per page selector with non-breaking text -->
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #595959; white-space: nowrap;">
+          <span style="white-space: nowrap;">Lignes par page&nbsp;:</span>
+          <select [value]="itemsPerPage()" (change)="updateItemsPerPage($event)" style="padding: 4px 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px; font-size: 12px; outline: none; background: white; cursor: pointer; white-space: nowrap;">
             <option [value]="4">4</option>
             <option [value]="8">8</option>
             <option [value]="10">10</option>
@@ -130,7 +130,7 @@
         </div>
 
         <!-- Page buttons -->
-        <div style="display: flex; align-items: center; gap: 4px;">
+        <div style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
           <button 
             type="button" 
             (click)="prevPage()" 
@@ -142,7 +142,7 @@
             ‹ Précédent
           </button>
 
-          <span style="font-size: 12.5px; font-weight: 600; color: #0b1a30; padding: 0 8px;">
+          <span style="font-size: 12.5px; font-weight: 600; color: #0b1a30; padding: 0 8px; white-space: nowrap;">
             Page {{ currentPage() }} / {{ totalPages() }}
           </span>
 

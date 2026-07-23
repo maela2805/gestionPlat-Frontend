@@ -17,6 +17,10 @@ export class UsersComponent implements OnInit {
   showModal = signal<boolean>(false);
   editingUser = signal<UserSystem | null>(null);
 
+  // Pagination Signals
+  currentPage = signal<number>(1);
+  itemsPerPage = signal<number>(4);
+
   userForm: FormGroup;
   isSaving = signal<boolean>(false);
   formError = signal<string | null>(null);
@@ -36,6 +40,15 @@ export class UsersComponent implements OnInit {
       list = list.filter(u => u.roleName === role);
     }
     return list;
+  });
+
+  totalPages = computed(() => Math.ceil(this.filteredUsers().length / this.itemsPerPage()) || 1);
+
+  paginatedUsers = computed(() => {
+    const page = this.currentPage();
+    const perPage = this.itemsPerPage();
+    const start = (page - 1) * perPage;
+    return this.filteredUsers().slice(start, start + perPage);
   });
 
   constructor(
@@ -66,10 +79,37 @@ export class UsersComponent implements OnInit {
 
   updateSearch(e: Event): void {
     this.searchTerm.set((e.target as HTMLInputElement).value);
+    this.currentPage.set(1);
   }
 
   updateRoleFilter(e: Event): void {
     this.selectedRoleFilter.set((e.target as HTMLSelectElement).value);
+    this.currentPage.set(1);
+  }
+
+  // Pagination Methods
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage() < this.totalPages()) {
+      this.currentPage.set(this.currentPage() + 1);
+    }
+  }
+
+  prevPage(): void {
+    if (this.currentPage() > 1) {
+      this.currentPage.set(this.currentPage() - 1);
+    }
+  }
+
+  updateItemsPerPage(event: Event): void {
+    const val = Number((event.target as HTMLSelectElement).value);
+    this.itemsPerPage.set(val);
+    this.currentPage.set(1);
   }
 
   openCreateModal(): void {
