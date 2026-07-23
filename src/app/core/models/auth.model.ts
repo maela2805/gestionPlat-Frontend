@@ -18,6 +18,7 @@ export interface AuthResponse {
   accessToken?: string;
   type?: string;
   tokenType?: string;
+  userId?: number;
   email: string;
   firstName?: string;
   lastName?: string;

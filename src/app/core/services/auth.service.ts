@@ -26,12 +26,12 @@ export class AuthService {
         if (token) {
           this.saveToken(token);
           const userObj: User = {
-            id: response.userId,
+            id: response.userId || 0,
             email: response.email,
             firstName: response.firstName,
             lastName: response.lastName,
             active: true,
-            roleName: response.role
+            roleName: response.role || 'ROLE_EMPLOYEE'
           };
           this.currentUser.set(userObj);
           localStorage.setItem(this.USER_KEY, JSON.stringify(userObj));
@@ -48,7 +48,7 @@ export class AuthService {
         if (token) {
           this.saveToken(token);
           const userObj: User = {
-            id: response.userId,
+            id: response.userId || 0,
             email: response.email,
             firstName: response.firstName,
             lastName: response.lastName,
