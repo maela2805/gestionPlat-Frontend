@@ -2,6 +2,7 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductService } from '../../core/services/product.service';
 import { CategoryService } from '../../core/services/category.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Product, ProductRequest } from '../../core/models/product.model';
 import { Category } from '../../core/models/category.model';
 
@@ -65,6 +66,7 @@ export class ProductsComponent implements OnInit {
   constructor(
     private productService: ProductService,
     private categoryService: CategoryService,
+    public authService: AuthService,
     private fb: FormBuilder
   ) {
     this.productForm = this.fb.group({
@@ -110,6 +112,19 @@ export class ProductsComponent implements OnInit {
     const val = (event.target as HTMLSelectElement).value;
     this.filterAlertOnly.set(val === 'alert');
     this.currentPage.set(1);
+  }
+
+  // Permission Checks (Cahier des charges GEI2)
+  canCreateProduct(): boolean {
+    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN', 'MANAGER']);
+  }
+
+  canEditProduct(): boolean {
+    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN', 'MANAGER']);
+  }
+
+  canDeleteProduct(): boolean {
+    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN']);
   }
 
   // Pagination Controls

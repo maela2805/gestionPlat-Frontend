@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CategoryService } from '../../core/services/category.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Category } from '../../core/models/category.model';
 
 @Component({
@@ -18,6 +19,7 @@ export class CategoriesComponent implements OnInit {
 
   categoryForm: FormGroup;
   isSaving = signal<boolean>(false);
+  formError = signal<string | null>(null);
 
   filteredCategories = computed(() => {
     let list = this.categories();
@@ -33,7 +35,6 @@ export class CategoriesComponent implements OnInit {
     const parentId = this.parentFilterId();
     if (parentId !== null) {
       if (parentId === 0) {
-        // Root only
         list = list.filter(c => !c.parentCategory);
       } else {
         list = list.filter(c => c.parentCategory && c.parentCategory.id === parentId);
@@ -45,6 +46,7 @@ export class CategoriesComponent implements OnInit {
 
   constructor(
     private categoryService: CategoryService,
+    public authService: AuthService,
     private fb: FormBuilder
   ) {
     this.categoryForm = this.fb.group({
@@ -56,6 +58,14 @@ export class CategoriesComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadData();
+  }
+
+  canCreateCategory(): boolean {
+    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN', 'MANAGER']);
+  }
+
+  canDeleteCategory(): boolean {
+    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN']);
   }
 
   loadData(): void {
@@ -71,8 +81,6 @@ export class CategoriesComponent implements OnInit {
     const val = (e.target as HTMLSelectElement).value;
     this.parentFilterId.set(val !== '' ? Number(val) : null);
   }
-
-  formError = signal<string | null>(null);
 
   openCreateModal(): void {
     this.categoryForm.reset({ parentCategoryId: null });

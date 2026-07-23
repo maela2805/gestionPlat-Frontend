@@ -7,7 +7,7 @@
       </div>
       <h1 class="page-title">Gestion de Stock - Liste des produits</h1>
     </div>
-    <div class="page-actions">
+    <div class="page-actions" *ngIf="canCreateProduct()">
       <button class="btn btn-primary" (click)="openCreateModal()">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
         <span>Ajouter un produit</span>
@@ -59,7 +59,7 @@
             <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">PRIX VENTE</th>
             <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">STOCK DISPO</th>
             <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">SEUIL ALERTE</th>
-            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase; text-align: center;">ACTIONS</th>
+            <th *ngIf="canEditProduct() || canDeleteProduct()" style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase; text-align: center;">ACTIONS</th>
           </tr>
         </thead>
         <tbody>
@@ -85,9 +85,10 @@
               </span>
             </td>
             <td style="padding: 8px 16px; font-size: 12px; color: #8c8c8c;">{{ p.alertThreshold }}</td>
-            <td style="padding: 8px 16px; text-align: center;">
+            <td *ngIf="canEditProduct() || canDeleteProduct()" style="padding: 8px 16px; text-align: center;">
               <div style="display: inline-flex; gap: 6px; justify-content: center;">
                 <button 
+                  *ngIf="canEditProduct()"
                   type="button" 
                   (click)="openEditModal(p)" 
                   title="Modifier le produit" 
@@ -96,6 +97,7 @@
                   <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
                 </button>
                 <button 
+                  *ngIf="canDeleteProduct()"
                   type="button" 
                   (click)="deleteProduct(p)" 
                   title="Supprimer le produit" 
@@ -107,7 +109,7 @@
             </td>
           </tr>
           <tr *ngIf="filteredProducts().length === 0">
-            <td colspan="8" style="padding: 30px 20px; text-align: center; color: #8c8c8c; font-style: italic; font-size: 13px;">
+            <td [attr.colspan]="canEditProduct() || canDeleteProduct() ? 8 : 7" style="padding: 30px 20px; text-align: center; color: #8c8c8c; font-style: italic; font-size: 13px;">
               Aucun produit trouvé.
             </td>
           </tr>

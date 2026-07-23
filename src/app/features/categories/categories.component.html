@@ -1,5 +1,5 @@
 <div class="categories-page" style="width: 100%;">
-  <!-- Page Header Block (Matching prototype screenshot) -->
+  <!-- Page Header Block -->
   <div class="page-header-block">
     <div>
       <div class="breadcrumb">
@@ -7,7 +7,7 @@
       </div>
       <h1 class="page-title">Gestion de Stock - Catégories & Arborescence</h1>
     </div>
-    <div class="page-actions">
+    <div class="page-actions" *ngIf="canCreateCategory()">
       <button class="btn btn-primary" (click)="openCreateModal()">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L8.6 3.3A2 2 0 0 0 6.9 2.5H4a2 2 0 0 0-2 2v13.5A1.5 1.5 0 0 0 3.5 19.5z"/><line x1="12" y1="10" x2="12" y2="16"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
         <span>Nouvelle Catégorie</span>
@@ -15,7 +15,7 @@
     </div>
   </div>
 
-  <!-- Filter Row (Matching prototype screenshot) -->
+  <!-- Filter Row -->
   <div class="filter-row" style="margin-bottom: 24px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
     <div class="search-wrapper" style="position: relative; width: 360px;">
       <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #8c8c8c;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -39,7 +39,7 @@
     </div>
   </div>
 
-  <!-- Panel Card for 100% Width Table (Matching prototype screenshot) -->
+  <!-- Panel Card for 100% Width Table -->
   <div class="panel-card" style="padding: 0; width: 100%; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04); border-radius: 12px; background: white; border: 1px solid rgba(0,0,0,0.06); overflow: hidden;">
     <div class="table-responsive" style="width: 100%; overflow-x: auto;">
       <table class="table-custom" style="width: 100%; border-collapse: collapse; min-width: 100%;">
@@ -47,7 +47,7 @@
           <tr style="background: rgba(0,0,0,0.02); border-bottom: 1px solid rgba(0,0,0,0.06);">
             <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">NOM</th>
             <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">NOMBRE DE PRODUITS</th>
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase; text-align: center;">ACTIONS</th>
+            <th *ngIf="canDeleteCategory()" style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase; text-align: center;">ACTIONS</th>
           </tr>
         </thead>
         <tbody>
@@ -61,7 +61,7 @@
                 {{ (c.productCount || 0) }} produit(s)
               </span>
             </td>
-            <td style="padding: 18px 20px; text-align: center;">
+            <td *ngIf="canDeleteCategory()" style="padding: 18px 20px; text-align: center;">
               <button 
                 type="button" 
                 (click)="deleteCategory(c)" 
@@ -73,8 +73,8 @@
             </td>
           </tr>
           <tr *ngIf="filteredCategories().length === 0">
-            <td colspan="3" style="padding: 40px 20px; text-align: center; color: #8c8c8c; font-style: italic; font-size: 14px;">
-              Aucune catégorie trouvée. Cliquez sur "Nouvelle Catégorie" pour en créer une.
+            <td [attr.colspan]="canDeleteCategory() ? 3 : 2" style="padding: 40px 20px; text-align: center; color: #8c8c8c; font-style: italic; font-size: 14px;">
+              Aucune catégorie trouvée.
             </td>
           </tr>
         </tbody>

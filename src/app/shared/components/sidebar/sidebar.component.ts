@@ -7,7 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrls: ['./sidebar.component.scss']
 })
 export class SidebarComponent {
-  private authService = inject(AuthService);
+  public authService = inject(AuthService);
   user = this.authService.currentUser;
   isStockSubmenuOpen = signal<boolean>(true);
 
@@ -21,11 +21,15 @@ export class SidebarComponent {
 
   getInitials(): string {
     const u = this.user();
-    if (!u) return 'MK';
+    if (!u) return 'GE';
     if (u.firstName && u.lastName) {
       return (u.firstName[0] + u.lastName[0]).toUpperCase();
     }
     return u.email.substring(0, 2).toUpperCase();
+  }
+
+  canAccessUsers(): boolean {
+    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN']);
   }
 
   logout(): void {
