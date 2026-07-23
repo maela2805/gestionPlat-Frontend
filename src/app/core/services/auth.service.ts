@@ -60,6 +60,22 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
+  hasRole(requiredRole: string): boolean {
+    const user = this.currentUser();
+    if (!user) return false;
+    const roleName = user.roleName || (user.role && user.role.name) || '';
+    if (roleName === 'ROLE_SUPER_ADMIN' || roleName === 'SUPER_ADMIN') return true;
+    return roleName === requiredRole || roleName === `ROLE_${requiredRole}`;
+  }
+
+  hasAnyRole(allowedRoles: string[]): boolean {
+    const user = this.currentUser();
+    if (!user) return false;
+    const roleName = user.roleName || (user.role && user.role.name) || '';
+    if (roleName === 'ROLE_SUPER_ADMIN' || roleName === 'SUPER_ADMIN') return true;
+    return allowedRoles.some(r => roleName === r || roleName === `ROLE_${r}` || `ROLE_${roleName}` === r);
+  }
+
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
   }
@@ -74,3 +90,4 @@ export class AuthService {
     return raw ? JSON.parse(raw) : null;
   }
 }
+
