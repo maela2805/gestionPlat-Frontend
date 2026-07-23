@@ -25,6 +25,16 @@ export class AuthService {
         const token = response.accessToken || response.token;
         if (token) {
           this.saveToken(token);
+          const userObj: User = {
+            id: response.userId,
+            email: response.email,
+            firstName: response.firstName,
+            lastName: response.lastName,
+            active: true,
+            roleName: response.role
+          };
+          this.currentUser.set(userObj);
+          localStorage.setItem(this.USER_KEY, JSON.stringify(userObj));
           this.fetchProfile().subscribe({ error: () => {} });
         }
       })
@@ -37,7 +47,16 @@ export class AuthService {
         const token = response.accessToken || response.token;
         if (token) {
           this.saveToken(token);
-          this.fetchProfile().subscribe({ error: () => {} });
+          const userObj: User = {
+            id: response.userId,
+            email: response.email,
+            firstName: response.firstName,
+            lastName: response.lastName,
+            active: true,
+            roleName: response.role || 'ROLE_CLIENT'
+          };
+          this.currentUser.set(userObj);
+          localStorage.setItem(this.USER_KEY, JSON.stringify(userObj));
         }
       })
     );
@@ -63,7 +82,7 @@ export class AuthService {
   hasRole(requiredRole: string): boolean {
     const user = this.currentUser();
     if (!user) return false;
-    const roleName = user.roleName || (user.role && user.role.name) || '';
+    const roleName = user.roleName || (user.role && user.role.name) || (typeof user.role === 'string' ? user.role : '') || '';
     if (roleName === 'ROLE_SUPER_ADMIN' || roleName === 'SUPER_ADMIN') return true;
     return roleName === requiredRole || roleName === `ROLE_${requiredRole}`;
   }
@@ -71,7 +90,7 @@ export class AuthService {
   hasAnyRole(allowedRoles: string[]): boolean {
     const user = this.currentUser();
     if (!user) return false;
-    const roleName = user.roleName || (user.role && user.role.name) || '';
+    const roleName = user.roleName || (user.role && user.role.name) || (typeof user.role === 'string' ? user.role : '') || '';
     if (roleName === 'ROLE_SUPER_ADMIN' || roleName === 'SUPER_ADMIN') return true;
     return allowedRoles.some(r => roleName === r || roleName === `ROLE_${r}` || `ROLE_${roleName}` === r);
   }
@@ -90,4 +109,3 @@ export class AuthService {
     return raw ? JSON.parse(raw) : null;
   }
 }
-
