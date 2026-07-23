@@ -1,5 +1,5 @@
 <div class="stock-page" style="width: 100%;">
-  <!-- Page Header Block (Matching prototype screenshot) -->
+  <!-- Page Header Block -->
   <div class="page-header-block">
     <div>
       <div class="breadcrumb">
@@ -15,7 +15,7 @@
     </div>
   </div>
 
-  <!-- Filter Row (Matching prototype screenshot) -->
+  <!-- Filter Row -->
   <div class="filter-row" style="margin-bottom: 24px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
     <div class="search-wrapper" style="position: relative; width: 360px;">
       <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #8c8c8c;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -49,64 +49,115 @@
     </div>
   </div>
 
-  <!-- Panel Card for 100% Width Table (Matching prototype screenshot) -->
+  <!-- Table Panel with Compact Rows -->
   <div class="panel-card" style="padding: 0; width: 100%; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04); border-radius: 12px; background: white; border: 1px solid rgba(0,0,0,0.06); overflow: hidden;">
     <div class="table-responsive" style="width: 100%; overflow-x: auto;">
       <table class="table-custom" style="width: 100%; border-collapse: collapse; min-width: 100%;">
         <thead>
           <tr style="background: rgba(0,0,0,0.02); border-bottom: 1px solid rgba(0,0,0,0.06);">
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">DATE</th>
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">RÉFÉRENCE PRODUIT</th>
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">DÉSIGNATION</th>
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">TYPE MOUVEMENT</th>
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">QUANTITÉ</th>
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">AUTEUR</th>
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">NOTES</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">DATE</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">RÉFÉRENCE PRODUIT</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">DÉSIGNATION</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">TYPE MOUVEMENT</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">QUANTITÉ</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">AUTEUR</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">NOTES</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let m of filteredMovements()" style="border-bottom: 1px solid rgba(0,0,0,0.04); transition: background 0.2s;">
-            <td style="padding: 14px 20px; font-size: 13px; color: #595959; font-weight: 500;">
+          <!-- Compact Row Padding: 8px 16px -->
+          <tr *ngFor="let m of paginatedMovements()" style="border-bottom: 1px solid rgba(0,0,0,0.04); transition: background 0.2s;">
+            <td style="padding: 8px 16px; font-size: 12.5px; color: #595959; font-weight: 500;">
               {{ m.createdAt | date:'dd/MM/yyyy HH:mm' }}
             </td>
-            <td style="padding: 14px 20px;">
-              <code style="background: rgba(0,0,0,0.04); padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; color: #1890ff;">
+            <td style="padding: 8px 16px;">
+              <code style="background: rgba(0,0,0,0.04); padding: 2px 6px; border-radius: 4px; font-size: 11.5px; font-weight: 600; color: #1890ff;">
                 {{ m.product.reference }}
               </code>
             </td>
-            <td style="padding: 14px 20px;">
-              <span style="font-weight: 800; color: #0b1a30; font-size: 14px;">{{ m.product.name }}</span>
+            <td style="padding: 8px 16px;">
+              <span style="font-weight: 700; color: #0b1a30; font-size: 13px;">{{ m.product.name }}</span>
             </td>
-            <td style="padding: 14px 20px;">
+            <td style="padding: 8px 16px;">
               <span 
                 class="badge" 
                 [style.background]="m.type === 'ENTREE' ? 'rgba(82, 196, 26, 0.12)' : 'rgba(255, 77, 79, 0.12)'" 
                 [style.color]="m.type === 'ENTREE' ? '#52c41a' : '#ff4d4f'" 
                 [style.border]="m.type === 'ENTREE' ? '1px solid rgba(82, 196, 26, 0.3)' : '1px solid rgba(255, 77, 79, 0.3)'"
-                style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;"
+                style="padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;"
               >
                 {{ m.type === 'ENTREE' ? 'Entrée (' + m.reason + ')' : 'Sortie (' + m.reason + ')' }}
               </span>
             </td>
-            <td style="padding: 14px 20px; font-size: 14px; font-weight: 800; color: #0b1a30;">
+            <td style="padding: 8px 16px; font-size: 13px; font-weight: 800; color: #0b1a30;">
               {{ m.quantity }}
             </td>
-            <td style="padding: 14px 20px;">
-              <span style="background: rgba(0, 0, 0, 0.05); color: #595959; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase;">
+            <td style="padding: 8px 16px;">
+              <span style="background: rgba(0, 0, 0, 0.05); color: #595959; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 700; text-transform: uppercase;">
                 {{ m.userEmail || 'SUPER_ADMIN' }}
               </span>
             </td>
-            <td style="padding: 14px 20px; font-size: 13px; color: #595959;">
-              {{ m.note || 'Création de fiche produit' }}
+            <td style="padding: 8px 16px; font-size: 12.5px; color: #595959;">
+              {{ m.note || 'Ajustement de stock' }}
             </td>
           </tr>
           <tr *ngIf="filteredMovements().length === 0">
-            <td colspan="7" style="padding: 40px 20px; text-align: center; color: #8c8c8c; font-style: italic; font-size: 14px;">
-              Aucun mouvement de stock enregistré. Cliquez sur "Enregistrer un mouvement" pour effectuer un ajustement.
+            <td colspan="7" style="padding: 30px 20px; text-align: center; color: #8c8c8c; font-style: italic; font-size: 13px;">
+              Aucun mouvement de stock enregistré.
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Pagination Controls Footer -->
+    <div class="pagination-footer" style="padding: 12px 20px; border-top: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: #fafafa;">
+      <div style="font-size: 12.5px; color: #595959; font-weight: 500;">
+        Affichage de <strong>{{ paginatedMovements().length }}</strong> sur <strong>{{ filteredMovements().length }}</strong> mouvements
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <!-- Items per page selector -->
+        <div style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #595959;">
+          <span>Lignes par page :</span>
+          <select [value]="itemsPerPage()" (change)="updateItemsPerPage($event)" style="padding: 4px 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px; font-size: 12px; outline: none; background: white; cursor: pointer;">
+            <option [value]="4">4</option>
+            <option [value]="8">8</option>
+            <option [value]="10">10</option>
+            <option [value]="20">20</option>
+            <option [value]="50">50</option>
+          </select>
+        </div>
+
+        <!-- Page buttons -->
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <button 
+            type="button" 
+            (click)="prevPage()" 
+            [disabled]="currentPage() === 1" 
+            style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; background: white; color: #0b1a30; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+            [style.opacity]="currentPage() === 1 ? '0.5' : '1'"
+            [style.cursor]="currentPage() === 1 ? 'not-allowed' : 'pointer'"
+          >
+            ‹ Précédent
+          </button>
+
+          <span style="font-size: 12.5px; font-weight: 600; color: #0b1a30; padding: 0 8px;">
+            Page {{ currentPage() }} / {{ totalPages() }}
+          </span>
+
+          <button 
+            type="button" 
+            (click)="nextPage()" 
+            [disabled]="currentPage() >= totalPages()" 
+            style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; background: white; color: #0b1a30; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+            [style.opacity]="currentPage() >= totalPages() ? '0.5' : '1'"
+            [style.cursor]="currentPage() >= totalPages() ? 'not-allowed' : 'pointer'"
+          >
+            Suivant ›
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 

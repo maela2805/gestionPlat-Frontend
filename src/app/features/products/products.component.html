@@ -1,5 +1,5 @@
 <div class="products-page" style="width: 100%;">
-  <!-- Page Header Block (Matching prototype screenshot) -->
+  <!-- Page Header Block -->
   <div class="page-header-block">
     <div>
       <div class="breadcrumb">
@@ -15,7 +15,7 @@
     </div>
   </div>
 
-  <!-- Filter Row (Matching prototype screenshot) -->
+  <!-- Filter Row -->
   <div class="filter-row" style="margin-bottom: 24px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
     <div class="search-wrapper" style="position: relative; width: 360px;">
       <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #8c8c8c;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -46,72 +46,123 @@
     </div>
   </div>
 
-  <!-- Panel Card for 100% Width Table (Matching prototype screenshot) -->
+  <!-- Table Panel with Compact Data Rows -->
   <div class="panel-card" style="padding: 0; width: 100%; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04); border-radius: 12px; background: white; border: 1px solid rgba(0,0,0,0.06); overflow: hidden;">
     <div class="table-responsive" style="width: 100%; overflow-x: auto;">
       <table class="table-custom" style="width: 100%; border-collapse: collapse; min-width: 100%;">
         <thead>
           <tr style="background: rgba(0,0,0,0.02); border-bottom: 1px solid rgba(0,0,0,0.06);">
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">RÉFÉRENCE</th>
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">DÉSIGNATION</th>
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">CATÉGORIE</th>
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">PRIX ACHAT</th>
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">PRIX VENTE</th>
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">STOCK DISPO</th>
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">SEUIL ALERTE</th>
-            <th style="padding: 14px 20px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase; text-align: right;">ACTIONS</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">RÉFÉRENCE</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">DÉSIGNATION</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">CATÉGORIE</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">PRIX ACHAT</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">PRIX VENTE</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">STOCK DISPO</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">SEUIL ALERTE</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase; text-align: center;">ACTIONS</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let p of filteredProducts()" style="border-bottom: 1px solid rgba(0,0,0,0.04); transition: background 0.2s;">
-            <td style="padding: 14px 20px;"><code style="background: rgba(0,0,0,0.04); padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; color: #1890ff;">{{ p.reference }}</code></td>
-            <td style="padding: 14px 20px;">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <img [src]="p.imageUrl | defaultImage" [alt]="p.name" style="width: 36px; height: 36px; border-radius: 6px; object-fit: cover;" />
-                <span style="font-weight: 700; color: #0b1a30; font-size: 14px;">{{ p.name }}</span>
+          <!-- Compact Row Padding: 8px 16px -->
+          <tr *ngFor="let p of paginatedProducts()" style="border-bottom: 1px solid rgba(0,0,0,0.04); transition: background 0.2s;">
+            <td style="padding: 8px 16px;"><code style="background: rgba(0,0,0,0.04); padding: 2px 6px; border-radius: 4px; font-size: 11.5px; font-weight: 600; color: #1890ff;">{{ p.reference }}</code></td>
+            <td style="padding: 8px 16px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <img [src]="p.imageUrl | defaultImage" [alt]="p.name" style="width: 28px; height: 28px; border-radius: 4px; object-fit: cover;" />
+                <span style="font-weight: 600; color: #0b1a30; font-size: 13px;">{{ p.name }}</span>
               </div>
             </td>
-            <td style="padding: 14px 20px;">
-              <span class="badge" style="background: rgba(24, 144, 255, 0.1); color: #1890ff; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+            <td style="padding: 8px 16px;">
+              <span class="badge" style="background: rgba(24, 144, 255, 0.1); color: #1890ff; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">
                 {{ p.category?.name || 'Général' }}
               </span>
             </td>
-            <td style="padding: 14px 20px; font-size: 13px; color: #595959;">{{ p.buyPrice | fcfa }}</td>
-            <td style="padding: 14px 20px; font-size: 14px; font-weight: 700; color: #1890ff;">{{ p.sellPrice | fcfa }}</td>
-            <td style="padding: 14px 20px;">
-              <span class="badge" [style.background]="p.stock <= p.alertThreshold ? 'rgba(255, 77, 79, 0.15)' : 'rgba(82, 196, 26, 0.15)'" [style.color]="p.stock <= p.alertThreshold ? '#ff4d4f' : '#52c41a'" style="padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+            <td style="padding: 8px 16px; font-size: 12.5px; color: #595959;">{{ p.buyPrice | fcfa }}</td>
+            <td style="padding: 8px 16px; font-size: 13px; font-weight: 700; color: #1890ff;">{{ p.sellPrice | fcfa }}</td>
+            <td style="padding: 8px 16px;">
+              <span class="badge" [style.background]="p.stock <= p.alertThreshold ? 'rgba(255, 77, 79, 0.15)' : 'rgba(82, 196, 26, 0.15)'" [style.color]="p.stock <= p.alertThreshold ? '#ff4d4f' : '#52c41a'" style="padding: 2px 8px; border-radius: 12px; font-size: 11.5px; font-weight: 700;">
                 {{ p.stock }}
               </span>
             </td>
-            <td style="padding: 14px 20px; font-size: 13px; color: #8c8c8c;">{{ p.alertThreshold }}</td>
-            <td style="padding: 14px 20px; text-align: center;">
-              <div style="display: inline-flex; gap: 8px; justify-content: center;">
+            <td style="padding: 8px 16px; font-size: 12px; color: #8c8c8c;">{{ p.alertThreshold }}</td>
+            <td style="padding: 8px 16px; text-align: center;">
+              <div style="display: inline-flex; gap: 6px; justify-content: center;">
                 <button 
                   type="button" 
                   (click)="openEditModal(p)" 
                   title="Modifier le produit" 
-                  style="background: rgba(24, 144, 255, 0.08); color: #1890ff; border: 1px solid rgba(24, 144, 255, 0.2); width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 6px rgba(24, 144, 255, 0.15);"
+                  style="background: rgba(24, 144, 255, 0.08); color: #1890ff; border: 1px solid rgba(24, 144, 255, 0.2); width: 28px; height: 28px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
                 </button>
                 <button 
                   type="button" 
                   (click)="deleteProduct(p)" 
                   title="Supprimer le produit" 
-                  style="background: rgba(255, 77, 79, 0.08); color: #ff4d4f; border: 1px solid rgba(255, 77, 79, 0.2); width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 6px rgba(255, 77, 79, 0.15);"
+                  style="background: rgba(255, 77, 79, 0.08); color: #ff4d4f; border: 1px solid rgba(255, 77, 79, 0.2); width: 28px; height: 28px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                 </button>
               </div>
             </td>
           </tr>
           <tr *ngIf="filteredProducts().length === 0">
-            <td colspan="8" style="padding: 40px 20px; text-align: center; color: #8c8c8c; font-style: italic; font-size: 14px;">
-              Aucun produit enregistré dans le stock. Cliquez sur "Ajouter un produit" pour en créer un.
+            <td colspan="8" style="padding: 30px 20px; text-align: center; color: #8c8c8c; font-style: italic; font-size: 13px;">
+              Aucun produit trouvé.
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Pagination Controls Footer -->
+    <div class="pagination-footer" style="padding: 12px 20px; border-top: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: #fafafa;">
+      <div style="font-size: 12.5px; color: #595959; font-weight: 500;">
+        Affichage de <strong>{{ paginatedProducts().length }}</strong> sur <strong>{{ filteredProducts().length }}</strong> produits
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <!-- Items per page selector -->
+        <div style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #595959;">
+          <span>Lignes par page :</span>
+          <select [value]="itemsPerPage()" (change)="updateItemsPerPage($event)" style="padding: 4px 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px; font-size: 12px; outline: none; background: white; cursor: pointer;">
+            <option [value]="4">4</option>
+            <option [value]="8">8</option>
+            <option [value]="10">10</option>
+            <option [value]="20">20</option>
+            <option [value]="50">50</option>
+          </select>
+        </div>
+
+        <!-- Page buttons -->
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <button 
+            type="button" 
+            (click)="prevPage()" 
+            [disabled]="currentPage() === 1" 
+            style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; background: white; color: #0b1a30; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+            [style.opacity]="currentPage() === 1 ? '0.5' : '1'"
+            [style.cursor]="currentPage() === 1 ? 'not-allowed' : 'pointer'"
+          >
+            ‹ Précédent
+          </button>
+
+          <span style="font-size: 12.5px; font-weight: 600; color: #0b1a30; padding: 0 8px;">
+            Page {{ currentPage() }} / {{ totalPages() }}
+          </span>
+
+          <button 
+            type="button" 
+            (click)="nextPage()" 
+            [disabled]="currentPage() >= totalPages()" 
+            style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; background: white; color: #0b1a30; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+            [style.opacity]="currentPage() >= totalPages() ? '0.5' : '1'"
+            [style.cursor]="currentPage() >= totalPages() ? 'not-allowed' : 'pointer'"
+          >
+            Suivant ›
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 

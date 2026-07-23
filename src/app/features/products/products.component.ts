@@ -17,7 +17,11 @@ export class ProductsComponent implements OnInit {
   searchTerm = signal<string>('');
   selectedCategoryId = signal<number | null>(null);
   filterAlertOnly = signal<boolean>(false);
-  viewMode = signal<'grid' | 'table'>('grid');
+  viewMode = signal<'grid' | 'table'>('table');
+
+  // Pagination Signals
+  currentPage = signal<number>(1);
+  itemsPerPage = signal<number>(4);
 
   showModal = signal<boolean>(false);
   editingProduct = signal<Product | null>(null);
@@ -47,6 +51,15 @@ export class ProductsComponent implements OnInit {
     }
 
     return list;
+  });
+
+  totalPages = computed(() => Math.ceil(this.filteredProducts().length / this.itemsPerPage()) || 1);
+
+  paginatedProducts = computed(() => {
+    const page = this.currentPage();
+    const perPage = this.itemsPerPage();
+    const start = (page - 1) * perPage;
+    return this.filteredProducts().slice(start, start + perPage);
   });
 
   constructor(
@@ -84,20 +97,44 @@ export class ProductsComponent implements OnInit {
   updateSearch(event: Event): void {
     const val = (event.target as HTMLInputElement).value;
     this.searchTerm.set(val);
+    this.currentPage.set(1);
   }
 
   updateCategoryFilter(event: Event): void {
     const val = (event.target as HTMLSelectElement).value;
     this.selectedCategoryId.set(val ? Number(val) : null);
+    this.currentPage.set(1);
   }
 
   updateAlertFilterSelect(event: Event): void {
     const val = (event.target as HTMLSelectElement).value;
     this.filterAlertOnly.set(val === 'alert');
+    this.currentPage.set(1);
   }
 
-  toggleAlertFilter(): void {
-    this.filterAlertOnly.set(!this.filterAlertOnly());
+  // Pagination Controls
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage() < this.totalPages()) {
+      this.currentPage.set(this.currentPage() + 1);
+    }
+  }
+
+  prevPage(): void {
+    if (this.currentPage() > 1) {
+      this.currentPage.set(this.currentPage() - 1);
+    }
+  }
+
+  updateItemsPerPage(event: Event): void {
+    const val = Number((event.target as HTMLSelectElement).value);
+    this.itemsPerPage.set(val);
+    this.currentPage.set(1);
   }
 
   onImageUploaded(url: string | null): void {

@@ -27,6 +27,10 @@ export class StockComponent implements OnInit {
   authorFilter = signal<string>('');
   showModal = signal<boolean>(false);
 
+  // Pagination Signals
+  currentPage = signal<number>(1);
+  itemsPerPage = signal<number>(4);
+
   filteredMovements = computed(() => {
     let list = this.movements();
     const search = this.historySearch().toLowerCase().trim();
@@ -48,6 +52,15 @@ export class StockComponent implements OnInit {
     return list;
   });
 
+  totalPages = computed(() => Math.ceil(this.filteredMovements().length / this.itemsPerPage()) || 1);
+
+  paginatedMovements = computed(() => {
+    const page = this.currentPage();
+    const perPage = this.itemsPerPage();
+    const start = (page - 1) * perPage;
+    return this.filteredMovements().slice(start, start + perPage);
+  });
+
   openAdjustmentModal(): void {
     this.adjustForm.reset({ type: 'ENTREE', quantity: 1, reason: 'REAPPROVISIONNEMENT' });
     this.successMessage.set(null);
@@ -61,6 +74,7 @@ export class StockComponent implements OnInit {
 
   updateAuthorFilter(e: Event): void {
     this.authorFilter.set((e.target as HTMLSelectElement).value);
+    this.currentPage.set(1);
   }
 
   constructor(
@@ -100,10 +114,37 @@ export class StockComponent implements OnInit {
 
   updateHistorySearch(e: Event): void {
     this.historySearch.set((e.target as HTMLInputElement).value);
+    this.currentPage.set(1);
   }
 
   updateHistoryType(e: Event): void {
     this.historyTypeFilter.set((e.target as HTMLSelectElement).value);
+    this.currentPage.set(1);
+  }
+
+  // Pagination Methods
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage() < this.totalPages()) {
+      this.currentPage.set(this.currentPage() + 1);
+    }
+  }
+
+  prevPage(): void {
+    if (this.currentPage() > 1) {
+      this.currentPage.set(this.currentPage() - 1);
+    }
+  }
+
+  updateItemsPerPage(event: Event): void {
+    const val = Number((event.target as HTMLSelectElement).value);
+    this.itemsPerPage.set(val);
+    this.currentPage.set(1);
   }
 
   submitAdjustment(): void {

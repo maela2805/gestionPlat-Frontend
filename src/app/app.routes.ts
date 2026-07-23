@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { staffGuard } from './core/guards/staff.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -13,22 +14,22 @@ export const routes: Routes = [
   },
   { 
     path: 'dashboard', 
-    canActivate: [authGuard],
+    canActivate: [staffGuard],
     loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) 
   },
   { 
     path: 'products', 
-    canActivate: [authGuard],
+    canActivate: [staffGuard],
     loadComponent: () => import('./features/products/products.component').then(m => m.ProductsComponent) 
   },
   { 
     path: 'categories', 
-    canActivate: [authGuard],
+    canActivate: [staffGuard],
     loadComponent: () => import('./features/categories/categories.component').then(m => m.CategoriesComponent) 
   },
   { 
     path: 'stock', 
-    canActivate: [authGuard],
+    canActivate: [staffGuard],
     loadComponent: () => import('./features/stock/stock.component').then(m => m.StockComponent) 
   },
   { 

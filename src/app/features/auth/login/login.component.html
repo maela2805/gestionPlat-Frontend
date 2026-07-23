@@ -31,6 +31,10 @@
         <span *ngIf="isFieldInvalid('password')" class="field-error">Mot de passe requis</span>
       </div>
 
+      <div *ngIf="successMessage()" class="alert-success" style="background: rgba(82, 196, 26, 0.15); border: 1px solid #52c41a; color: #52c41a; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 0.85rem;">
+        ✅ {{ successMessage() }}
+      </div>
+
       <div *ngIf="errorMessage()" class="alert-error">
         ⚠️ {{ errorMessage() }}
       </div>

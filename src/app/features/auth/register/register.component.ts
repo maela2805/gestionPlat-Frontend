@@ -35,7 +35,10 @@ export class RegisterComponent {
     this.authService.register(this.registerForm.value).subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.router.navigate(['/dashboard']);
+        // Déconnexion de la session back-office pour les comptes clients
+        this.authService.logout();
+        // Redirection vers la connexion avec message d'information client
+        this.router.navigate(['/login'], { queryParams: { registered: 'true' } });
       },
       error: (err) => {
         this.isLoading.set(false);
