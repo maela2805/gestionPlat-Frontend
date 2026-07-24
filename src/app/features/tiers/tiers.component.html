@@ -58,66 +58,35 @@
     </div>
   </div>
 
-  <!-- Filter & Tab Row -->
-  <div class="filter-card" style="background: white; border-radius: 12px; padding: 16px 20px; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
-    <!-- Type Filter Tabs -->
-    <div class="tab-group" style="display: flex; gap: 6px; background: rgba(0,0,0,0.03); padding: 4px; border-radius: 8px;">
-      <button 
-        type="button" 
-        (click)="setTypeFilter('')" 
-        [style.background]="activeTypeFilter() === '' ? '#ffffff' : 'transparent'"
-        [style.color]="activeTypeFilter() === '' ? '#1890ff' : '#595959'"
-        [style.box-shadow]="activeTypeFilter() === '' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'"
-        style="padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-      >
-        Tous les tiers ({{ totalCount() }})
-      </button>
-      <button 
-        type="button" 
-        (click)="setTypeFilter('FOURNISSEUR')" 
-        [style.background]="activeTypeFilter() === 'FOURNISSEUR' ? '#ffffff' : 'transparent'"
-        [style.color]="activeTypeFilter() === 'FOURNISSEUR' ? '#722ed1' : '#595959'"
-        [style.box-shadow]="activeTypeFilter() === 'FOURNISSEUR' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'"
-        style="padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-      >
-        Fournisseurs ({{ fournisseursCount() }})
-      </button>
-      <button 
-        type="button" 
-        (click)="setTypeFilter('CLIENT')" 
-        [style.background]="activeTypeFilter() === 'CLIENT' ? '#ffffff' : 'transparent'"
-        [style.color]="activeTypeFilter() === 'CLIENT' ? '#52c41a' : '#595959'"
-        [style.box-shadow]="activeTypeFilter() === 'CLIENT' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'"
-        style="padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-      >
-        Clients ({{ clientsCount() }})
-      </button>
-      <button 
-        type="button" 
-        (click)="setTypeFilter('PARTENAIRE')" 
-        [style.background]="activeTypeFilter() === 'PARTENAIRE' ? '#ffffff' : 'transparent'"
-        [style.color]="activeTypeFilter() === 'PARTENAIRE' ? '#fa8c16' : '#595959'"
-        [style.box-shadow]="activeTypeFilter() === 'PARTENAIRE' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'"
-        style="padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-      >
-        Partenaires ({{ partenairesCount() }})
-      </button>
+  <!-- Filter Row: Search Bar FIRST, then Type Select Filter, then Status Select Filter -->
+  <div class="filter-card" style="background: white; border-radius: 12px; padding: 16px 20px; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 20px; display: flex; align-items: center; justify-content: flex-start; flex-wrap: wrap; gap: 16px;">
+    <!-- 1. Search Bar FIRST -->
+    <div style="position: relative; width: 320px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #8c8c8c;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input 
+        type="text" 
+        placeholder="Rechercher (nom, code, ville, tel)..." 
+        [value]="searchTerm()" 
+        (input)="updateSearch($event)"
+        style="width: 100%; padding: 9px 14px 9px 38px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; outline: none; background: #ffffff;"
+      />
     </div>
 
-    <!-- Search & Status Dropdown -->
-    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-      <div style="position: relative; width: 260px;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #8c8c8c;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input 
-          type="text" 
-          placeholder="Rechercher nom, code, ville..." 
-          [value]="searchTerm()" 
-          (input)="updateSearch($event)"
-          style="width: 100%; padding: 8px 12px 8px 36px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; outline: none;"
-        />
-      </div>
+    <!-- 2. Type Filter Select Dropdown SECOND -->
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <label style="font-size: 12px; font-weight: 700; color: #0b1a30; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">TYPE :</label>
+      <select [value]="activeTypeFilter()" (change)="updateTypeFilter($event)" style="padding: 8.5px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; font-weight: 600; color: #0b1a30; background: #ffffff; outline: none; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <option value="">Tous les types ({{ totalCount() }})</option>
+        <option value="FOURNISSEUR">📦 Fournisseurs ({{ fournisseursCount() }})</option>
+        <option value="CLIENT">👤 Clients ({{ clientsCount() }})</option>
+        <option value="PARTENAIRE">🤝 Partenaires ({{ partenairesCount() }})</option>
+      </select>
+    </div>
 
-      <select [value]="statusFilter()" (change)="updateStatusFilter($event)" style="padding: 8px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; outline: none; background: white; cursor: pointer;">
+    <!-- 3. Status Filter Select Dropdown THIRD -->
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <label style="font-size: 12px; font-weight: 700; color: #0b1a30; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">STATUT :</label>
+      <select [value]="statusFilter()" (change)="updateStatusFilter($event)" style="padding: 8.5px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; font-weight: 600; color: #0b1a30; background: #ffffff; outline: none; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
         <option value="">Tous les statuts</option>
         <option value="ACTIF">🟢 Actifs uniquement</option>
         <option value="INACTIF">🔴 Inactifs uniquement</option>

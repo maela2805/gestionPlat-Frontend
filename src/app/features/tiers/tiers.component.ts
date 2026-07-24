@@ -122,6 +122,11 @@ export class TiersComponent implements OnInit {
     this.currentPage.set(1);
   }
 
+  updateTypeFilter(e: Event): void {
+    this.activeTypeFilter.set((e.target as HTMLSelectElement).value);
+    this.currentPage.set(1);
+  }
+
   updateStatusFilter(e: Event): void {
     this.statusFilter.set((e.target as HTMLSelectElement).value);
     this.currentPage.set(1);
