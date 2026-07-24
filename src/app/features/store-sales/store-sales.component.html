@@ -66,18 +66,30 @@
             <td style="padding: 12px 16px; font-size: 12px; color: #595959;">{{ sale.saleDate | date:'dd/MM/yyyy HH:mm' }}</td>
             <td style="padding: 12px 16px; font-size: 13px; font-weight: 700; color: #1890ff;">{{ sale.totalAmount }} FCFA</td>
             <td style="padding: 12px 16px; font-size: 12px;">
-              <span *ngIf="sale.status === 'BROUILLON'" style="padding: 3px 8px; border-radius: 12px; background: rgba(0,0,0,0.06); color: #595959; font-weight: 700;">📄 BROUILLON</span>
-              <span *ngIf="sale.status === 'VALIDEE'" style="padding: 3px 8px; border-radius: 12px; background: rgba(82,196,26,0.1); color: #52c41a; font-weight: 700;">🟢 VALIDÉE (Expédiée)</span>
-              <span *ngIf="sale.status === 'ANNULEE'" style="padding: 3px 8px; border-radius: 12px; background: rgba(255,77,79,0.1); color: #ff4d4f; font-weight: 700;">🔴 ANNULÉE</span>
+              <span *ngIf="sale.status === 'BROUILLON'" style="padding: 4px 10px; border-radius: 20px; background: #f0f2f5; color: #595959; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #8c8c8c;"></span>Brouillon
+              </span>
+              <span *ngIf="sale.status === 'VALIDEE'" style="padding: 4px 10px; border-radius: 20px; background: rgba(82,196,26,0.1); color: #52c41a; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #52c41a;"></span>Validée (Expédiée)
+              </span>
+              <span *ngIf="sale.status === 'ANNULEE'" style="padding: 4px 10px; border-radius: 20px; background: rgba(255,77,79,0.1); color: #ff4d4f; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #ff4d4f;"></span>Annulée
+              </span>
             </td>
             <td style="padding: 12px 16px; text-align: right;" (click)="$event.stopPropagation()">
-              <button type="button" (click)="openDetailModal(sale)" style="padding: 6px 10px; background: rgba(24,144,255,0.1); color: #1890ff; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-right: 6px;">Voir Bon</button>
-              
-              <button *ngIf="sale.status === 'BROUILLON'" type="button" (click)="validateSale(sale, $event)" style="padding: 6px 12px; background: #52c41a; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; margin-right: 6px;">
-                🚀 Valider & Expédier (Sortie Stock)
-              </button>
+              <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                <button type="button" (click)="openDetailModal(sale)" title="Voir le bon de vente" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid rgba(24,144,255,0.2); background: rgba(24,144,255,0.06); color: #1890ff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                
+                <button *ngIf="sale.status === 'BROUILLON'" type="button" (click)="validateSale(sale, $event)" title="Valider & Expédier (Sortie de stock)" style="width: 32px; height: 32px; border-radius: 6px; border: none; background: #52c41a; color: white; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 6px rgba(82,196,26,0.3);">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </button>
 
-              <button *ngIf="sale.status !== 'VALIDEE' && sale.status !== 'ANNULEE'" type="button" (click)="cancelSale(sale, $event)" style="padding: 6px 10px; background: rgba(255,77,79,0.1); color: #ff4d4f; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Annuler</button>
+                <button *ngIf="sale.status !== 'VALIDEE' && sale.status !== 'ANNULEE'" type="button" (click)="cancelSale(sale, $event)" title="Annuler la vente" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid rgba(255,77,79,0.2); background: rgba(255,77,79,0.06); color: #ff4d4f; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>

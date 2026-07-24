@@ -66,21 +66,37 @@
             <td style="padding: 12px 16px; font-size: 12px; color: #595959;">{{ order.orderDate | date:'dd/MM/yyyy HH:mm' }}</td>
             <td style="padding: 12px 16px; font-size: 13px; font-weight: 700; color: #0b1a30;">{{ order.totalAmount }} FCFA</td>
             <td style="padding: 12px 16px; font-size: 12px;">
-              <span *ngIf="order.status === 'BROUILLON'" style="padding: 3px 8px; border-radius: 12px; background: rgba(0,0,0,0.06); color: #595959; font-weight: 700;">📄 BROUILLON</span>
-              <span *ngIf="order.status === 'VALIDEE'" style="padding: 3px 8px; border-radius: 12px; background: rgba(24,144,255,0.1); color: #1890ff; font-weight: 700;">⏳ VALIDÉE</span>
-              <span *ngIf="order.status === 'LIVREE'" style="padding: 3px 8px; border-radius: 12px; background: rgba(82,196,26,0.1); color: #52c41a; font-weight: 700;">🟢 LIVRÉE</span>
-              <span *ngIf="order.status === 'ANNULEE'" style="padding: 3px 8px; border-radius: 12px; background: rgba(255,77,79,0.1); color: #ff4d4f; font-weight: 700;">🔴 ANNULÉE</span>
+              <span *ngIf="order.status === 'BROUILLON'" style="padding: 4px 10px; border-radius: 20px; background: #f0f2f5; color: #595959; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #8c8c8c;"></span>Brouillon
+              </span>
+              <span *ngIf="order.status === 'VALIDEE'" style="padding: 4px 10px; border-radius: 20px; background: rgba(24,144,255,0.1); color: #1890ff; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #1890ff;"></span>Validée (En cours)
+              </span>
+              <span *ngIf="order.status === 'LIVREE'" style="padding: 4px 10px; border-radius: 20px; background: rgba(82,196,26,0.1); color: #52c41a; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #52c41a;"></span>Livrée (Réceptionnée)
+              </span>
+              <span *ngIf="order.status === 'ANNULEE'" style="padding: 4px 10px; border-radius: 20px; background: rgba(255,77,79,0.1); color: #ff4d4f; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #ff4d4f;"></span>Annulée
+              </span>
             </td>
             <td style="padding: 12px 16px; text-align: right;" (click)="$event.stopPropagation()">
-              <button type="button" (click)="openDetailModal(order)" style="padding: 6px 10px; background: rgba(24,144,255,0.1); color: #1890ff; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-right: 6px;">Voir</button>
-              
-              <button *ngIf="order.status === 'BROUILLON'" type="button" (click)="validateOrder(order, $event)" style="padding: 6px 10px; background: #1890ff; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-right: 6px;">Valider</button>
-              
-              <button *ngIf="order.status === 'VALIDEE' || order.status === 'BROUILLON'" type="button" (click)="receiveDelivery(order, $event)" style="padding: 6px 12px; background: #52c41a; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; margin-right: 6px;">
-                📦 Réceptionner Livraison
-              </button>
+              <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                <button type="button" (click)="openDetailModal(order)" title="Détails de la commande" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid rgba(24,144,255,0.2); background: rgba(24,144,255,0.06); color: #1890ff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                
+                <button *ngIf="order.status === 'BROUILLON'" type="button" (click)="validateOrder(order, $event)" title="Valider la commande" style="width: 32px; height: 32px; border-radius: 6px; border: none; background: #1890ff; color: white; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 6px rgba(24,144,255,0.3);">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </button>
+                
+                <button *ngIf="order.status === 'VALIDEE' || order.status === 'BROUILLON'" type="button" (click)="receiveDelivery(order, $event)" title="Réceptionner livraison (Mise à jour stock & création produits)" style="width: 32px; height: 32px; border-radius: 6px; border: none; background: #52c41a; color: white; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 6px rgba(82,196,26,0.3);">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                </button>
 
-              <button *ngIf="order.status !== 'LIVREE' && order.status !== 'ANNULEE'" type="button" (click)="cancelOrder(order, $event)" style="padding: 6px 10px; background: rgba(255,77,79,0.1); color: #ff4d4f; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Annuler</button>
+                <button *ngIf="order.status !== 'LIVREE' && order.status !== 'ANNULEE'" type="button" (click)="cancelOrder(order, $event)" title="Annuler la commande" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid rgba(255,77,79,0.2); background: rgba(255,77,79,0.06); color: #ff4d4f; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -117,10 +133,11 @@
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
             <label style="font-size: 13px; font-weight: 700; color: #0b1a30;">Produits à Commander *</label>
             <div style="display: flex; gap: 8px;">
-              <button type="button" (click)="openQuickProductModal()" style="padding: 6px 12px; background: rgba(24,144,255,0.1); color: #1890ff; border: 1px dashed #1890ff; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                ✨ + Créer un nouveau produit
+              <button type="button" (click)="openQuickProductModal()" style="padding: 6px 12px; background: rgba(24,144,255,0.08); color: #1890ff; border: 1px dashed #1890ff; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                <span>Nouveau Produit</span>
               </button>
-              <button type="button" (click)="addItemRow()" style="padding: 6px 12px; background: rgba(114,46,209,0.1); color: #722ed1; border: none; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">
+              <button type="button" (click)="addItemRow()" style="padding: 6px 12px; background: rgba(114,46,209,0.1); color: #722ed1; border: none; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
                 + Ajouter une ligne
               </button>
             </div>
@@ -129,7 +146,7 @@
           <div formArrayName="items" style="display: flex; flex-direction: column; gap: 10px;">
             <div *ngFor="let itemGroup of itemsFormArray.controls; let i = index" [formGroupName]="i" style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; align-items: center; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 8px;">
               <div *ngIf="!itemGroup.get('productId')?.value && itemGroup.get('productName')?.value" style="display: flex; align-items: center; gap: 6px;">
-                <span style="background: rgba(24,144,255,0.1); color: #1890ff; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 11.5px; white-space: nowrap;">✨ À créer à la livraison</span>
+                <span style="background: rgba(24,144,255,0.1); color: #1890ff; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 11.5px; white-space: nowrap;">Nouveau produit</span>
                 <span style="font-size: 13px; font-weight: 700; color: #0b1a30;">{{ itemGroup.get('productName')?.value }}</span>
               </div>
 
