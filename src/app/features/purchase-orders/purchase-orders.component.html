@@ -25,10 +25,10 @@
 
       <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)" style="padding: 8.5px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; outline: none; background: white; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
         <option value="">Tous les statuts</option>
-        <option value="BROUILLON">📄 BROUILLON</option>
-        <option value="VALIDEE">⏳ VALIDÉE (En cours)</option>
-        <option value="LIVREE">🟢 LIVRÉE (Réceptionnée)</option>
-        <option value="ANNULEE">🔴 ANNULÉE</option>
+        <option value="BROUILLON">BROUILLON</option>
+        <option value="VALIDEE">VALIDÉE (En cours)</option>
+        <option value="LIVREE">LIVRÉE (Réceptionnée)</option>
+        <option value="ANNULEE">ANNULÉE</option>
       </select>
     </div>
 
@@ -224,8 +224,9 @@
         </table>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-          <button *ngIf="selectedOrderDetail()?.status === 'VALIDEE' || selectedOrderDetail()?.status === 'BROUILLON'" (click)="receiveDelivery(selectedOrderDetail()!)" style="padding: 9px 16px; background: #52c41a; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">
-            📦 Réceptionner Livraison
+          <button *ngIf="selectedOrderDetail()?.status === 'VALIDEE' || selectedOrderDetail()?.status === 'BROUILLON'" (click)="receiveDelivery(selectedOrderDetail()!)" style="padding: 9px 16px; background: #52c41a; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+            <span>Réceptionner Livraison</span>
           </button>
           <button (click)="closeDetailModal()" style="padding: 9px 18px; background: #0b1a30; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; margin-left: auto;">Fermer</button>
         </div>
@@ -237,7 +238,7 @@
   <div *ngIf="showQuickProductModal()" class="modal-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1100; padding: 20px;">
     <div class="modal-card" style="background: white; border-radius: 12px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3); padding: 24px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 12px;">
-        <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #0b1a30;">✨ Nouveau Produit (Création & Ajout Direct)</h3>
+        <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #0b1a30;">Nouveau Produit (Création & Ajout Direct)</h3>
         <button (click)="closeQuickProductModal()" style="background: transparent; border: none; font-size: 18px; cursor: pointer; color: #8c8c8c;">✕</button>
       </div>
 

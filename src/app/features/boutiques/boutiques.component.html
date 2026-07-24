@@ -41,21 +41,24 @@
         <h3 style="margin: 0 0 8px 0; font-size: 17px; font-weight: 700; color: #0b1a30;">{{ b.name }}</h3>
 
         <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #595959; margin-bottom: 16px;">
-          <div>📍 {{ b.address || '-' }}, {{ b.city || '-' }}</div>
-          <div>📞 {{ b.phone || 'Non renseigné' }}</div>
-          <div>👤 Responsable : <strong>{{ b.managerName || 'Non assigné' }}</strong></div>
+          <div>Adresse : <strong>{{ b.address || '-' }}, {{ b.city || '-' }}</strong></div>
+          <div>Téléphone : <strong>{{ b.phone || 'Non renseigné' }}</strong></div>
+          <div>Responsable : <strong>{{ b.managerName || 'Non assigné' }}</strong></div>
         </div>
       </div>
 
       <div style="display: flex; align-items: center; gap: 8px; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 14px; margin-top: 10px;">
-        <button type="button" (click)="openPriceModal(b, $event)" style="flex: 1; padding: 8px; background: rgba(114,46,209,0.1); color: #722ed1; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
-          🏷️ Prix de Cession
+        <button type="button" (click)="openPriceModal(b, $event)" title="Gérer les prix de cession" style="flex: 1; padding: 8px 12px; background: rgba(114,46,209,0.08); color: #722ed1; border: 1px solid rgba(114,46,209,0.2); border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          <span>Prix de Cession</span>
         </button>
-        <button type="button" (click)="openEditModal(b, $event)" style="padding: 8px 12px; background: rgba(0,0,0,0.05); color: #0b1a30; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
-          Éditer
+
+        <button type="button" (click)="openEditModal(b, $event)" title="Modifier la boutique" style="width: 34px; height: 34px; background: rgba(24,144,255,0.08); color: #1890ff; border: 1px solid rgba(24,144,255,0.2); border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
         </button>
-        <button type="button" (click)="deleteBoutique(b, $event)" style="padding: 8px 12px; background: rgba(255,77,79,0.1); color: #ff4d4f; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
-          Suppr.
+
+        <button type="button" (click)="deleteBoutique(b, $event)" title="Supprimer la boutique" style="width: 34px; height: 34px; background: rgba(255,77,79,0.08); color: #ff4d4f; border: 1px solid rgba(255,77,79,0.2); border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
         </button>
       </div>
     </div>

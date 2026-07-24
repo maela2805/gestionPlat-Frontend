@@ -77,9 +77,9 @@
       <label style="font-size: 12px; font-weight: 700; color: #0b1a30; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">TYPE :</label>
       <select [value]="activeTypeFilter()" (change)="updateTypeFilter($event)" style="padding: 8.5px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; font-weight: 600; color: #0b1a30; background: #ffffff; outline: none; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
         <option value="">Tous les types ({{ totalCount() }})</option>
-        <option value="FOURNISSEUR">📦 Fournisseurs ({{ fournisseursCount() }})</option>
-        <option value="CLIENT">👤 Clients ({{ clientsCount() }})</option>
-        <option value="PARTENAIRE">🤝 Partenaires ({{ partenairesCount() }})</option>
+        <option value="FOURNISSEUR">Fournisseurs ({{ fournisseursCount() }})</option>
+        <option value="CLIENT">Clients ({{ clientsCount() }})</option>
+        <option value="PARTENAIRE">Partenaires ({{ partenairesCount() }})</option>
       </select>
     </div>
 
@@ -88,8 +88,8 @@
       <label style="font-size: 12px; font-weight: 700; color: #0b1a30; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">STATUT :</label>
       <select [value]="statusFilter()" (change)="updateStatusFilter($event)" style="padding: 8.5px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; font-weight: 600; color: #0b1a30; background: #ffffff; outline: none; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
         <option value="">Tous les statuts</option>
-        <option value="ACTIF">🟢 Actifs uniquement</option>
-        <option value="INACTIF">🔴 Inactifs uniquement</option>
+        <option value="ACTIF">Actifs uniquement</option>
+        <option value="INACTIF">Inactifs uniquement</option>
       </select>
     </div>
   </div>
@@ -128,14 +128,14 @@
               {{ item.name }}
             </td>
             <td style="padding: 12px 16px; font-size: 12px;">
-              <span *ngIf="item.type === 'FOURNISSEUR'" style="padding: 3px 8px; border-radius: 12px; background: rgba(114,46,209,0.1); color: #722ed1; font-weight: 700;">
-                📦 FOURNISSEUR
+              <span *ngIf="item.type === 'FOURNISSEUR'" style="padding: 4px 10px; border-radius: 20px; background: rgba(114,46,209,0.1); color: #722ed1; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #722ed1;"></span>FOURNISSEUR
               </span>
-              <span *ngIf="item.type === 'CLIENT'" style="padding: 3px 8px; border-radius: 12px; background: rgba(82,196,26,0.1); color: #52c41a; font-weight: 700;">
-                👤 CLIENT
+              <span *ngIf="item.type === 'CLIENT'" style="padding: 4px 10px; border-radius: 20px; background: rgba(82,196,26,0.1); color: #52c41a; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #52c41a;"></span>CLIENT
               </span>
-              <span *ngIf="item.type === 'PARTENAIRE'" style="padding: 3px 8px; border-radius: 12px; background: rgba(250,140,22,0.1); color: #fa8c16; font-weight: 700;">
-                🤝 PARTENAIRE
+              <span *ngIf="item.type === 'PARTENAIRE'" style="padding: 4px 10px; border-radius: 20px; background: rgba(250,140,22,0.1); color: #fa8c16; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #fa8c16;"></span>PARTENAIRE
               </span>
             </td>
             <td style="padding: 12px 16px; font-size: 13px; color: #595959;">
@@ -154,15 +154,19 @@
               </span>
             </td>
             <td style="padding: 12px 16px; text-align: right;" (click)="$event.stopPropagation()">
-              <button type="button" (click)="openDetailModal(item)" title="Fiche complète" style="padding: 6px 10px; background: rgba(24,144,255,0.1); color: #1890ff; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-right: 6px;">
-                Voir
-              </button>
-              <button type="button" (click)="openEditModal(item, $event)" title="Modifier" style="padding: 6px 10px; background: rgba(0,0,0,0.05); color: #0b1a30; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-right: 6px;">
-                Éditer
-              </button>
-              <button type="button" (click)="deleteTiers(item, $event)" title="Supprimer" style="padding: 6px 10px; background: rgba(255,77,79,0.1); color: #ff4d4f; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
-                Suppr.
-              </button>
+              <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                <button type="button" (click)="openDetailModal(item)" title="Fiche complète" style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid rgba(24,144,255,0.2); background: rgba(24,144,255,0.06); color: #1890ff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+
+                <button type="button" (click)="openEditModal(item, $event)" title="Modifier" style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.15); background: rgba(0,0,0,0.03); color: #0b1a30; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                </button>
+
+                <button type="button" (click)="deleteTiers(item, $event)" title="Supprimer" style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid rgba(255,77,79,0.2); background: rgba(255,77,79,0.06); color: #ff4d4f; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -215,17 +219,17 @@
           <div style="display: flex; flex-direction: column; gap: 6px;">
             <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Type de Tiers *</label>
             <select formControlName="type" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;">
-              <option value="FOURNISSEUR">📦 FOURNISSEUR</option>
-              <option value="CLIENT">👤 CLIENT</option>
-              <option value="PARTENAIRE">🤝 PARTENAIRE / PRESTATAIRE</option>
+              <option value="FOURNISSEUR">FOURNISSEUR</option>
+              <option value="CLIENT">CLIENT</option>
+              <option value="PARTENAIRE">PARTENAIRE / PRESTATAIRE</option>
             </select>
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 6px;">
             <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Statut *</label>
             <select formControlName="status" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;">
-              <option value="ACTIF">🟢 Actif</option>
-              <option value="INACTIF">🔴 Inactif</option>
+              <option value="ACTIF">Actif</option>
+              <option value="INACTIF">Inactif</option>
             </select>
           </div>
         </div>
@@ -303,9 +307,9 @@
           <span style="background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
             {{ selectedTiersDetail()?.code }}
           </span>
-          <span *ngIf="selectedTiersDetail()?.type === 'FOURNISSEUR'" style="color: #d3ade6; font-weight: 700; font-size: 12px;">📦 FOURNISSEUR</span>
-          <span *ngIf="selectedTiersDetail()?.type === 'CLIENT'" style="color: #b7eb8f; font-weight: 700; font-size: 12px;">👤 CLIENT</span>
-          <span *ngIf="selectedTiersDetail()?.type === 'PARTENAIRE'" style="color: #ffe7ba; font-weight: 700; font-size: 12px;">🤝 PARTENAIRE</span>
+          <span *ngIf="selectedTiersDetail()?.type === 'FOURNISSEUR'" style="color: #d3ade6; font-weight: 700; font-size: 12px;">FOURNISSEUR</span>
+          <span *ngIf="selectedTiersDetail()?.type === 'CLIENT'" style="color: #b7eb8f; font-weight: 700; font-size: 12px;">CLIENT</span>
+          <span *ngIf="selectedTiersDetail()?.type === 'PARTENAIRE'" style="color: #ffe7ba; font-weight: 700; font-size: 12px;">PARTENAIRE</span>
         </div>
       </div>
 
