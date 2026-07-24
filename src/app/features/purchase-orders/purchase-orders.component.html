@@ -1,0 +1,205 @@
+<div class="purchase-orders-page" style="width: 100%; padding: 24px;">
+  <!-- Header -->
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+    <div>
+      <div style="font-size: 13px; color: #8c8c8c; margin-bottom: 6px;">
+        <span>Tawfekh Vaisselle</span> <span class="breadcrumb-separator">></span> <span style="color: #1890ff; font-weight: 600;">Approvisionnement & Achats</span>
+      </div>
+      <h1 style="margin: 0; font-size: 22px; font-weight: 700; color: #0b1a30;">Commandes Fournisseurs (Réapprovisionnement Entrepôt)</h1>
+    </div>
+    <div>
+      <button (click)="openCreateModal()" style="display: flex; align-items: center; gap: 8px; padding: 10px 18px; background: #722ed1; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(114,46,209,0.25);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        <span>Passer une Commande Fournisseur</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Card -->
+  <div style="background: white; border-radius: 12px; padding: 16px 20px; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+      <div style="position: relative; width: 280px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #8c8c8c;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="Rechercher référence, fournisseur..." [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" style="width: 100%; padding: 8px 12px 8px 36px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; outline: none;" />
+      </div>
+
+      <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)" style="padding: 8px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; outline: none; background: white; cursor: pointer;">
+        <option value="">Tous les statuts</option>
+        <option value="BROUILLON">📄 BROUILLON</option>
+        <option value="VALIDEE">⏳ VALIDÉE (En cours)</option>
+        <option value="LIVREE">🟢 LIVRÉE (Réceptionnée)</option>
+        <option value="ANNULEE">🔴 ANNULÉE</option>
+      </select>
+    </div>
+
+    <div style="font-size: 13px; font-weight: 600; color: #595959;">
+      Commandes Réceptionnées: <strong style="color: #52c41a;">{{ deliveredOrders() }} / {{ totalOrders() }}</strong>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div style="background: white; border-radius: 12px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 16px rgba(0,0,0,0.04); overflow: hidden;">
+    <div style="width: 100%; overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+          <tr style="background: rgba(0,0,0,0.02); border-bottom: 1px solid rgba(0,0,0,0.06);">
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">RÉFÉRANCE</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">FOURNISSEUR</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">DATE COMMANDE</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">MONTANT TOTAL</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">STATUT</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase; text-align: right;">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="isLoading()">
+            <td colspan="6" style="text-align: center; padding: 32px; color: #8c8c8c;">Chargement des commandes...</td>
+          </tr>
+
+          <tr *ngIf="!isLoading() && filteredOrders().length === 0">
+            <td colspan="6" style="text-align: center; padding: 32px; color: #8c8c8c;">Aucune commande fournisseur trouvée.</td>
+          </tr>
+
+          <tr *ngFor="let order of filteredOrders()" (click)="openDetailModal(order)" style="border-bottom: 1px solid rgba(0,0,0,0.04); cursor: pointer; transition: background 0.2s;">
+            <td style="padding: 12px 16px; font-size: 13px; font-weight: 700; color: #722ed1;">{{ order.reference }}</td>
+            <td style="padding: 12px 16px; font-size: 13px; font-weight: 600; color: #0b1a30;">{{ order.supplierName }}</td>
+            <td style="padding: 12px 16px; font-size: 12px; color: #595959;">{{ order.orderDate | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td style="padding: 12px 16px; font-size: 13px; font-weight: 700; color: #0b1a30;">{{ order.totalAmount }} FCFA</td>
+            <td style="padding: 12px 16px; font-size: 12px;">
+              <span *ngIf="order.status === 'BROUILLON'" style="padding: 3px 8px; border-radius: 12px; background: rgba(0,0,0,0.06); color: #595959; font-weight: 700;">📄 BROUILLON</span>
+              <span *ngIf="order.status === 'VALIDEE'" style="padding: 3px 8px; border-radius: 12px; background: rgba(24,144,255,0.1); color: #1890ff; font-weight: 700;">⏳ VALIDÉE</span>
+              <span *ngIf="order.status === 'LIVREE'" style="padding: 3px 8px; border-radius: 12px; background: rgba(82,196,26,0.1); color: #52c41a; font-weight: 700;">🟢 LIVRÉE</span>
+              <span *ngIf="order.status === 'ANNULEE'" style="padding: 3px 8px; border-radius: 12px; background: rgba(255,77,79,0.1); color: #ff4d4f; font-weight: 700;">🔴 ANNULÉE</span>
+            </td>
+            <td style="padding: 12px 16px; text-align: right;" (click)="$event.stopPropagation()">
+              <button type="button" (click)="openDetailModal(order)" style="padding: 6px 10px; background: rgba(24,144,255,0.1); color: #1890ff; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-right: 6px;">Voir</button>
+              
+              <button *ngIf="order.status === 'BROUILLON'" type="button" (click)="validateOrder(order, $event)" style="padding: 6px 10px; background: #1890ff; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-right: 6px;">Valider</button>
+              
+              <button *ngIf="order.status === 'VALIDEE' || order.status === 'BROUILLON'" type="button" (click)="receiveDelivery(order, $event)" style="padding: 6px 12px; background: #52c41a; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; margin-right: 6px;">
+                📦 Réceptionner Livraison
+              </button>
+
+              <button *ngIf="order.status !== 'LIVREE' && order.status !== 'ANNULEE'" type="button" (click)="cancelOrder(order, $event)" style="padding: 6px 10px; background: rgba(255,77,79,0.1); color: #ff4d4f; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Annuler</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Create Order Modal -->
+  <div *ngIf="showCreateModal()" class="modal-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;">
+    <div class="modal-card" style="background: white; border-radius: 12px; width: 100%; max-width: 720px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2); padding: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 14px;">
+        <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #0b1a30;">Créer un Bon de Commande Fournisseur</h3>
+        <button (click)="closeCreateModal()" style="background: transparent; border: none; font-size: 18px; cursor: pointer; color: #8c8c8c;">✕</button>
+      </div>
+
+      <form [formGroup]="orderForm" (ngSubmit)="submitOrder()" style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Sélectionner le Fournisseur *</label>
+            <select formControlName="supplierId" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;">
+              <option [value]="null" disabled>-- Choisir un fournisseur --</option>
+              <option *ngFor="let s of suppliers()" [value]="s.id">{{ s.name }} ({{ s.code }})</option>
+            </select>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Date de Livraison Prévue</label>
+            <input type="datetime-local" formControlName="expectedDeliveryDate" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+          </div>
+        </div>
+
+        <!-- Order Line Items -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <label style="font-size: 13px; font-weight: 700; color: #0b1a30;">Produits à Commander *</label>
+            <button type="button" (click)="addItemRow()" style="padding: 6px 12px; background: rgba(114,46,209,0.1); color: #722ed1; border: none; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">
+              + Ajouter une ligne
+            </button>
+          </div>
+
+          <div formArrayName="items" style="display: flex; flex-direction: column; gap: 10px;">
+            <div *ngFor="let itemGroup of itemsFormArray.controls; let i = index" [formGroupName]="i" style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; align-items: center; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 8px;">
+              <select formControlName="productId" style="padding: 8px 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 12.5px;">
+                <option [value]="null" disabled>-- Sélectionner produit --</option>
+                <option *ngFor="let p of products()" [value]="p.id">{{ p.name }} (Réf: {{ p.reference }})</option>
+              </select>
+
+              <input type="number" formControlName="unitPrice" placeholder="Prix d'achat" style="padding: 8px 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 12.5px;" />
+              
+              <input type="number" formControlName="quantityOrdered" placeholder="Qté" min="1" style="padding: 8px 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 12.5px;" />
+
+              <button type="button" (click)="removeItemRow(i)" style="background: rgba(255,77,79,0.1); color: #ff4d4f; border: none; border-radius: 6px; padding: 8px; cursor: pointer;">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Note / Observations</label>
+          <textarea formControlName="note" rows="2" placeholder="Remarques..." style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;"></textarea>
+        </div>
+
+        <div *ngIf="errorMessage()" style="background: rgba(255,77,79,0.1); color: #ff4d4f; padding: 10px 14px; border-radius: 6px; font-size: 13px;">
+          ⚠️ {{ errorMessage() }}
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+          <button type="button" (click)="closeCreateModal()" style="padding: 9px 16px; background: rgba(0,0,0,0.05); color: #595959; border: none; border-radius: 6px; font-weight: 600; font-size: 13px;">Annuler</button>
+          <button type="submit" [disabled]="orderForm.invalid || isSaving()" style="padding: 9px 20px; background: #722ed1; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 13px;">
+            {{ isSaving() ? 'Enregistrement...' : 'Créer la commande' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div *ngIf="showDetailModal() && selectedOrderDetail()" class="modal-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;">
+    <div class="modal-card" style="background: white; border-radius: 12px; width: 100%; max-width: 620px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); overflow: hidden;">
+      <div style="background: #0b1a30; color: white; padding: 20px 24px; position: relative;">
+        <button (click)="closeDetailModal()" style="position: absolute; right: 16px; top: 16px; background: transparent; border: none; font-size: 18px; color: white; cursor: pointer;">✕</button>
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #722ed1;">COMMANDE FOURNISSEUR</div>
+        <h2 style="margin: 0 0 4px 0; font-size: 20px; font-weight: 800;">{{ selectedOrderDetail()?.reference }}</h2>
+        <div style="font-size: 13px; color: rgba(255,255,255,0.8);">Fournisseur: <strong>{{ selectedOrderDetail()?.supplierName }}</strong></div>
+      </div>
+
+      <div style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; background: rgba(0,0,0,0.02); padding: 12px; border-radius: 8px; font-size: 12.5px;">
+          <div>Statut: <strong>{{ selectedOrderDetail()?.status }}</strong></div>
+          <div>Date: <strong>{{ selectedOrderDetail()?.orderDate | date:'dd/MM/yyyy' }}</strong></div>
+          <div>Montant: <strong style="color: #722ed1;">{{ selectedOrderDetail()?.totalAmount }} FCFA</strong></div>
+        </div>
+
+        <h4 style="margin: 0; font-size: 14px; font-weight: 700; color: #0b1a30;">Produits Commandés</h4>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead>
+            <tr style="background: rgba(0,0,0,0.03); border-bottom: 1px solid rgba(0,0,0,0.08); text-align: left;">
+              <th style="padding: 8px 10px;">Produit</th>
+              <th style="padding: 8px 10px;">Prix unitaire</th>
+              <th style="padding: 8px 10px;">Qté Commandée</th>
+              <th style="padding: 8px 10px;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of selectedOrderDetail()?.items" style="border-bottom: 1px solid rgba(0,0,0,0.04);">
+              <td style="padding: 8px 10px; font-weight: 600;">{{ item.productName }}</td>
+              <td style="padding: 8px 10px;">{{ item.unitPrice }} FCFA</td>
+              <td style="padding: 8px 10px; font-weight: 700;">{{ item.quantityOrdered }}</td>
+              <td style="padding: 8px 10px; font-weight: 700;">{{ item.totalPrice }} FCFA</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+          <button *ngIf="selectedOrderDetail()?.status === 'VALIDEE' || selectedOrderDetail()?.status === 'BROUILLON'" (click)="receiveDelivery(selectedOrderDetail()!)" style="padding: 9px 16px; background: #52c41a; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">
+            📦 Réceptionner Livraison
+          </button>
+          <button (click)="closeDetailModal()" style="padding: 9px 18px; background: #0b1a30; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; margin-left: auto;">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -38,6 +38,21 @@ export const routes: Routes = [
     loadChildren: () => import('./features/tiers/tiers.module').then(m => m.TiersModule) 
   },
   { 
+    path: 'boutiques', 
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/boutiques/boutiques.module').then(m => m.BoutiquesModule) 
+  },
+  { 
+    path: 'purchase-orders', 
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/purchase-orders/purchase-orders.module').then(m => m.PurchaseOrdersModule) 
+  },
+  { 
+    path: 'store-sales', 
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/store-sales/store-sales.module').then(m => m.StoreSalesModule) 
+  },
+  { 
     path: 'profile', 
     canActivate: [authGuard],
     loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) 
