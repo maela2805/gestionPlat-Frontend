@@ -7,7 +7,10 @@
       </div>
       <h1 class="page-title">Gestion de Stock - Historique des mouvements</h1>
     </div>
-    <div class="page-actions">
+    <div class="page-actions" style="display: flex; gap: 10px;">
+      <button class="btn btn-secondary" (click)="openProductModal()" style="background: white; border: 1px dashed #1890ff; color: #1890ff; font-weight: 700; display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 8px 14px; border-radius: 8px;">
+        ✨ + Nouveau Produit
+      </button>
       <button class="btn btn-primary" (click)="openAdjustmentModal()">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
         <span>Enregistrer un mouvement</span>
@@ -171,7 +174,12 @@
 
       <form [formGroup]="adjustForm" (ngSubmit)="submitAdjustment()" class="modal-body" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
         <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-          <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Sélectionner le Produit *</label>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Sélectionner le Produit *</label>
+            <button type="button" (click)="openProductModal()" style="background: rgba(24,144,255,0.1); color: #1890ff; border: 1px dashed #1890ff; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 700; cursor: pointer;">
+              ✨ + Créer un nouveau produit
+            </button>
+          </div>
           <select class="form-control" formControlName="productId" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;">
             <option [value]="null" disabled>-- Choisir un produit --</option>
             <option *ngFor="let p of products()" [value]="p.id">
@@ -217,6 +225,85 @@
           <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
           <button type="submit" class="btn btn-primary" [disabled]="adjustForm.invalid || isSaving()">
             {{ isSaving() ? 'Enregistrement...' : 'Valider le Mouvement' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Full Product Creation Modal from Stock -->
+  <div *ngIf="showProductModal()" class="modal-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1100; padding: 20px;">
+    <div class="modal-card" style="background: white; border-radius: 12px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3); padding: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 12px;">
+        <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #0b1a30;">✨ Nouveau Produit (Création & Mouvement Initial)</h3>
+        <button (click)="closeProductModal()" style="background: transparent; border: none; font-size: 18px; cursor: pointer; color: #8c8c8c;">✕</button>
+      </div>
+
+      <form [formGroup]="productForm" (ngSubmit)="submitProduct()" style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 12.5px; font-weight: 600; color: #0b1a30;">Référence (Auto-générée) *</label>
+            <input type="text" formControlName="reference" style="padding: 8px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; font-weight: 700; color: #1890ff; background: #f4f6fa;" />
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 12.5px; font-weight: 600; color: #0b1a30;">Désignation / Nom *</label>
+            <input type="text" formControlName="name" placeholder="ex: Plat creux 30cm" style="padding: 8px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <label style="font-size: 12.5px; font-weight: 600; color: #0b1a30;">Description</label>
+          <textarea formControlName="description" rows="2" placeholder="Description du produit..." style="padding: 8px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;"></textarea>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 12.5px; font-weight: 600; color: #0b1a30;">Prix d'achat (FCFA) *</label>
+            <input type="number" formControlName="buyPrice" placeholder="0" style="padding: 8px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 12.5px; font-weight: 600; color: #0b1a30;">Prix de vente réf. (Optionnel)</label>
+            <input type="number" formControlName="sellPrice" placeholder="Indicatif" style="padding: 8px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 12.5px; font-weight: 600; color: #0b1a30;">Stock Initial (Entrée Mouvement)</label>
+            <input type="number" formControlName="initialStock" placeholder="1" style="padding: 8px 12px; border: 1.5px solid #52c41a; border-radius: 6px; font-size: 13px; font-weight: 700; color: #52c41a;" />
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 12.5px; font-weight: 600; color: #0b1a30;">Seuil d'Alerte Stock</label>
+            <input type="number" formControlName="alertThreshold" placeholder="5" style="padding: 8px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 12.5px; font-weight: 600; color: #0b1a30;">Catégorie</label>
+            <select formControlName="categoryId" style="padding: 8px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;">
+              <option [value]="null">-- Aucune catégorie --</option>
+              <option *ngFor="let cat of categories()" [value]="cat.id">{{ cat.name }}</option>
+            </select>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 12.5px; font-weight: 600; color: #0b1a30;">Code-barres (Unique)</label>
+            <input type="text" formControlName="barcode" placeholder="3700123456789" style="padding: 8px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+          </div>
+        </div>
+
+        <div *ngIf="productFormError()" style="background: rgba(255,77,79,0.1); color: #ff4d4f; padding: 8px 12px; border-radius: 6px; font-size: 12.5px;">
+          ⚠️ {{ productFormError() }}
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px;">
+          <button type="button" (click)="closeProductModal()" style="padding: 8px 14px; background: rgba(0,0,0,0.05); color: #595959; border: none; border-radius: 6px; font-weight: 600; font-size: 12.5px;">Annuler</button>
+          <button type="submit" [disabled]="productForm.invalid || isSavingProduct()" style="padding: 8px 16px; background: #52c41a; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 12.5px;">
+            {{ isSavingProduct() ? 'Création...' : 'Créer et Enregistrer l\'Entrée en Stock' }}
           </button>
         </div>
       </form>

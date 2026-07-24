@@ -3,9 +3,11 @@ import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { PurchaseOrderService } from '../../core/services/purchase-order.service';
 import { ProductService } from '../../core/services/product.service';
 import { TiersService } from '../../core/services/tiers.service';
+import { CategoryService } from '../../core/services/category.service';
 import { PurchaseOrder, CreatePurchaseOrderRequest } from '../../core/models/purchase-order.model';
 import { Product } from '../../core/models/product.model';
 import { Tiers } from '../../core/models/tiers.model';
+import { Category } from '../../core/models/category.model';
 
 @Component({
   selector: 'app-purchase-orders',
@@ -16,6 +18,7 @@ export class PurchaseOrdersComponent implements OnInit {
   ordersList = signal<PurchaseOrder[]>([]);
   products = signal<Product[]>([]);
   suppliers = signal<Tiers[]>([]);
+  categories = signal<Category[]>([]);
 
   isLoading = signal<boolean>(false);
   isSaving = signal<boolean>(false);
@@ -25,9 +28,13 @@ export class PurchaseOrdersComponent implements OnInit {
   statusFilter = signal<string>('');
   showCreateModal = signal<boolean>(false);
   showDetailModal = signal<boolean>(false);
+  showQuickProductModal = signal<boolean>(false);
   selectedOrderDetail = signal<PurchaseOrder | null>(null);
 
   orderForm: FormGroup;
+  quickProductForm: FormGroup;
+  isCreatingProduct = signal<boolean>(false);
+  quickProductError = signal<string | null>(null);
 
   totalOrders = computed(() => this.ordersList().length);
   deliveredOrders = computed(() => this.ordersList().filter(o => o.status === 'LIVREE').length);
@@ -52,6 +59,7 @@ export class PurchaseOrdersComponent implements OnInit {
     private purchaseOrderService: PurchaseOrderService,
     private productService: ProductService,
     private tiersService: TiersService,
+    private categoryService: CategoryService,
     private fb: FormBuilder
   ) {
     this.orderForm = this.fb.group({
@@ -61,12 +69,29 @@ export class PurchaseOrdersComponent implements OnInit {
       note: [''],
       items: this.fb.array([])
     });
+
+    this.quickProductForm = this.fb.group({
+      reference: [''],
+      name: ['', Validators.required],
+      description: [''],
+      buyPrice: [0, [Validators.required, Validators.min(0)]],
+      sellPrice: [null],
+      initialStock: [0],
+      alertThreshold: [5],
+      barcode: [''],
+      categoryId: [null]
+    });
   }
 
   ngOnInit(): void {
     this.loadOrders();
     this.loadProducts();
     this.loadSuppliers();
+    this.loadCategories();
+  }
+
+  loadCategories(): void {
+    this.categoryService.getAllCategories().subscribe(cats => this.categories.set(cats));
   }
 
   get itemsFormArray(): FormArray {
@@ -111,6 +136,72 @@ export class PurchaseOrdersComponent implements OnInit {
 
   loadSuppliers(): void {
     this.tiersService.getAllTiers('FOURNISSEUR').subscribe(data => this.suppliers.set(data));
+  }
+
+  openQuickProductModal(): void {
+    const count = this.products().length + 1;
+    this.quickProductForm.reset({
+      reference: 'PROD-' + count.toString().padStart(5, '0'),
+      name: '',
+      description: '',
+      buyPrice: 0,
+      sellPrice: null,
+      initialStock: 0,
+      alertThreshold: 5,
+      barcode: '',
+      categoryId: null
+    });
+    this.quickProductError.set(null);
+    this.showQuickProductModal.set(true);
+  }
+
+  closeQuickProductModal(): void {
+    this.showQuickProductModal.set(false);
+  }
+
+  submitQuickProduct(): void {
+    if (this.quickProductForm.invalid) return;
+
+    this.isCreatingProduct.set(true);
+    this.quickProductError.set(null);
+
+    const val = this.quickProductForm.value;
+    this.productService.createProduct({
+      reference: val.reference,
+      name: val.name,
+      description: val.description,
+      buyPrice: Number(val.buyPrice),
+      sellPrice: val.sellPrice ? Number(val.sellPrice) : undefined,
+      initialStock: val.initialStock ? Number(val.initialStock) : 0,
+      alertThreshold: val.alertThreshold ? Number(val.alertThreshold) : 5,
+      barcode: val.barcode,
+      categoryId: val.categoryId ? Number(val.categoryId) : undefined
+    }).subscribe({
+      next: (newProd) => {
+        this.isCreatingProduct.set(false);
+        this.closeQuickProductModal();
+        // Refresh product list
+        this.loadProducts();
+
+        // Automatically add an item line with this new product selected
+        const itemGroup = this.fb.group({
+          productId: [newProd.id, Validators.required],
+          unitPrice: [newProd.buyPrice, [Validators.required, Validators.min(0)]],
+          quantityOrdered: [1, [Validators.required, Validators.min(1)]]
+        });
+        itemGroup.get('productId')?.valueChanges.subscribe(prodId => {
+          const prod = this.products().find(p => p.id === Number(prodId));
+          if (prod) {
+            itemGroup.patchValue({ unitPrice: prod.buyPrice }, { emitEvent: false });
+          }
+        });
+        this.itemsFormArray.push(itemGroup);
+      },
+      error: (err) => {
+        this.isCreatingProduct.set(false);
+        this.quickProductError.set(err.message || 'Erreur lors de la création du produit');
+      }
+    });
   }
 
   openCreateModal(): void {

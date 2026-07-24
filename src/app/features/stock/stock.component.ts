@@ -6,6 +6,9 @@ import { StockMovementService } from '../../core/services/stock-movement.service
 import { Product, StockAdjustmentRequest } from '../../core/models/product.model';
 import { StockMovement, MovementType, MovementReason } from '../../core/models/stock-movement.model';
 
+import { CategoryService } from '../../core/services/category.service';
+import { Category } from '../../core/models/category.model';
+
 export interface MotifOption {
   value: MovementReason;
   label: string;
@@ -30,11 +33,15 @@ export class StockComponent implements OnInit {
 
   products = signal<Product[]>([]);
   movements = signal<StockMovement[]>([]);
+  categories = signal<Category[]>([]);
 
   adjustForm: FormGroup;
+  productForm: FormGroup;
   isSaving = signal<boolean>(false);
+  isSavingProduct = signal<boolean>(false);
   successMessage = signal<string | null>(null);
   errorMessage = signal<string | null>(null);
+  productFormError = signal<string | null>(null);
 
   selectedMovementType = signal<MovementType>('ENTREE');
 
@@ -47,6 +54,7 @@ export class StockComponent implements OnInit {
   historyTypeFilter = signal<string>('');
   authorFilter = signal<string>('');
   showModal = signal<boolean>(false);
+  showProductModal = signal<boolean>(false);
 
   // Pagination Signals
   currentPage = signal<number>(1);
@@ -94,6 +102,59 @@ export class StockComponent implements OnInit {
     this.showModal.set(false);
   }
 
+  openProductModal(): void {
+    const count = this.products().length + 1;
+    this.productForm.reset({
+      reference: 'PROD-' + count.toString().padStart(5, '0'),
+      name: '',
+      description: '',
+      buyPrice: 0,
+      sellPrice: null,
+      initialStock: 1,
+      alertThreshold: 5,
+      barcode: '',
+      categoryId: null
+    });
+    this.productFormError.set(null);
+    this.showProductModal.set(true);
+  }
+
+  closeProductModal(): void {
+    this.showProductModal.set(false);
+  }
+
+  submitProduct(): void {
+    if (this.productForm.invalid) return;
+
+    this.isSavingProduct.set(true);
+    this.productFormError.set(null);
+
+    const val = this.productForm.value;
+    this.productService.createProduct({
+      reference: val.reference,
+      name: val.name,
+      description: val.description,
+      buyPrice: Number(val.buyPrice),
+      sellPrice: val.sellPrice ? Number(val.sellPrice) : undefined,
+      initialStock: val.initialStock ? Number(val.initialStock) : 0,
+      alertThreshold: val.alertThreshold ? Number(val.alertThreshold) : 5,
+      barcode: val.barcode,
+      categoryId: val.categoryId ? Number(val.categoryId) : undefined
+    }).subscribe({
+      next: (newProd) => {
+        this.isSavingProduct.set(false);
+        this.closeProductModal();
+        this.loadProducts();
+        this.loadMovements(); // Reload movements so initial stock movement shows up!
+        this.adjustForm.patchValue({ productId: newProd.id });
+      },
+      error: (err) => {
+        this.isSavingProduct.set(false);
+        this.productFormError.set(err.message || 'Erreur lors de la création du produit');
+      }
+    });
+  }
+
   updateAuthorFilter(e: Event): void {
     this.authorFilter.set((e.target as HTMLSelectElement).value);
     this.currentPage.set(1);
@@ -102,6 +163,7 @@ export class StockComponent implements OnInit {
   constructor(
     private productService: ProductService,
     private movementService: StockMovementService,
+    private categoryService: CategoryService,
     private fb: FormBuilder,
     private route: ActivatedRoute
   ) {
@@ -112,11 +174,24 @@ export class StockComponent implements OnInit {
       reason: ['REAPPROVISIONNEMENT', Validators.required],
       note: ['']
     });
+
+    this.productForm = this.fb.group({
+      reference: [''],
+      name: ['', Validators.required],
+      description: [''],
+      buyPrice: [0, [Validators.required, Validators.min(0)]],
+      sellPrice: [null],
+      initialStock: [1],
+      alertThreshold: [5],
+      barcode: [''],
+      categoryId: [null]
+    });
   }
 
   ngOnInit(): void {
     this.loadProducts();
     this.loadMovements();
+    this.loadCategories();
 
     this.adjustForm.get('type')?.valueChanges.subscribe((type: MovementType) => {
       if (type) {
@@ -139,6 +214,10 @@ export class StockComponent implements OnInit {
 
   loadProducts(): void {
     this.productService.getAllProducts().subscribe(prods => this.products.set(prods));
+  }
+
+  loadCategories(): void {
+    this.categoryService.getAllCategories().subscribe(cats => this.categories.set(cats));
   }
 
   loadMovements(): void {

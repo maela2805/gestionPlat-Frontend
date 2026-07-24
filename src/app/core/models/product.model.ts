@@ -6,7 +6,7 @@ export interface Product {
   name: string;
   description?: string;
   buyPrice: number;
-  sellPrice: number;
+  sellPrice?: number;
   stock: number;
   alertThreshold: number;
   barcode?: string;
@@ -21,7 +21,7 @@ export interface ProductRequest {
   name: string;
   description?: string;
   buyPrice: number;
-  sellPrice: number;
+  sellPrice?: number;
   initialStock?: number;
   alertThreshold?: number;
   barcode?: string;

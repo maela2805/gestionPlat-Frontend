@@ -74,7 +74,7 @@ export class ProductsComponent implements OnInit {
       name: ['', Validators.required],
       description: [''],
       buyPrice: [0, [Validators.required, Validators.min(0)]],
-      sellPrice: [0, [Validators.required, Validators.min(0)]],
+      sellPrice: [null],
       initialStock: [0],
       alertThreshold: [5],
       barcode: [''],
