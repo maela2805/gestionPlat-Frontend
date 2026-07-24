@@ -33,6 +33,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/stock/stock.component').then(m => m.StockComponent) 
   },
   { 
+    path: 'tiers', 
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/tiers/tiers.module').then(m => m.TiersModule) 
+  },
+  { 
     path: 'profile', 
     canActivate: [authGuard],
     loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) 

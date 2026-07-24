@@ -1,0 +1,387 @@
+<div class="tiers-page" style="width: 100%; padding: 24px;">
+  <!-- Page Header -->
+  <div class="page-header-block" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+    <div>
+      <div class="breadcrumb" style="font-size: 13px; color: #8c8c8c; margin-bottom: 6px;">
+        <span>GE</span> <span class="breadcrumb-separator">></span> <span>Partenaires & Contacts</span> <span class="breadcrumb-separator">></span> <span class="breadcrumb-item active" style="color: #1890ff; font-weight: 600;">Gestion des Tiers</span>
+      </div>
+      <h1 class="page-title" style="margin: 0; font-size: 22px; font-weight: 700; color: #0b1a30;">Gestion des Tiers & Partenaires</h1>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-primary" (click)="openCreateModal()" style="display: flex; align-items: center; gap: 8px; padding: 10px 18px; background: #1890ff; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(24, 144, 255, 0.25);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        <span>Ajouter un Tiers</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stat Cards Row -->
+  <div class="stat-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+    <div class="stat-card" style="background: white; border-radius: 12px; padding: 18px 20px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 16px;">
+      <div style="width: 46px; height: 46px; border-radius: 10px; background: rgba(24,144,255,0.1); color: #1890ff; display: flex; align-items: center; justify-content: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 600; color: #8c8c8c; text-transform: uppercase;">Total Tiers</div>
+        <div style="font-size: 24px; font-weight: 800; color: #0b1a30;">{{ totalCount() }}</div>
+      </div>
+    </div>
+
+    <div class="stat-card" style="background: white; border-radius: 12px; padding: 18px 20px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 16px;">
+      <div style="width: 46px; height: 46px; border-radius: 10px; background: rgba(114,46,209,0.1); color: #722ed1; display: flex; align-items: center; justify-content: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 600; color: #8c8c8c; text-transform: uppercase;">Fournisseurs</div>
+        <div style="font-size: 24px; font-weight: 800; color: #722ed1;">{{ fournisseursCount() }}</div>
+      </div>
+    </div>
+
+    <div class="stat-card" style="background: white; border-radius: 12px; padding: 18px 20px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 16px;">
+      <div style="width: 46px; height: 46px; border-radius: 10px; background: rgba(82,196,26,0.1); color: #52c41a; display: flex; align-items: center; justify-content: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 600; color: #8c8c8c; text-transform: uppercase;">Clients</div>
+        <div style="font-size: 24px; font-weight: 800; color: #52c41a;">{{ clientsCount() }}</div>
+      </div>
+    </div>
+
+    <div class="stat-card" style="background: white; border-radius: 12px; padding: 18px 20px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 16px;">
+      <div style="width: 46px; height: 46px; border-radius: 10px; background: rgba(250,140,22,0.1); color: #fa8c16; display: flex; align-items: center; justify-content: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"/><path d="M18 8h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-4"/></svg>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 600; color: #8c8c8c; text-transform: uppercase;">Partenaires</div>
+        <div style="font-size: 24px; font-weight: 800; color: #fa8c16;">{{ partenairesCount() }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter & Tab Row -->
+  <div class="filter-card" style="background: white; border-radius: 12px; padding: 16px 20px; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+    <!-- Type Filter Tabs -->
+    <div class="tab-group" style="display: flex; gap: 6px; background: rgba(0,0,0,0.03); padding: 4px; border-radius: 8px;">
+      <button 
+        type="button" 
+        (click)="setTypeFilter('')" 
+        [style.background]="activeTypeFilter() === '' ? '#ffffff' : 'transparent'"
+        [style.color]="activeTypeFilter() === '' ? '#1890ff' : '#595959'"
+        [style.box-shadow]="activeTypeFilter() === '' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'"
+        style="padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+      >
+        Tous les tiers ({{ totalCount() }})
+      </button>
+      <button 
+        type="button" 
+        (click)="setTypeFilter('FOURNISSEUR')" 
+        [style.background]="activeTypeFilter() === 'FOURNISSEUR' ? '#ffffff' : 'transparent'"
+        [style.color]="activeTypeFilter() === 'FOURNISSEUR' ? '#722ed1' : '#595959'"
+        [style.box-shadow]="activeTypeFilter() === 'FOURNISSEUR' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'"
+        style="padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+      >
+        Fournisseurs ({{ fournisseursCount() }})
+      </button>
+      <button 
+        type="button" 
+        (click)="setTypeFilter('CLIENT')" 
+        [style.background]="activeTypeFilter() === 'CLIENT' ? '#ffffff' : 'transparent'"
+        [style.color]="activeTypeFilter() === 'CLIENT' ? '#52c41a' : '#595959'"
+        [style.box-shadow]="activeTypeFilter() === 'CLIENT' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'"
+        style="padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+      >
+        Clients ({{ clientsCount() }})
+      </button>
+      <button 
+        type="button" 
+        (click)="setTypeFilter('PARTENAIRE')" 
+        [style.background]="activeTypeFilter() === 'PARTENAIRE' ? '#ffffff' : 'transparent'"
+        [style.color]="activeTypeFilter() === 'PARTENAIRE' ? '#fa8c16' : '#595959'"
+        [style.box-shadow]="activeTypeFilter() === 'PARTENAIRE' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'"
+        style="padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+      >
+        Partenaires ({{ partenairesCount() }})
+      </button>
+    </div>
+
+    <!-- Search & Status Dropdown -->
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+      <div style="position: relative; width: 260px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #8c8c8c;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input 
+          type="text" 
+          placeholder="Rechercher nom, code, ville..." 
+          [value]="searchTerm()" 
+          (input)="updateSearch($event)"
+          style="width: 100%; padding: 8px 12px 8px 36px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; outline: none;"
+        />
+      </div>
+
+      <select [value]="statusFilter()" (change)="updateStatusFilter($event)" style="padding: 8px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; outline: none; background: white; cursor: pointer;">
+        <option value="">Tous les statuts</option>
+        <option value="ACTIF">🟢 Actifs uniquement</option>
+        <option value="INACTIF">🔴 Inactifs uniquement</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card" style="background: white; border-radius: 12px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 16px rgba(0,0,0,0.04); overflow: hidden;">
+    <div class="table-responsive" style="width: 100%; overflow-x: auto;">
+      <table class="table-custom" style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: rgba(0,0,0,0.02); border-bottom: 1px solid rgba(0,0,0,0.06); text-align: left;">
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">CODE</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">NOM / RAISON SOCIALE</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">TYPE</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">CONTACT</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">VILLE</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">STATUT</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase; text-align: right;">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="isLoading()">
+            <td colspan="7" style="text-align: center; padding: 32px; color: #8c8c8c; font-size: 14px;">Chargement des tiers en cours...</td>
+          </tr>
+
+          <tr *ngIf="!isLoading() && paginatedTiers().length === 0">
+            <td colspan="7" style="text-align: center; padding: 32px; color: #8c8c8c; font-size: 14px;">
+              Aucun tiers trouvé.
+            </td>
+          </tr>
+
+          <tr *ngFor="let item of paginatedTiers()" style="border-bottom: 1px solid rgba(0,0,0,0.04); transition: background 0.2s; cursor: pointer;" (click)="openDetailModal(item)">
+            <td style="padding: 12px 16px; font-size: 13px; font-weight: 700; color: #1890ff;">
+              {{ item.code }}
+            </td>
+            <td style="padding: 12px 16px; font-size: 13px; font-weight: 600; color: #0b1a30;">
+              {{ item.name }}
+            </td>
+            <td style="padding: 12px 16px; font-size: 12px;">
+              <span *ngIf="item.type === 'FOURNISSEUR'" style="padding: 3px 8px; border-radius: 12px; background: rgba(114,46,209,0.1); color: #722ed1; font-weight: 700;">
+                📦 FOURNISSEUR
+              </span>
+              <span *ngIf="item.type === 'CLIENT'" style="padding: 3px 8px; border-radius: 12px; background: rgba(82,196,26,0.1); color: #52c41a; font-weight: 700;">
+                👤 CLIENT
+              </span>
+              <span *ngIf="item.type === 'PARTENAIRE'" style="padding: 3px 8px; border-radius: 12px; background: rgba(250,140,22,0.1); color: #fa8c16; font-weight: 700;">
+                🤝 PARTENAIRE
+              </span>
+            </td>
+            <td style="padding: 12px 16px; font-size: 13px; color: #595959;">
+              <div>{{ item.phone || '-' }}</div>
+              <div style="font-size: 11px; color: #8c8c8c;">{{ item.email || '' }}</div>
+            </td>
+            <td style="padding: 12px 16px; font-size: 13px; color: #595959;">
+              {{ item.city || '-' }}
+            </td>
+            <td style="padding: 12px 16px; font-size: 12px;">
+              <span *ngIf="item.status === 'ACTIF'" style="padding: 3px 8px; border-radius: 12px; background: rgba(82,196,26,0.1); color: #52c41a; font-weight: 700;">
+                ● ACTIF
+              </span>
+              <span *ngIf="item.status === 'INACTIF'" style="padding: 3px 8px; border-radius: 12px; background: rgba(255,77,79,0.1); color: #ff4d4f; font-weight: 700;">
+                ● INACTIF
+              </span>
+            </td>
+            <td style="padding: 12px 16px; text-align: right;" (click)="$event.stopPropagation()">
+              <button type="button" (click)="openDetailModal(item)" title="Fiche complète" style="padding: 6px 10px; background: rgba(24,144,255,0.1); color: #1890ff; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-right: 6px;">
+                Voir
+              </button>
+              <button type="button" (click)="openEditModal(item, $event)" title="Modifier" style="padding: 6px 10px; background: rgba(0,0,0,0.05); color: #0b1a30; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-right: 6px;">
+                Éditer
+              </button>
+              <button type="button" (click)="deleteTiers(item, $event)" title="Supprimer" style="padding: 6px 10px; background: rgba(255,77,79,0.1); color: #ff4d4f; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
+                Suppr.
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Footer -->
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-top: 1px solid rgba(0,0,0,0.06); background: white;">
+      <div style="font-size: 12px; color: #8c8c8c;">
+        Affichage de {{ paginatedTiers().length }} sur {{ filteredTiers().length }} tiers
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button 
+          type="button" 
+          (click)="prevPage()" 
+          [disabled]="currentPage() === 1" 
+          style="padding: 6px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; background: white; font-size: 12px; font-weight: 600; cursor: pointer;"
+          [style.opacity]="currentPage() === 1 ? '0.5' : '1'"
+        >
+          ‹ Précédent
+        </button>
+        <span style="font-size: 12px; font-weight: 600; color: #0b1a30;">
+          Page {{ currentPage() }} / {{ totalPages() }}
+        </span>
+        <button 
+          type="button" 
+          (click)="nextPage()" 
+          [disabled]="currentPage() >= totalPages()" 
+          style="padding: 6px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; background: white; font-size: 12px; font-weight: 600; cursor: pointer;"
+          [style.opacity]="currentPage() >= totalPages() ? '0.5' : '1'"
+        >
+          Suivant ›
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Modal (Ajout / Modification) -->
+  <div *ngIf="showFormModal()" class="modal-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;">
+    <div class="modal-card" style="background: white; border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid rgba(0,0,0,0.06);">
+        <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #0b1a30;">
+          {{ editingTiers() ? 'Modifier le Tiers (' + editingTiers()?.code + ')' : 'Créer un nouveau Tiers' }}
+        </h3>
+        <button type="button" (click)="closeFormModal()" style="background: transparent; border: none; font-size: 18px; cursor: pointer; color: #8c8c8c;">✕</button>
+      </div>
+
+      <form [formGroup]="tiersForm" (ngSubmit)="submitForm()" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Type de Tiers *</label>
+            <select formControlName="type" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;">
+              <option value="FOURNISSEUR">📦 FOURNISSEUR</option>
+              <option value="CLIENT">👤 CLIENT</option>
+              <option value="PARTENAIRE">🤝 PARTENAIRE / PRESTATAIRE</option>
+            </select>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Statut *</label>
+            <select formControlName="status" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;">
+              <option value="ACTIF">🟢 Actif</option>
+              <option value="INACTIF">🔴 Inactif</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 16px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Code Tiers (ex: FRS-001)</label>
+            <input type="text" formControlName="code" placeholder="Génération auto si vide" [readOnly]="!!editingTiers()" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Nom / Raison Sociale *</label>
+            <input type="text" formControlName="name" placeholder="Nom de l'entreprise ou contact" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Email</label>
+            <input type="email" formControlName="email" placeholder="contact@domaine.com" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Téléphone</label>
+            <input type="text" formControlName="phone" placeholder="+221 77 000 00 00" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Adresse</label>
+            <input type="text" formControlName="address" placeholder="Rue, quartier, avenue..." style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Ville</label>
+            <input type="text" formControlName="city" placeholder="Dakar" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">NIF / Numéro de Registre (SIRET/NIF)</label>
+          <input type="text" formControlName="taxId" placeholder="Numéro fiscal / NIF" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Note / Observations</label>
+          <textarea formControlName="note" rows="2" placeholder="Informations complémentaires..." style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;"></textarea>
+        </div>
+
+        <div *ngIf="errorMessage()" style="background: rgba(255,77,79,0.1); color: #ff4d4f; padding: 10px 14px; border-radius: 6px; font-size: 13px;">
+          ⚠️ {{ errorMessage() }}
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+          <button type="button" (click)="closeFormModal()" style="padding: 9px 16px; background: rgba(0,0,0,0.05); color: #595959; border: none; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer;">
+            Annuler
+          </button>
+          <button type="submit" [disabled]="tiersForm.invalid || isSaving()" style="padding: 9px 20px; background: #1890ff; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer;">
+            {{ isSaving() ? 'Enregistrement...' : (editingTiers() ? 'Enregistrer les modifications' : 'Créer le Tiers') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Detail Modal (Fiche Contact Tiers) -->
+  <div *ngIf="showDetailModal() && selectedTiersDetail()" class="modal-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;">
+    <div class="modal-card" style="background: white; border-radius: 12px; width: 100%; max-width: 520px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); overflow: hidden;">
+      <div style="background: #0b1a30; color: white; padding: 20px 24px; position: relative;">
+        <button type="button" (click)="closeDetailModal()" style="position: absolute; right: 16px; top: 16px; background: transparent; border: none; font-size: 18px; color: white; cursor: pointer;">✕</button>
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #1890ff; letter-spacing: 0.5px; margin-bottom: 4px;">FICHE DU TIERS</div>
+        <h2 style="margin: 0 0 6px 0; font-size: 20px; font-weight: 800;">{{ selectedTiersDetail()?.name }}</h2>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+            {{ selectedTiersDetail()?.code }}
+          </span>
+          <span *ngIf="selectedTiersDetail()?.type === 'FOURNISSEUR'" style="color: #d3ade6; font-weight: 700; font-size: 12px;">📦 FOURNISSEUR</span>
+          <span *ngIf="selectedTiersDetail()?.type === 'CLIENT'" style="color: #b7eb8f; font-weight: 700; font-size: 12px;">👤 CLIENT</span>
+          <span *ngIf="selectedTiersDetail()?.type === 'PARTENAIRE'" style="color: #ffe7ba; font-weight: 700; font-size: 12px;">🤝 PARTENAIRE</span>
+        </div>
+      </div>
+
+      <div style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: rgba(0,0,0,0.02); padding: 14px; border-radius: 8px;">
+          <div>
+            <div style="font-size: 11px; font-weight: 700; color: #8c8c8c; text-transform: uppercase;">Téléphone</div>
+            <div style="font-size: 14px; font-weight: 600; color: #0b1a30;">{{ selectedTiersDetail()?.phone || 'Non renseigné' }}</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; font-weight: 700; color: #8c8c8c; text-transform: uppercase;">Email</div>
+            <div style="font-size: 14px; font-weight: 600; color: #0b1a30;">{{ selectedTiersDetail()?.email || 'Non renseigné' }}</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div>
+            <div style="font-size: 11px; font-weight: 700; color: #8c8c8c; text-transform: uppercase;">Adresse</div>
+            <div style="font-size: 13px; color: #0b1a30;">{{ selectedTiersDetail()?.address || '-' }}</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; font-weight: 700; color: #8c8c8c; text-transform: uppercase;">Ville</div>
+            <div style="font-size: 13px; color: #0b1a30;">{{ selectedTiersDetail()?.city || '-' }}</div>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size: 11px; font-weight: 700; color: #8c8c8c; text-transform: uppercase;">Identifiant Fiscal (NIF / SIRET)</div>
+          <div style="font-size: 13px; color: #0b1a30; font-weight: 600;">{{ selectedTiersDetail()?.taxId || 'Non renseigné' }}</div>
+        </div>
+
+        <div *ngIf="selectedTiersDetail()?.note">
+          <div style="font-size: 11px; font-weight: 700; color: #8c8c8c; text-transform: uppercase;">Observations</div>
+          <div style="font-size: 13px; color: #595959; background: #fffbe6; padding: 10px; border-radius: 6px; border: 1px solid #ffe58f;">
+            {{ selectedTiersDetail()?.note }}
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 14px;">
+          <span style="font-size: 12px; color: #8c8c8c;">Statut: <strong>{{ selectedTiersDetail()?.status }}</strong></span>
+          <button type="button" (click)="closeDetailModal()" style="padding: 8px 16px; background: #0b1a30; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
