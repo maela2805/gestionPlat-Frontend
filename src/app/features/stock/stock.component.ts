@@ -6,6 +6,20 @@ import { StockMovementService } from '../../core/services/stock-movement.service
 import { Product, StockAdjustmentRequest } from '../../core/models/product.model';
 import { StockMovement, MovementType, MovementReason } from '../../core/models/stock-movement.model';
 
+export interface MotifOption {
+  value: MovementReason;
+  label: string;
+  types: MovementType[];
+}
+
+export const MOTIF_OPTIONS: MotifOption[] = [
+  { value: 'REAPPROVISIONNEMENT', label: 'Réapprovisionnement', types: ['ENTREE'] },
+  { value: 'VENTE', label: 'Vente / Plat servi', types: ['SORTIE'] },
+  { value: 'PERTE', label: 'Perte / Périmé', types: ['SORTIE'] },
+  { value: 'AJUSTEMENT', label: 'Ajustement inventaire', types: ['ENTREE', 'SORTIE'] },
+  { value: 'RETOUR_FOURNISSEUR', label: 'Retour Fournisseur', types: ['SORTIE'] }
+];
+
 @Component({
   selector: 'app-stock',
   templateUrl: './stock.component.html',
@@ -21,6 +35,13 @@ export class StockComponent implements OnInit {
   isSaving = signal<boolean>(false);
   successMessage = signal<string | null>(null);
   errorMessage = signal<string | null>(null);
+
+  selectedMovementType = signal<MovementType>('ENTREE');
+
+  filteredReasons = computed(() => {
+    const type = this.selectedMovementType();
+    return MOTIF_OPTIONS.filter(m => m.types.includes(type));
+  });
 
   historySearch = signal<string>('');
   historyTypeFilter = signal<string>('');
@@ -62,6 +83,7 @@ export class StockComponent implements OnInit {
   });
 
   openAdjustmentModal(): void {
+    this.selectedMovementType.set('ENTREE');
     this.adjustForm.reset({ type: 'ENTREE', quantity: 1, reason: 'REAPPROVISIONNEMENT' });
     this.successMessage.set(null);
     this.errorMessage.set(null);
@@ -95,6 +117,17 @@ export class StockComponent implements OnInit {
   ngOnInit(): void {
     this.loadProducts();
     this.loadMovements();
+
+    this.adjustForm.get('type')?.valueChanges.subscribe((type: MovementType) => {
+      if (type) {
+        this.selectedMovementType.set(type);
+        const validReasons = this.filteredReasons();
+        const currentReason = this.adjustForm.get('reason')?.value;
+        if (!validReasons.some(r => r.value === currentReason)) {
+          this.adjustForm.patchValue({ reason: validReasons[0]?.value || '' });
+        }
+      }
+    });
 
     this.route.queryParams.subscribe(params => {
       if (params['productId']) {
@@ -167,6 +200,7 @@ export class StockComponent implements OnInit {
       next: () => {
         this.isSaving.set(false);
         this.successMessage.set('Ajustement de stock enregistré avec succès !');
+        this.selectedMovementType.set('ENTREE');
         this.adjustForm.reset({ type: 'ENTREE', quantity: 1, reason: 'REAPPROVISIONNEMENT' });
         this.closeModal();
         this.loadProducts();

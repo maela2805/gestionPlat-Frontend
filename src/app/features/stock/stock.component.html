@@ -198,11 +198,9 @@
         <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
           <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Motif *</label>
           <select class="form-control" formControlName="reason" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;">
-            <option value="REAPPROVISIONNEMENT">Réapprovisionnement</option>
-            <option value="VENTE">Vente / Plat servi</option>
-            <option value="PERTE">Perte / Périmé</option>
-            <option value="AJUSTEMENT">Ajustement inventaire</option>
-            <option value="RETOUR_FOURNISSEUR">Retour Fournisseur</option>
+            <option *ngFor="let m of filteredReasons()" [value]="m.value">
+              {{ m.label }}
+            </option>
           </select>
         </div>
 
