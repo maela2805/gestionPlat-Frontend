@@ -17,13 +17,13 @@
 
   <!-- Filters Card -->
   <div style="background: white; border-radius: 12px; padding: 16px 20px; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-      <div style="position: relative; width: 280px;">
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: nowrap;">
+      <div style="position: relative; width: 280px; flex-shrink: 0;">
         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #8c8c8c;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="text" placeholder="Rechercher référence, fournisseur..." [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" style="width: 100%; padding: 8px 12px 8px 36px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; outline: none;" />
+        <input type="text" placeholder="Rechercher référence, fournisseur..." [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" style="width: 100%; padding: 8.5px 12px 8.5px 36px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; outline: none; background: white;" />
       </div>
 
-      <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)" style="padding: 8px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; outline: none; background: white; cursor: pointer;">
+      <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)" style="padding: 8.5px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; outline: none; background: white; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
         <option value="">Tous les statuts</option>
         <option value="BROUILLON">📄 BROUILLON</option>
         <option value="VALIDEE">⏳ VALIDÉE (En cours)</option>
@@ -128,7 +128,12 @@
 
           <div formArrayName="items" style="display: flex; flex-direction: column; gap: 10px;">
             <div *ngFor="let itemGroup of itemsFormArray.controls; let i = index" [formGroupName]="i" style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; align-items: center; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 8px;">
-              <select formControlName="productId" style="padding: 8px 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 12.5px;">
+              <div *ngIf="!itemGroup.get('productId')?.value && itemGroup.get('productName')?.value" style="display: flex; align-items: center; gap: 6px;">
+                <span style="background: rgba(24,144,255,0.1); color: #1890ff; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 11.5px; white-space: nowrap;">✨ À créer à la livraison</span>
+                <span style="font-size: 13px; font-weight: 700; color: #0b1a30;">{{ itemGroup.get('productName')?.value }}</span>
+              </div>
+
+              <select *ngIf="itemGroup.get('productId')?.value || !itemGroup.get('productName')?.value" formControlName="productId" style="padding: 8px 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 12.5px;">
                 <option [value]="null" disabled>-- Sélectionner produit --</option>
                 <option *ngFor="let p of products()" [value]="p.id">{{ p.name }} (Réf: {{ p.reference }})</option>
               </select>
@@ -190,7 +195,10 @@
           </thead>
           <tbody>
             <tr *ngFor="let item of selectedOrderDetail()?.items" style="border-bottom: 1px solid rgba(0,0,0,0.04);">
-              <td style="padding: 8px 10px; font-weight: 600;">{{ item.productName }}</td>
+              <td style="padding: 8px 10px; font-weight: 600;">
+                {{ item.productName }}
+                <span *ngIf="item.isPendingProduct && selectedOrderDetail()?.status !== 'LIVREE'" style="margin-left: 6px; font-size: 11px; background: rgba(250,140,22,0.15); color: #fa8c16; padding: 2px 6px; border-radius: 4px; font-weight: 700;">Création à la livraison</span>
+              </td>
               <td style="padding: 8px 10px;">{{ item.unitPrice }} FCFA</td>
               <td style="padding: 8px 10px; font-weight: 700;">{{ item.quantityOrdered }}</td>
               <td style="padding: 8px 10px; font-weight: 700;">{{ item.totalPrice }} FCFA</td>

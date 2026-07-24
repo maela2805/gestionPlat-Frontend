@@ -100,15 +100,24 @@ export class PurchaseOrdersComponent implements OnInit {
 
   addItemRow(): void {
     const itemGroup = this.fb.group({
-      productId: [null, Validators.required],
+      productId: [null],
+      productName: [''],
+      productReference: [''],
+      categoryId: [null],
       unitPrice: [0, [Validators.required, Validators.min(0)]],
       quantityOrdered: [1, [Validators.required, Validators.min(1)]]
     });
 
     itemGroup.get('productId')?.valueChanges.subscribe(prodId => {
-      const prod = this.products().find(p => p.id === Number(prodId));
-      if (prod) {
-        itemGroup.patchValue({ unitPrice: prod.buyPrice }, { emitEvent: false });
+      if (prodId) {
+        const prod = this.products().find(p => p.id === Number(prodId));
+        if (prod) {
+          itemGroup.patchValue({
+            unitPrice: prod.buyPrice,
+            productName: prod.name,
+            productReference: prod.reference
+          }, { emitEvent: false });
+        }
       }
     });
 
@@ -146,7 +155,7 @@ export class PurchaseOrdersComponent implements OnInit {
       description: '',
       buyPrice: 0,
       sellPrice: null,
-      initialStock: 0,
+      initialStock: 1,
       alertThreshold: 5,
       barcode: '',
       categoryId: null
@@ -162,46 +171,21 @@ export class PurchaseOrdersComponent implements OnInit {
   submitQuickProduct(): void {
     if (this.quickProductForm.invalid) return;
 
-    this.isCreatingProduct.set(true);
-    this.quickProductError.set(null);
-
     const val = this.quickProductForm.value;
-    this.productService.createProduct({
-      reference: val.reference,
-      name: val.name,
-      description: val.description,
-      buyPrice: Number(val.buyPrice),
-      sellPrice: val.sellPrice ? Number(val.sellPrice) : undefined,
-      initialStock: val.initialStock ? Number(val.initialStock) : 0,
-      alertThreshold: val.alertThreshold ? Number(val.alertThreshold) : 5,
-      barcode: val.barcode,
-      categoryId: val.categoryId ? Number(val.categoryId) : undefined
-    }).subscribe({
-      next: (newProd) => {
-        this.isCreatingProduct.set(false);
-        this.closeQuickProductModal();
-        // Refresh product list
-        this.loadProducts();
+    const qty = val.initialStock && val.initialStock > 0 ? Number(val.initialStock) : 1;
 
-        // Automatically add an item line with this new product selected
-        const itemGroup = this.fb.group({
-          productId: [newProd.id, Validators.required],
-          unitPrice: [newProd.buyPrice, [Validators.required, Validators.min(0)]],
-          quantityOrdered: [1, [Validators.required, Validators.min(1)]]
-        });
-        itemGroup.get('productId')?.valueChanges.subscribe(prodId => {
-          const prod = this.products().find(p => p.id === Number(prodId));
-          if (prod) {
-            itemGroup.patchValue({ unitPrice: prod.buyPrice }, { emitEvent: false });
-          }
-        });
-        this.itemsFormArray.push(itemGroup);
-      },
-      error: (err) => {
-        this.isCreatingProduct.set(false);
-        this.quickProductError.set(err.message || 'Erreur lors de la création du produit');
-      }
+    // Add line item with pending product information (deferred creation until delivery)
+    const itemGroup = this.fb.group({
+      productId: [null],
+      productName: [val.name, Validators.required],
+      productReference: [val.reference],
+      categoryId: [val.categoryId ? Number(val.categoryId) : null],
+      unitPrice: [Number(val.buyPrice), [Validators.required, Validators.min(0)]],
+      quantityOrdered: [qty, [Validators.required, Validators.min(1)]]
     });
+
+    this.itemsFormArray.push(itemGroup);
+    this.closeQuickProductModal();
   }
 
   openCreateModal(): void {
@@ -243,7 +227,10 @@ export class PurchaseOrdersComponent implements OnInit {
       expectedDeliveryDate: val.expectedDeliveryDate || undefined,
       note: val.note,
       items: val.items.map((i: any) => ({
-        productId: Number(i.productId),
+        productId: i.productId ? Number(i.productId) : undefined,
+        productName: i.productName || undefined,
+        productReference: i.productReference || undefined,
+        categoryId: i.categoryId ? Number(i.categoryId) : undefined,
         unitPrice: Number(i.unitPrice),
         quantityOrdered: Number(i.quantityOrdered)
       }))

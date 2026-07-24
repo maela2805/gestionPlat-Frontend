@@ -2,13 +2,14 @@ export type PurchaseOrderStatus = 'BROUILLON' | 'VALIDEE' | 'LIVREE' | 'ANNULEE'
 
 export interface PurchaseOrderItem {
   id?: number;
-  productId: number;
+  productId?: number;
   productReference?: string;
   productName?: string;
   unitPrice: number;
   quantityOrdered: number;
   quantityReceived?: number;
   totalPrice: number;
+  isPendingProduct?: boolean;
 }
 
 export interface PurchaseOrder {
@@ -28,7 +29,10 @@ export interface PurchaseOrder {
 }
 
 export interface CreatePurchaseOrderItemRequest {
-  productId: number;
+  productId?: number;
+  productName?: string;
+  productReference?: string;
+  categoryId?: number;
   unitPrice: number;
   quantityOrdered: number;
 }
