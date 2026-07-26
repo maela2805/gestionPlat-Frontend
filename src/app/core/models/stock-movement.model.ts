@@ -1,4 +1,5 @@
 import { Product } from './product.model';
+import { Boutique } from './boutique.model';
 
 export type MovementType = 'ENTREE' | 'SORTIE';
 export type MovementReason = 'REAPPROVISIONNEMENT' | 'VENTE' | 'PERTE' | 'AJUSTEMENT' | 'RETOUR_FOURNISSEUR';
@@ -6,6 +7,7 @@ export type MovementReason = 'REAPPROVISIONNEMENT' | 'VENTE' | 'PERTE' | 'AJUSTE
 export interface StockMovement {
   id: number;
   product: Product;
+  boutique?: Boutique;
   quantity: number;
   type: MovementType;
   reason: MovementReason;

@@ -8,6 +8,8 @@ import { StockMovement, MovementType, MovementReason } from '../../core/models/s
 
 import { CategoryService } from '../../core/services/category.service';
 import { Category } from '../../core/models/category.model';
+import { BoutiqueService } from '../../core/services/boutique.service';
+import { Boutique } from '../../core/models/boutique.model';
 
 export interface MotifOption {
   value: MovementReason;
@@ -34,6 +36,7 @@ export class StockComponent implements OnInit {
   products = signal<Product[]>([]);
   movements = signal<StockMovement[]>([]);
   categories = signal<Category[]>([]);
+  boutiques = signal<Boutique[]>([]);
 
   adjustForm: FormGroup;
   productForm: FormGroup;
@@ -52,6 +55,7 @@ export class StockComponent implements OnInit {
 
   historySearch = signal<string>('');
   historyTypeFilter = signal<string>('');
+  warehouseFilter = signal<string>('ALL');
   authorFilter = signal<string>('');
   showModal = signal<boolean>(false);
   showProductModal = signal<boolean>(false);
@@ -73,6 +77,15 @@ export class StockComponent implements OnInit {
     const type = this.historyTypeFilter();
     if (type) {
       list = list.filter(m => m.type === type);
+    }
+    const warehouse = this.warehouseFilter();
+    if (warehouse !== 'ALL') {
+      if (warehouse === 'CENTRAL') {
+        list = list.filter(m => !m.boutique);
+      } else {
+        const bId = Number(warehouse);
+        list = list.filter(m => m.boutique && m.boutique.id === bId);
+      }
     }
     const author = this.authorFilter();
     if (author) {
@@ -160,10 +173,16 @@ export class StockComponent implements OnInit {
     this.currentPage.set(1);
   }
 
+  updateWarehouseFilter(e: Event): void {
+    this.warehouseFilter.set((e.target as HTMLSelectElement).value);
+    this.currentPage.set(1);
+  }
+
   constructor(
     private productService: ProductService,
     private movementService: StockMovementService,
     private categoryService: CategoryService,
+    private boutiqueService: BoutiqueService,
     private fb: FormBuilder,
     private route: ActivatedRoute
   ) {
@@ -192,6 +211,7 @@ export class StockComponent implements OnInit {
     this.loadProducts();
     this.loadMovements();
     this.loadCategories();
+    this.loadBoutiques();
 
     this.adjustForm.get('type')?.valueChanges.subscribe((type: MovementType) => {
       if (type) {
@@ -218,6 +238,10 @@ export class StockComponent implements OnInit {
 
   loadCategories(): void {
     this.categoryService.getAllCategories().subscribe(cats => this.categories.set(cats));
+  }
+
+  loadBoutiques(): void {
+    this.boutiqueService.getAllBoutiques().subscribe(b => this.boutiques.set(b));
   }
 
   loadMovements(): void {
