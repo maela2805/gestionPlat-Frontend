@@ -14,6 +14,7 @@ export interface InventoryRow {
   designation: string;
   theoreticalStock: number;
   physicalStock: number;
+  selected: boolean;
 }
 
 @Component({
@@ -34,11 +35,13 @@ export class InventoryComponent implements OnInit {
   isLoading = signal<boolean>(false);
   isSaving = signal<boolean>(false);
   searchTerm = signal<string>('');
+  modalSearchTerm = signal<string>('');
   inventoryNote = signal<string>('');
 
   // Active inventory counting rows for the selected warehouse
   inventoryRows = signal<InventoryRow[]>([]);
 
+  showNewInventoryModal = signal<boolean>(false);
   showDetailModal = signal<boolean>(false);
   selectedInventoryDetail = signal<Inventory | null>(null);
 
@@ -49,8 +52,8 @@ export class InventoryComponent implements OnInit {
     return b ? `Entrepôt ${b.name}` : 'Entrepôt Inconnu';
   });
 
-  filteredRows = computed(() => {
-    const search = this.searchTerm().toLowerCase().trim();
+  filteredModalRows = computed(() => {
+    const search = this.modalSearchTerm().toLowerCase().trim();
     let rows = this.inventoryRows();
     if (search) {
       rows = rows.filter(r =>
@@ -61,26 +64,46 @@ export class InventoryComponent implements OnInit {
     return rows;
   });
 
+  selectedRowsCount = computed(() => {
+    return this.inventoryRows().filter(r => r.selected).length;
+  });
+
   totalTheoreticalStock = computed(() => {
-    return this.filteredRows().reduce((sum, r) => sum + r.theoreticalStock, 0);
+    return this.inventoryRows()
+      .filter(r => r.selected)
+      .reduce((sum, r) => sum + r.theoreticalStock, 0);
   });
 
   totalPhysicalStock = computed(() => {
-    return this.filteredRows().reduce((sum, r) => sum + r.physicalStock, 0);
+    return this.inventoryRows()
+      .filter(r => r.selected)
+      .reduce((sum, r) => sum + r.physicalStock, 0);
   });
 
   totalGapsCount = computed(() => {
-    return this.filteredRows().filter(r => (r.physicalStock - r.theoreticalStock) !== 0).length;
+    return this.inventoryRows()
+      .filter(r => r.selected && (r.physicalStock - r.theoreticalStock) !== 0).length;
   });
 
   filteredInventories = computed(() => {
     const id = this.selectedWarehouseId();
+    const search = this.searchTerm().toLowerCase().trim();
     let list = this.inventories();
+
     if (id === null) {
       list = list.filter(i => !i.boutique);
     } else {
       list = list.filter(i => i.boutique && i.boutique.id === id);
     }
+
+    if (search) {
+      list = list.filter(i =>
+        i.reference.toLowerCase().includes(search) ||
+        (i.note && i.note.toLowerCase().includes(search)) ||
+        (i.userEmail && i.userEmail.toLowerCase().includes(search))
+      );
+    }
+
     return list;
   });
 
@@ -107,9 +130,6 @@ export class InventoryComponent implements OnInit {
   loadProducts(): void {
     this.productService.getAllProducts().subscribe(prods => {
       this.products.set(prods);
-      if (this.selectedWarehouseId() === null) {
-        this.buildCentralInventoryRows(prods);
-      }
     });
   }
 
@@ -119,11 +139,20 @@ export class InventoryComponent implements OnInit {
 
   selectWarehouse(warehouseId: number | null): void {
     this.selectedWarehouseId.set(warehouseId);
+  }
+
+  openNewInventoryModal(): void {
     this.inventoryNote.set('');
+    this.modalSearchTerm.set('');
+    const warehouseId = this.selectedWarehouseId();
 
     if (warehouseId === null) {
       // Central Warehouse
-      this.buildCentralInventoryRows(this.products());
+      this.productService.getAllProducts().subscribe(prods => {
+        this.products.set(prods);
+        this.buildCentralInventoryRows(prods);
+        this.showNewInventoryModal.set(true);
+      });
     } else {
       // Boutique Warehouse
       this.isLoading.set(true);
@@ -131,10 +160,15 @@ export class InventoryComponent implements OnInit {
         next: (stocks) => {
           this.buildBoutiqueInventoryRows(stocks);
           this.isLoading.set(false);
+          this.showNewInventoryModal.set(true);
         },
         error: () => this.isLoading.set(false)
       });
     }
+  }
+
+  closeNewInventoryModal(): void {
+    this.showNewInventoryModal.set(false);
   }
 
   buildCentralInventoryRows(prods: Product[]): void {
@@ -143,7 +177,8 @@ export class InventoryComponent implements OnInit {
       reference: p.reference,
       designation: p.name,
       theoreticalStock: p.stock ?? 0,
-      physicalStock: p.stock ?? 0
+      physicalStock: p.stock ?? 0,
+      selected: true
     }));
     this.inventoryRows.set(rows);
   }
@@ -154,30 +189,50 @@ export class InventoryComponent implements OnInit {
       reference: s.productReference,
       designation: s.productName,
       theoreticalStock: s.quantity,
-      physicalStock: s.quantity
+      physicalStock: s.quantity,
+      selected: true
     }));
     this.inventoryRows.set(rows);
   }
 
-  updatePhysicalStock(index: number, val: string): void {
+  toggleSelectAll(checked: boolean): void {
+    const rows = this.inventoryRows().map(r => ({ ...r, selected: checked }));
+    this.inventoryRows.set(rows);
+  }
+
+  toggleSelectRow(productId: number, checked: boolean): void {
+    const rows = this.inventoryRows().map(r => {
+      if (r.productId === productId) {
+        return { ...r, selected: checked };
+      }
+      return r;
+    });
+    this.inventoryRows.set(rows);
+  }
+
+  updatePhysicalStock(productId: number, val: string): void {
     const num = Number(val);
     if (isNaN(num) || num < 0) return;
 
-    const rows = [...this.inventoryRows()];
-    rows[index].physicalStock = num;
+    const rows = this.inventoryRows().map(r => {
+      if (r.productId === productId) {
+        return { ...r, physicalStock: num };
+      }
+      return r;
+    });
     this.inventoryRows.set(rows);
   }
 
   submitWarehouseInventory(validateDirectly: boolean = false): void {
-    const rows = this.inventoryRows();
-    if (rows.length === 0) {
-      alert('Aucun produit disponible pour cet inventaire.');
+    const selectedRows = this.inventoryRows().filter(r => r.selected);
+    if (selectedRows.length === 0) {
+      alert('Veuillez sélectionner au moins un produit à inclure dans l\'inventaire.');
       return;
     }
 
     this.isSaving.set(true);
 
-    const itemsReq: InventoryItemRequest[] = rows.map(r => ({
+    const itemsReq: InventoryItemRequest[] = selectedRows.map(r => ({
       productId: r.productId,
       countedQuantity: r.physicalStock
     }));
@@ -196,9 +251,9 @@ export class InventoryComponent implements OnInit {
             next: () => {
               this.isSaving.set(false);
               alert(`Inventaire ${createdInv.reference} créé et validé avec succès ! Les stocks ont été mis à jour.`);
+              this.showNewInventoryModal.set(false);
               this.loadInventories();
               this.loadProducts();
-              this.selectWarehouse(wId);
             },
             error: (err) => {
               this.isSaving.set(false);
@@ -208,6 +263,7 @@ export class InventoryComponent implements OnInit {
         } else {
           this.isSaving.set(false);
           alert(`Brouillon d'inventaire ${createdInv.reference} enregistré avec succès !`);
+          this.showNewInventoryModal.set(false);
           this.loadInventories();
         }
       },
@@ -235,7 +291,6 @@ export class InventoryComponent implements OnInit {
           alert('Inventaire validé avec succès ! Les stocks ont été ajustés.');
           this.loadInventories();
           this.loadProducts();
-          this.selectWarehouse(this.selectedWarehouseId());
           if (this.showDetailModal()) this.closeDetailModal();
         },
         error: (err) => alert(err.error?.message || 'Erreur lors de la validation.')

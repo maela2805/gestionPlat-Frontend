@@ -3,16 +3,16 @@
   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
     <div>
       <div style="font-size: 13px; color: #8c8c8c; margin-bottom: 6px;">
-        <span>Tawfekh Vaisselle</span> <span class="breadcrumb-separator">></span> <span style="color: #1890ff; font-weight: 600;">Inventaire des Entrepôts</span>
+        <span>Tawfekh Vaisselle</span> <span class="breadcrumb-separator">></span> <span style="color: #1890ff; font-weight: 600;">Inventaires</span>
       </div>
-      <h1 style="margin: 0; font-size: 22px; font-weight: 700; color: #0b1a30;">Inventaire Physique des Stocks par Entrepôt</h1>
+      <h1 style="margin: 0; font-size: 22px; font-weight: 700; color: #0b1a30;">Gestion & Historique des Inventaires</h1>
     </div>
   </div>
 
-  <!-- Warehouse Selection Tabs / Buttons -->
+  <!-- Warehouse Selection Tabs -->
   <div style="background: white; border-radius: 12px; padding: 20px; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px;">
     <label style="font-size: 13px; font-weight: 700; color: #0b1a30; display: block; margin-bottom: 12px;">
-      Veuillez choisir un Entrepôt pour effectuer ou consulter l'inventaire :
+      Veuillez choisir un Entrepôt pour consulter l'historique ou effectuer un nouvel inventaire :
     </label>
 
     <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
@@ -41,47 +41,236 @@
     </div>
   </div>
 
-  <!-- Warehouse Summary Stats Bar -->
-  <div style="background: white; border-radius: 12px; padding: 16px 20px; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+  <!-- Warehouse Summary Bar with "Réaliser un inventaire" Action -->
+  <div style="background: white; border-radius: 12px; padding: 20px; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
     <div>
-      <span style="font-size: 12px; font-weight: 700; color: #1890ff; text-transform: uppercase;">ENTREPÔT SÉLECTIONNÉ</span>
-      <h2 style="margin: 2px 0 0 0; font-size: 18px; font-weight: 800; color: #0b1a30;">{{ currentWarehouseName() }}</h2>
+      <span style="font-size: 11px; font-weight: 700; color: #1890ff; text-transform: uppercase; letter-spacing: 0.5px;">ENTREPÔT SÉLECTIONNÉ</span>
+      <h2 style="margin: 2px 0 0 0; font-size: 20px; font-weight: 800; color: #0b1a30;">{{ currentWarehouseName() }}</h2>
     </div>
 
-    <!-- Search Input -->
-    <div style="position: relative; width: 280px;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #8c8c8c;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      <input type="text" placeholder="Rechercher référence ou désignation..." [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" style="width: 100%; padding: 8px 12px 8px 36px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; outline: none;" />
-    </div>
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+      <!-- Search in History -->
+      <div style="position: relative; width: 280px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #8c8c8c;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input 
+          type="text" 
+          placeholder="Rechercher un inventaire..." 
+          [value]="searchTerm()" 
+          (input)="searchTerm.set($any($event.target).value)" 
+          style="width: 100%; padding: 9px 12px 9px 36px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; font-size: 13px; outline: none;" 
+        />
+      </div>
 
-    <!-- Stats summary -->
-    <div style="display: flex; gap: 16px; font-size: 13px; font-weight: 600; flex-wrap: wrap;">
-      <div style="background: rgba(24,144,255,0.08); color: #1890ff; padding: 6px 12px; border-radius: 6px;">
-        Stock Théorique : <strong>{{ totalTheoreticalStock() }}</strong>
-      </div>
-      <div style="background: rgba(114,46,209,0.08); color: #722ed1; padding: 6px 12px; border-radius: 6px;">
-        Stock Physique : <strong>{{ totalPhysicalStock() }}</strong>
-      </div>
-      <div style="background: rgba(255,77,79,0.08); color: #ff4d4f; padding: 6px 12px; border-radius: 6px;">
-        Articles avec Écart : <strong>{{ totalGapsCount() }}</strong>
-      </div>
+      <!-- Action Button: Realiser un inventaire -->
+      <button 
+        type="button" 
+        (click)="openNewInventoryModal()"
+        style="padding: 10px 22px; background: #1890ff; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(24,144,255,0.3); transition: all 0.2s;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        <span>Réaliser un inventaire</span>
+      </button>
     </div>
   </div>
 
-  <!-- Main Inventory Counting Table -->
-  <div style="background: white; border-radius: 12px; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow: hidden; margin-bottom: 24px;">
-    <div style="padding: 16px 20px; border-bottom: 1px solid rgba(0,0,0,0.06); background: #fafafa; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-      <div style="font-size: 14px; font-weight: 700; color: #0b1a30;">
-        Fiche de Comptage d'Inventaire en Cours
+  <!-- Historical Inventories List Table -->
+  <div style="background: white; border-radius: 12px; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 4px 12px rgba(0,0,0,0.03); padding: 20px; margin-bottom: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #0b1a30;">
+        📋 Historique des Inventaires ({{ filteredInventories().length }})
+      </h3>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+      <thead>
+        <tr style="background: rgba(0,0,0,0.03); border-bottom: 1px solid rgba(0,0,0,0.08); text-align: left;">
+          <th style="padding: 12px 16px; font-weight: 700; color: #595959;">RÉFÉRENCE</th>
+          <th style="padding: 12px 16px; font-weight: 700; color: #595959;">NOTE / LIBELLÉ</th>
+          <th style="padding: 12px 16px; font-weight: 700; color: #595959;">STATUT</th>
+          <th style="padding: 12px 16px; font-weight: 700; color: #595959;">DATE DE CRÉATION</th>
+          <th style="padding: 12px 16px; font-weight: 700; color: #595959;">AUTEUR</th>
+          <th style="padding: 12px 16px; font-weight: 700; color: #595959; text-align: right;">ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let inv of filteredInventories()" style="border-bottom: 1px solid rgba(0,0,0,0.04);">
+          <td style="padding: 12px 16px; font-weight: 700; color: #1890ff;">{{ inv.reference }}</td>
+          <td style="padding: 12px 16px; font-weight: 600; color: #0b1a30;">{{ inv.note || '-' }}</td>
+          <td style="padding: 12px 16px;">
+            <span *ngIf="inv.status === 'VALIDE'" style="padding: 4px 12px; background: rgba(82,196,26,0.12); color: #52c41a; border: 1px solid rgba(82,196,26,0.3); border-radius: 16px; font-weight: 800; font-size: 11px;">● VALIDÉ</span>
+            <span *ngIf="inv.status === 'BROUILLON'" style="padding: 4px 12px; background: rgba(250,140,22,0.12); color: #fa8c16; border: 1px solid rgba(250,140,22,0.3); border-radius: 16px; font-weight: 800; font-size: 11px;">● BROUILLON</span>
+          </td>
+          <td style="padding: 12px 16px; color: #595959; font-weight: 500;">{{ inv.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td style="padding: 12px 16px; color: #8c8c8c;">{{ inv.userEmail || 'Système' }}</td>
+          <td style="padding: 12px 16px; text-align: right;">
+            <button 
+              (click)="openDetailModal(inv)" 
+              style="padding: 6px 14px; background: rgba(24,144,255,0.08); color: #1890ff; border: 1px solid rgba(24,144,255,0.2); border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; margin-right: 6px;">
+              👁️ Voir Détails
+            </button>
+            <button 
+              *ngIf="inv.status === 'BROUILLON'" 
+              (click)="validateInventoryFromList(inv, $event)" 
+              style="padding: 6px 14px; background: #52c41a; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 6px rgba(82,196,26,0.2);">
+              ✓ Valider
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredInventories().length === 0">
+          <td colspan="6" style="padding: 40px; text-align: center; color: #8c8c8c; font-size: 14px;">
+            Aucun inventaire enregistré pour cet entrepôt. Cliquez sur <strong>"Réaliser un inventaire"</strong> pour démarrer.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL: RÉALISER UN INVENTAIRE -->
+<div *ngIf="showNewInventoryModal()" class="modal-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;">
+  <div class="modal-card" style="background: white; border-radius: 16px; width: 100%; max-width: 1050px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 24px 48px rgba(0,0,0,0.25);">
+    
+    <!-- Modal Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid rgba(0,0,0,0.08); background: #fafafa;">
+      <div>
+        <div style="font-size: 11px; font-weight: 800; color: #1890ff; text-transform: uppercase; letter-spacing: 0.5px;">NOUVEAU COMPTAGE DE STOCK</div>
+        <h2 style="margin: 2px 0 0 0; font-size: 20px; font-weight: 800; color: #0b1a30;">
+          Réaliser un Inventaire - {{ currentWarehouseName() }}
+        </h2>
+      </div>
+      <button (click)="closeNewInventoryModal()" style="background: rgba(0,0,0,0.05); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; color: #595959; display: flex; align-items: center; justify-content: center;">✕</button>
+    </div>
+
+    <!-- Modal Body -->
+    <div style="padding: 24px; overflow-y: auto; flex: 1;">
+      <!-- Note Input -->
+      <div style="margin-bottom: 20px;">
+        <label style="font-size: 13px; font-weight: 700; color: #0b1a30; display: block; margin-bottom: 6px;">
+          Note / Libellé de l'inventaire (Optionnel) :
+        </label>
+        <input 
+          type="text" 
+          placeholder="ex: Inventaire fin de mois, Contrôle de stock..." 
+          [value]="inventoryNote()" 
+          (input)="inventoryNote.set($any($event.target).value)" 
+          style="width: 100%; padding: 10px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; font-size: 13px; outline: none;" 
+        />
       </div>
 
-      <!-- Action Buttons -->
-      <div style="display: flex; gap: 10px;">
+      <!-- Controls & Stats Bar -->
+      <div style="background: rgba(24,144,255,0.04); border-radius: 12px; padding: 16px; border: 1px solid rgba(24,144,255,0.15); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <!-- Modal Search Box -->
+        <div style="position: relative; width: 300px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #8c8c8c;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input 
+            type="text" 
+            placeholder="Filtrer par référence ou nom..." 
+            [value]="modalSearchTerm()" 
+            (input)="modalSearchTerm.set($any($event.target).value)" 
+            style="width: 100%; padding: 8px 12px 8px 36px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; outline: none; background: white;" 
+          />
+        </div>
+
+        <!-- Summary Stats Badges -->
+        <div style="display: flex; gap: 12px; font-size: 12px; font-weight: 700; flex-wrap: wrap;">
+          <div style="background: white; color: #1890ff; padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(24,144,255,0.2);">
+            Produits sélectionnés : <strong>{{ selectedRowsCount() }} / {{ inventoryRows().length }}</strong>
+          </div>
+          <div style="background: white; color: #595959; padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1);">
+            Stock Théorique : <strong>{{ totalTheoreticalStock() }}</strong>
+          </div>
+          <div style="background: white; color: #722ed1; padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(114,46,209,0.2);">
+            Stock Physique : <strong>{{ totalPhysicalStock() }}</strong>
+          </div>
+          <div style="background: white; color: #ff4d4f; padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255,77,79,0.2);">
+            Écarts : <strong>{{ totalGapsCount() }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Counting Table -->
+      <div style="border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead>
+            <tr style="background: #fafafa; border-bottom: 1px solid rgba(0,0,0,0.08); text-align: left;">
+              <th style="padding: 12px 14px; width: 40px; text-align: center;">
+                <input 
+                  type="checkbox" 
+                  [checked]="selectedRowsCount() === inventoryRows().length && inventoryRows().length > 0" 
+                  (change)="toggleSelectAll($any($event.target).checked)" 
+                  style="cursor: pointer; width: 16px; height: 16px;" 
+                />
+              </th>
+              <th style="padding: 12px 14px; font-weight: 700; color: #595959;">RÉFÉRENCE</th>
+              <th style="padding: 12px 14px; font-weight: 700; color: #595959;">DÉSIGNATION</th>
+              <th style="padding: 12px 14px; font-weight: 700; color: #1890ff;">STOCK THÉORIQUE</th>
+              <th style="padding: 12px 14px; font-weight: 700; color: #722ed1; width: 180px;">STOCK RÉEL / PHYSIQUE</th>
+              <th style="padding: 12px 14px; font-weight: 700; color: #0b1a30; text-align: center;">ÉCART CALCULÉ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of filteredModalRows()" style="border-bottom: 1px solid rgba(0,0,0,0.04);" [style.opacity]="row.selected ? '1' : '0.45'">
+              <td style="padding: 12px 14px; text-align: center;">
+                <input 
+                  type="checkbox" 
+                  [checked]="row.selected" 
+                  (change)="toggleSelectRow(row.productId, $any($event.target).checked)" 
+                  style="cursor: pointer; width: 16px; height: 16px;" 
+                />
+              </td>
+              <td style="padding: 12px 14px; font-weight: 700; color: #1890ff;">{{ row.reference }}</td>
+              <td style="padding: 12px 14px; font-weight: 600; color: #0b1a30;">{{ row.designation }}</td>
+              <td style="padding: 12px 14px; font-size: 14px; font-weight: 600; color: #595959;">{{ row.theoreticalStock }}</td>
+              <td style="padding: 12px 14px;">
+                <input 
+                  type="number" 
+                  min="0"
+                  [disabled]="!row.selected"
+                  [value]="row.physicalStock" 
+                  #qtyInput
+                  (input)="updatePhysicalStock(row.productId, qtyInput.value)"
+                  style="width: 130px; padding: 7px 10px; border: 1.5px solid #722ed1; border-radius: 6px; font-size: 14px; font-weight: 700; color: #722ed1; outline: none;"
+                />
+              </td>
+              <td style="padding: 12px 14px; text-align: center;">
+                <!-- Badge ROUGE quand écart négatif (perte) -->
+                <span *ngIf="(row.physicalStock - row.theoreticalStock) < 0" style="display: inline-block; padding: 4px 10px; background: rgba(255, 77, 79, 0.12); color: #ff4d4f; border: 1px solid rgba(255, 77, 79, 0.3); border-radius: 16px; font-size: 12px; font-weight: 800;">
+                  {{ row.physicalStock - row.theoreticalStock }} (Manquant)
+                </span>
+
+                <!-- Badge ORANGE quand écart positif (surplus) -->
+                <span *ngIf="(row.physicalStock - row.theoreticalStock) > 0" style="display: inline-block; padding: 4px 10px; background: rgba(250, 140, 22, 0.12); color: #fa8c16; border: 1px solid rgba(250, 140, 22, 0.3); border-radius: 16px; font-size: 12px; font-weight: 800;">
+                  +{{ row.physicalStock - row.theoreticalStock }} (Surplus)
+                </span>
+
+                <!-- Badge VERT quand aucun écart -->
+                <span *ngIf="(row.physicalStock - row.theoreticalStock) === 0" style="display: inline-block; padding: 4px 10px; background: rgba(82, 196, 26, 0.12); color: #52c41a; border: 1px solid rgba(82, 196, 26, 0.3); border-radius: 16px; font-size: 12px; font-weight: 800;">
+                  ✓ 0 (Aucun écart)
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="filteredModalRows().length === 0">
+              <td colspan="6" style="padding: 32px; text-align: center; color: #8c8c8c;">Aucun produit ne correspond à la recherche.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal Footer Actions -->
+    <div style="padding: 16px 24px; border-top: 1px solid rgba(0,0,0,0.08); background: #fafafa; display: flex; justify-content: space-between; align-items: center;">
+      <button 
+        type="button" 
+        (click)="closeNewInventoryModal()"
+        style="padding: 9px 20px; background: transparent; color: #595959; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;">
+        Annuler
+      </button>
+
+      <div style="display: flex; gap: 12px;">
         <button 
           type="button" 
           (click)="submitWarehouseInventory(false)" 
           [disabled]="isSaving()"
-          style="padding: 8px 16px; background: rgba(24,144,255,0.1); color: #1890ff; border: 1px solid rgba(24,144,255,0.3); border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">
+          style="padding: 9px 18px; background: rgba(24,144,255,0.1); color: #1890ff; border: 1px solid rgba(24,144,255,0.3); border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;">
           Enregistrer le Brouillon
         </button>
 
@@ -89,109 +278,17 @@
           type="button" 
           (click)="submitWarehouseInventory(true)" 
           [disabled]="isSaving()"
-          style="padding: 8px 18px; background: #52c41a; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(82,196,26,0.25);">
+          style="padding: 9px 20px; background: #52c41a; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(82,196,26,0.3);">
           ✓ Valider l'Inventaire & Ajuster les Stocks
         </button>
       </div>
     </div>
-
-    <div *ngIf="isLoading()" style="padding: 40px; text-align: center; color: #8c8c8c; font-weight: 600;">
-      Chargement des stocks de l'entrepôt...
-    </div>
-
-    <!-- Inventory Table with exact requested column headers and colored badges for gap -->
-    <table *ngIf="!isLoading()" style="width: 100%; border-collapse: collapse; font-size: 13px;">
-      <thead>
-        <tr style="background: rgba(0,0,0,0.02); border-bottom: 1px solid rgba(0,0,0,0.08); text-align: left;">
-          <th style="padding: 12px 16px; font-weight: 700; color: #595959;">RÉFÉRENCE</th>
-          <th style="padding: 12px 16px; font-weight: 700; color: #595959;">DÉSIGNATION</th>
-          <th style="padding: 12px 16px; font-weight: 700; color: #1890ff;">STOCK THÉORIQUE</th>
-          <th style="padding: 12px 16px; font-weight: 700; color: #722ed1; width: 180px;">STOCK RÉEL / PHYSIQUE</th>
-          <th style="padding: 12px 16px; font-weight: 700; color: #0b1a30; text-align: center;">ÉCART</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let row of filteredRows(); let i = index" style="border-bottom: 1px solid rgba(0,0,0,0.04);">
-          <td style="padding: 12px 16px; font-weight: 700; color: #1890ff;">{{ row.reference }}</td>
-          <td style="padding: 12px 16px; font-weight: 600; color: #0b1a30;">{{ row.designation }}</td>
-          <td style="padding: 12px 16px; font-size: 14px; font-weight: 600; color: #595959;">{{ row.theoreticalStock }}</td>
-          <td style="padding: 12px 16px;">
-            <input 
-              type="number" 
-              min="0"
-              [value]="row.physicalStock" 
-              #qtyInput
-              (input)="updatePhysicalStock(i, qtyInput.value)"
-              style="width: 130px; padding: 7px 10px; border: 1.5px solid #722ed1; border-radius: 6px; font-size: 14px; font-weight: 700; color: #722ed1; outline: none;"
-            />
-          </td>
-          <td style="padding: 12px 16px; text-align: center;">
-            <!-- Badge ROUGE quand écart négatif (perte) -->
-            <span *ngIf="(row.physicalStock - row.theoreticalStock) < 0" style="display: inline-block; padding: 5px 12px; background: rgba(255, 77, 79, 0.12); color: #ff4d4f; border: 1px solid rgba(255, 77, 79, 0.3); border-radius: 20px; font-size: 12px; font-weight: 800;">
-              {{ row.physicalStock - row.theoreticalStock }} (Manquant)
-            </span>
-
-            <!-- Badge ORANGE quand écart positif (surplus) -->
-            <span *ngIf="(row.physicalStock - row.theoreticalStock) > 0" style="display: inline-block; padding: 5px 12px; background: rgba(250, 140, 22, 0.12); color: #fa8c16; border: 1px solid rgba(250, 140, 22, 0.3); border-radius: 20px; font-size: 12px; font-weight: 800;">
-              +{{ row.physicalStock - row.theoreticalStock }} (Surplus)
-            </span>
-
-            <!-- Badge VERT quand aucun écart -->
-            <span *ngIf="(row.physicalStock - row.theoreticalStock) === 0" style="display: inline-block; padding: 5px 12px; background: rgba(82, 196, 26, 0.12); color: #52c41a; border: 1px solid rgba(82, 196, 26, 0.3); border-radius: 20px; font-size: 12px; font-weight: 800;">
-              ✓ 0 (Aucun écart)
-            </span>
-          </td>
-        </tr>
-        <tr *ngIf="filteredRows().length === 0">
-          <td colspan="5" style="padding: 32px; text-align: center; color: #8c8c8c;">Aucun produit trouvé dans cet entrepôt.</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Historical Inventories List for Selected Warehouse -->
-  <div style="background: white; border-radius: 12px; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 4px 12px rgba(0,0,0,0.03); padding: 20px;">
-    <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 700; color: #0b1a30;">Historique des Inventaires Enregistrés pour cet Entrepôt</h3>
-
-    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-      <thead>
-        <tr style="background: rgba(0,0,0,0.03); border-bottom: 1px solid rgba(0,0,0,0.08); text-align: left;">
-          <th style="padding: 10px 14px; font-weight: 700; color: #595959;">RÉFÉRENCE</th>
-          <th style="padding: 10px 14px; font-weight: 700; color: #595959;">STATUT</th>
-          <th style="padding: 10px 14px; font-weight: 700; color: #595959;">DATE</th>
-          <th style="padding: 10px 14px; font-weight: 700; color: #595959;">AUTEUR</th>
-          <th style="padding: 10px 14px; font-weight: 700; color: #595959; text-align: right;">ACTIONS</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let inv of filteredInventories()" style="border-bottom: 1px solid rgba(0,0,0,0.04);">
-          <td style="padding: 10px 14px; font-weight: 700; color: #1890ff;">{{ inv.reference }}</td>
-          <td style="padding: 10px 14px;">
-            <span *ngIf="inv.status === 'VALIDE'" style="padding: 3px 10px; background: rgba(82,196,26,0.1); color: #52c41a; border-radius: 12px; font-weight: 700; font-size: 11px;">● VALIDÉ</span>
-            <span *ngIf="inv.status === 'BROUILLON'" style="padding: 3px 10px; background: rgba(250,140,22,0.1); color: #fa8c16; border-radius: 12px; font-weight: 700; font-size: 11px;">● BROUILLON</span>
-          </td>
-          <td style="padding: 10px 14px; color: #8c8c8c;">{{ inv.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
-          <td style="padding: 10px 14px; color: #8c8c8c;">{{ inv.userEmail || 'Système' }}</td>
-          <td style="padding: 10px 14px; text-align: right;">
-            <button (click)="openDetailModal(inv)" style="padding: 6px 12px; background: rgba(24,144,255,0.08); color: #1890ff; border: 1px solid rgba(24,144,255,0.2); border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-right: 6px;">
-              Détails
-            </button>
-            <button *ngIf="inv.status === 'BROUILLON'" (click)="validateInventoryFromList(inv, $event)" style="padding: 6px 12px; background: #52c41a; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
-              Valider
-            </button>
-          </td>
-        </tr>
-        <tr *ngIf="filteredInventories().length === 0">
-          <td colspan="5" style="padding: 24px; text-align: center; color: #8c8c8c;">Aucun inventaire enregistré pour cet entrepôt.</td>
-        </tr>
-      </tbody>
-    </table>
   </div>
 </div>
 
-<!-- Modal Detail -->
+<!-- MODAL: DÉTAILS D'UN INVENTAIRE HISTORIQUE -->
 <div *ngIf="showDetailModal() && selectedInventoryDetail()" class="modal-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;">
-  <div class="modal-card" style="background: white; border-radius: 12px; width: 100%; max-width: 780px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+  <div class="modal-card" style="background: white; border-radius: 12px; width: 100%; max-width: 820px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
     <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid rgba(0,0,0,0.06);">
       <div>
         <div style="font-size: 11px; font-weight: 700; color: #1890ff; text-transform: uppercase;">DÉTAILS INVENTAIRE</div>
@@ -201,6 +298,10 @@
     </div>
 
     <div style="padding: 20px;">
+      <div style="margin-bottom: 16px; font-size: 13px; color: #595959;">
+        <strong>Libellé :</strong> {{ selectedInventoryDetail()?.note || 'Non renseigné' }}
+      </div>
+
       <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
         <thead>
           <tr style="background: rgba(0,0,0,0.03); border-bottom: 1px solid rgba(0,0,0,0.08); text-align: left;">
