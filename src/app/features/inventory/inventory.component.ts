@@ -29,8 +29,8 @@ export class InventoryComponent implements OnInit {
   products = signal<Product[]>([]);
   inventories = signal<Inventory[]>([]);
 
-  // Selected warehouse: null = Entrepôt Central, number = Boutique ID
-  selectedWarehouseId = signal<number | null>(null);
+  // Selected warehouse: 'ALL' = Tous les entrepôts, null = Entrepôt Central, number = Boutique ID
+  selectedWarehouseId = signal<number | null | 'ALL'>('ALL');
 
   isLoading = signal<boolean>(false);
   isSaving = signal<boolean>(false);
@@ -47,6 +47,7 @@ export class InventoryComponent implements OnInit {
 
   currentWarehouseName = computed(() => {
     const id = this.selectedWarehouseId();
+    if (id === 'ALL') return 'Tous les entrepôts';
     if (id === null) return 'Entrepôt Central (Dépôt Principal)';
     const b = this.boutiques().find(item => item.id === id);
     return b ? `Entrepôt ${b.name}` : 'Entrepôt Inconnu';
@@ -92,9 +93,10 @@ export class InventoryComponent implements OnInit {
 
     if (id === null) {
       list = list.filter(i => !i.boutique);
-    } else {
+    } else if (typeof id === 'number') {
       list = list.filter(i => i.boutique && i.boutique.id === id);
     }
+    // If id === 'ALL', no boutique filter is applied
 
     if (search) {
       list = list.filter(i =>
@@ -123,7 +125,6 @@ export class InventoryComponent implements OnInit {
   loadBoutiques(): void {
     this.boutiqueService.getAllBoutiques().subscribe(data => {
       this.boutiques.set(data);
-      this.selectWarehouse(null);
     });
   }
 
@@ -137,13 +138,15 @@ export class InventoryComponent implements OnInit {
     this.inventoryService.getAllInventories().subscribe(data => this.inventories.set(data));
   }
 
-  selectWarehouse(warehouseId: number | null): void {
+  selectWarehouse(warehouseId: number | null | 'ALL'): void {
     this.selectedWarehouseId.set(warehouseId);
   }
 
   onWarehouseSelectChange(event: Event): void {
     const val = (event.target as HTMLSelectElement).value;
-    if (val === 'CENTRAL') {
+    if (val === 'ALL') {
+      this.selectWarehouse('ALL');
+    } else if (val === 'CENTRAL') {
       this.selectWarehouse(null);
     } else {
       this.selectWarehouse(Number(val));
@@ -155,7 +158,7 @@ export class InventoryComponent implements OnInit {
     this.modalSearchTerm.set('');
     const warehouseId = this.selectedWarehouseId();
 
-    if (warehouseId === null) {
+    if (warehouseId === 'ALL' || warehouseId === null) {
       // Central Warehouse
       this.productService.getAllProducts().subscribe(prods => {
         this.products.set(prods);
