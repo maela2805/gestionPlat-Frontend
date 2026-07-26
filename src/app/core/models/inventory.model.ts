@@ -29,7 +29,7 @@ export interface InventoryItemRequest {
 }
 
 export interface CreateInventoryRequest {
-  boutiqueId: number;
+  boutiqueId?: number;
   note?: string;
   items: InventoryItemRequest[];
 }
