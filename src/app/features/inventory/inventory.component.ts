@@ -250,8 +250,10 @@ export class InventoryComponent implements OnInit {
     }));
 
     const wId = this.selectedWarehouseId();
+    const boutiqueIdParam = (typeof wId === 'number') ? wId : undefined;
+
     const req: CreateInventoryRequest = {
-      boutiqueId: wId ? Number(wId) : undefined,
+      boutiqueId: boutiqueIdParam,
       note: this.inventoryNote() || `Inventaire ${this.currentWarehouseName()}`,
       items: itemsReq
     };
