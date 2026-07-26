@@ -141,6 +141,15 @@ export class InventoryComponent implements OnInit {
     this.selectedWarehouseId.set(warehouseId);
   }
 
+  onWarehouseSelectChange(event: Event): void {
+    const val = (event.target as HTMLSelectElement).value;
+    if (val === 'CENTRAL') {
+      this.selectWarehouse(null);
+    } else {
+      this.selectWarehouse(Number(val));
+    }
+  }
+
   openNewInventoryModal(): void {
     this.inventoryNote.set('');
     this.modalSearchTerm.set('');
