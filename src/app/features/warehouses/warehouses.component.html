@@ -1,0 +1,127 @@
+<div class="page-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Gestion du Stock par Entrepôt</h1>
+      <p class="page-subtitle">Consultez le stock physique disponible par boutique et effectuez des transferts de stock</p>
+    </div>
+    <button class="btn btn-primary" (click)="openTransferModal()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      Transfert de Stock
+    </button>
+  </div>
+
+  <!-- Warehouse Selector & KPIs -->
+  <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; margin-bottom: 24px; align-items: stretch;">
+    <div class="card" style="padding: 20px; background: white; border-radius: 12px; border: 1px solid #e8e8e8; display: flex; flex-direction: column; justify-content: center;">
+      <label style="font-size: 13px; font-weight: 600; color: #555; margin-bottom: 8px;">Sélectionner l'Entrepôt à consulter :</label>
+      <select class="form-select" [ngModel]="selectedWarehouseId()" (ngModelChange)="onWarehouseChange($event)" style="font-size: 15px; font-weight: 600; padding: 10px 14px;">
+        <option [value]="null">🏢 Entrepôt Central (Dépôt Principal)</option>
+        <option *ngFor="let b of boutiques()" [value]="b.id">🏪 Entrepôt {{ b.name }} ({{ b.code }})</option>
+      </select>
+    </div>
+
+    <div class="card" style="padding: 20px; background: white; border-radius: 12px; border: 1px solid #e8e8e8;">
+      <div style="font-size: 13px; color: #666; font-weight: 500;">Quantité Totale en Stock</div>
+      <div style="font-size: 26px; font-weight: 800; color: #1890ff; margin-top: 6px;">{{ totalItemsInWarehouse() }} <span style="font-size: 14px; font-weight: 400; color: #999;">unités</span></div>
+    </div>
+
+    <div class="card" style="padding: 20px; background: white; border-radius: 12px; border: 1px solid #e8e8e8;">
+      <div style="font-size: 13px; color: #666; font-weight: 500;">Alertes Stock Bas</div>
+      <div style="font-size: 26px; font-weight: 800; color: #ff4d4f; margin-top: 6px;">{{ lowStockItemsCount() }} <span style="font-size: 14px; font-weight: 400; color: #999;">produits</span></div>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="card" style="padding: 16px; margin-bottom: 24px; background: white; border-radius: 12px; border: 1px solid #e8e8e8;">
+    <input type="text" class="form-input" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" placeholder="Rechercher un produit par nom ou référence dans cet entrepôt..." style="width: 100%;">
+  </div>
+
+  <!-- Stock Table -->
+  <div class="card" style="background: white; border-radius: 12px; border: 1px solid #e8e8e8; overflow: hidden;">
+    <div style="padding: 16px 20px; background: #fafafa; border-bottom: 1px solid #e8e8e8; font-weight: 700; color: #333; font-size: 15px;">
+      Stock Actuel : {{ currentWarehouseName() }}
+    </div>
+
+    <div *ngIf="isLoading()" style="padding: 32px; text-align: center; color: #666;">Chargement du stock de l'entrepôt...</div>
+
+    <table *ngIf="!isLoading()" class="data-table" style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="background: #fafafa; border-bottom: 1px solid #e8e8e8; text-align: left; font-size: 13px; color: #666;">
+          <th style="padding: 14px 16px;">Référence</th>
+          <th style="padding: 14px 16px;">Désignation Produit</th>
+          <th style="padding: 14px 16px;">Prix d'achat</th>
+          <th style="padding: 14px 16px;">Quantité en Stock</th>
+          <th style="padding: 14px 16px;">Statut Stock</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of filteredStocks()" style="border-bottom: 1px solid #f0f0f0; font-size: 14px;">
+          <td style="padding: 14px 16px; font-weight: 600; color: #1890ff;">{{ item.productReference }}</td>
+          <td style="padding: 14px 16px; font-weight: 600; color: #333;">{{ item.productName }}</td>
+          <td style="padding: 14px 16px; color: #666;">{{ item.buyPrice | currency:'XOF':'symbol':'1.0-0' }}</td>
+          <td style="padding: 14px 16px; font-size: 16px; font-weight: 700;">{{ item.quantity }}</td>
+          <td style="padding: 14px 16px;">
+            <span [ngClass]="item.quantity === 0 ? 'badge-danger' : (item.quantity <= (item.alertThreshold || 5) ? 'badge-warning' : 'badge-success')"
+                  style="padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+              {{ item.quantity === 0 ? 'Rupture' : (item.quantity <= (item.alertThreshold || 5) ? 'Stock Faible' : 'En Stock') }}
+            </span>
+          </td>
+        </tr>
+        <tr *ngIf="filteredStocks().length === 0">
+          <td colspan="5" style="padding: 32px; text-align: center; color: #999;">Aucun produit trouvé dans cet entrepôt.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Transfert de Stock -->
+<div *ngIf="showTransferModal()" class="modal-backdrop">
+  <div class="modal-content" style="max-width: 600px; width: 90%; background: white; border-radius: 12px; padding: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 12px;">
+      <h2 style="font-size: 18px; font-weight: 700; margin: 0;">Transfert de Stock Inter-Entrepôts</h2>
+      <button (click)="closeTransferModal()" style="border: none; background: transparent; font-size: 20px; cursor: pointer;">&times;</button>
+    </div>
+
+    <div style="margin-bottom: 16px;">
+      <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Entrepôt de Départ (Source) *</label>
+      <select class="form-select" [ngModel]="fromWarehouseId()" (ngModelChange)="fromWarehouseId.set($event === null || $event === 'null' ? null : Number($event))" style="width: 100%;">
+        <option [value]="null">🏢 Entrepôt Central (Dépôt Principal)</option>
+        <option *ngFor="let b of boutiques()" [value]="b.id">🏪 Entrepôt {{ b.name }}</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom: 16px;">
+      <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Entrepôt d'Arrivée (Destination) *</label>
+      <select class="form-select" [ngModel]="toWarehouseId()" (ngModelChange)="toWarehouseId.set($event === null || $event === 'null' ? null : Number($event))" style="width: 100%;">
+        <option [value]="null">🏢 Entrepôt Central (Dépôt Principal)</option>
+        <option *ngFor="let b of boutiques()" [value]="b.id">🏪 Entrepôt {{ b.name }}</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom: 16px;">
+      <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Produit à Transferer *</label>
+      <select class="form-select" [ngModel]="selectedProductId()" (ngModelChange)="selectedProductId.set(Number($event))" style="width: 100%;">
+        <option *ngFor="let p of products()" [value]="p.id">{{ p.name }} ({{ p.reference }}) - Stock Central: {{ p.stock }}</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom: 16px;">
+      <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Quantité à Transferer *</label>
+      <input type="number" min="1" class="form-input" [ngModel]="transferQuantity()" (ngModelChange)="transferQuantity.set(Number($event))" style="width: 100%;">
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Note / Motif du transfert</label>
+      <input type="text" class="form-input" [ngModel]="transferNote()" (ngModelChange)="transferNote.set($event)" placeholder="Ex: Réapprovisionnement hebdomadaire" style="width: 100%;">
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 12px;">
+      <button class="btn btn-outline" (click)="closeTransferModal()">Annuler</button>
+      <button class="btn btn-primary" (click)="submitTransfer()" [disabled]="isTransferring()">
+        {{ isTransferring() ? 'Transfert en cours...' : 'Valider le Transfert' }}
+      </button>
+    </div>
+  </div>
+</div>

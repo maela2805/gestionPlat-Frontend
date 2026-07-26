@@ -48,6 +48,11 @@ export const routes: Routes = [
     loadChildren: () => import('./features/boutiques/boutiques.module').then(m => m.BoutiquesModule) 
   },
   { 
+    path: 'warehouses', 
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/warehouses/warehouses.module').then(m => m.WarehousesModule) 
+  },
+  { 
     path: 'purchase-orders', 
     canActivate: [authGuard],
     loadChildren: () => import('./features/purchase-orders/purchase-orders.module').then(m => m.PurchaseOrdersModule) 
