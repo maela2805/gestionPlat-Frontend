@@ -11,8 +11,10 @@ import { AuthService } from '../../../core/services/auth.service';
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   isLoading = signal<boolean>(false);
+  isSlowLoading = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
+  private slowLoadingTimer: any = null;
 
   constructor(
     private fb: FormBuilder,
@@ -45,12 +47,22 @@ export class LoginComponent implements OnInit {
     if (this.loginForm.invalid) return;
 
     this.isLoading.set(true);
+    this.isSlowLoading.set(false);
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
+    // Détecte si le backend est en démarrage (ex: sortie de veille Render)
+    this.slowLoadingTimer = setTimeout(() => {
+      if (this.isLoading()) {
+        this.isSlowLoading.set(true);
+      }
+    }, 2500);
+
     this.authService.login(this.loginForm.value).subscribe({
       next: () => {
+        this.clearTimer();
         this.isLoading.set(false);
+        this.isSlowLoading.set(false);
 
         // Vérification du rôle connecté : Les comptes CLIENT ne peuvent pas accéder au Back-Office
         if (!this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'EMPLOYEE'])) {
@@ -62,9 +74,18 @@ export class LoginComponent implements OnInit {
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
+        this.clearTimer();
         this.isLoading.set(false);
+        this.isSlowLoading.set(false);
         this.errorMessage.set(err.message || 'Email ou mot de passe incorrect');
       }
     });
+  }
+
+  private clearTimer(): void {
+    if (this.slowLoadingTimer) {
+      clearTimeout(this.slowLoadingTimer);
+      this.slowLoadingTimer = null;
+    }
   }
 }

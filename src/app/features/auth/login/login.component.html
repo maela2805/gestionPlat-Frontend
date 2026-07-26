@@ -39,6 +39,11 @@
         ⚠️ {{ errorMessage() }}
       </div>
 
+      <div *ngIf="isSlowLoading()" class="alert-info" style="background: rgba(24, 144, 255, 0.12); border: 1px solid #1890ff; color: #1890ff; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+        <span>⏳</span>
+        <span>Le serveur est en train de démarrer (sortie de veille Render). Veuillez patienter quelques secondes...</span>
+      </div>
+
       <button type="submit" class="btn-submit" [disabled]="isLoading() || loginForm.invalid">
         <span *ngIf="!isLoading()">Se connecter</span>
         <span *ngIf="isLoading()">Connexion en cours...</span>

@@ -35,7 +35,6 @@ export class AuthService {
           };
           this.currentUser.set(userObj);
           localStorage.setItem(this.USER_KEY, JSON.stringify(userObj));
-          this.fetchProfile().subscribe({ error: () => {} });
         }
       })
     );
