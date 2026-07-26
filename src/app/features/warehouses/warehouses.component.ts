@@ -181,7 +181,8 @@ export class WarehousesComponent implements OnInit {
       },
       error: (err) => {
         this.isTransferring.set(false);
-        alert(err.error || err.error?.message || 'Erreur lors du transfert de stock.');
+        const errorMsg = typeof err.error === 'string' ? err.error : (err.error?.message || err.message || 'Erreur lors du transfert de stock.');
+        alert(errorMsg);
       }
     });
   }

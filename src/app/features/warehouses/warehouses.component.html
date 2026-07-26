@@ -86,24 +86,24 @@
 
     <div style="margin-bottom: 16px;">
       <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Entrepôt de Départ (Source) *</label>
-      <select class="form-select" [ngModel]="fromWarehouseId()" (ngModelChange)="fromWarehouseId.set($event === null || $event === 'null' ? null : Number($event))" style="width: 100%;">
-        <option [value]="null">🏢 Entrepôt Central (Dépôt Principal)</option>
-        <option *ngFor="let b of boutiques()" [value]="b.id">🏪 Entrepôt {{ b.name }}</option>
+      <select class="form-select" [ngModel]="fromWarehouseId()" (ngModelChange)="fromWarehouseId.set($event)" style="width: 100%;">
+        <option [ngValue]="null">🏢 Entrepôt Central (Dépôt Principal)</option>
+        <option *ngFor="let b of boutiques()" [ngValue]="b.id">🏪 Entrepôt {{ b.name }}</option>
       </select>
     </div>
 
     <div style="margin-bottom: 16px;">
       <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Entrepôt d'Arrivée (Destination) *</label>
-      <select class="form-select" [ngModel]="toWarehouseId()" (ngModelChange)="toWarehouseId.set($event === null || $event === 'null' ? null : Number($event))" style="width: 100%;">
-        <option [value]="null">🏢 Entrepôt Central (Dépôt Principal)</option>
-        <option *ngFor="let b of boutiques()" [value]="b.id">🏪 Entrepôt {{ b.name }}</option>
+      <select class="form-select" [ngModel]="toWarehouseId()" (ngModelChange)="toWarehouseId.set($event)" style="width: 100%;">
+        <option [ngValue]="null">🏢 Entrepôt Central (Dépôt Principal)</option>
+        <option *ngFor="let b of boutiques()" [ngValue]="b.id">🏪 Entrepôt {{ b.name }}</option>
       </select>
     </div>
 
     <div style="margin-bottom: 16px;">
       <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Produit à Transferer *</label>
-      <select class="form-select" [ngModel]="selectedProductId()" (ngModelChange)="selectedProductId.set(Number($event))" style="width: 100%;">
-        <option *ngFor="let p of products()" [value]="p.id">{{ p.name }} ({{ p.reference }}) - Stock Central: {{ p.stock }}</option>
+      <select class="form-select" [ngModel]="selectedProductId()" (ngModelChange)="selectedProductId.set($event)" style="width: 100%;">
+        <option *ngFor="let p of products()" [ngValue]="p.id">{{ p.name }} ({{ p.reference }}) - Stock Central: {{ p.stock }}</option>
       </select>
     </div>
 
