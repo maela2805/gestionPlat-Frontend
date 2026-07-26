@@ -245,16 +245,16 @@ export class InventoryComponent implements OnInit {
     this.isSaving.set(true);
 
     const itemsReq: InventoryItemRequest[] = selectedRows.map(r => ({
-      productId: r.productId,
-      countedQuantity: r.physicalStock
+      productId: Number(r.productId),
+      countedQuantity: Math.max(0, Math.floor(Number(r.physicalStock || 0)))
     }));
 
     const wId = this.selectedWarehouseId();
-    const boutiqueIdParam = (typeof wId === 'number') ? wId : undefined;
+    const boutiqueIdParam = (typeof wId === 'number' && !isNaN(wId)) ? wId : undefined;
 
     const req: CreateInventoryRequest = {
       boutiqueId: boutiqueIdParam,
-      note: this.inventoryNote() || `Inventaire ${this.currentWarehouseName()}`,
+      note: this.inventoryNote() || `Inventaire ${this.selectedWarehouseId() === 'ALL' || this.selectedWarehouseId() === null ? 'Entrepôt Central (Dépôt Principal)' : this.currentWarehouseName()}`,
       items: itemsReq
     };
 
@@ -271,7 +271,8 @@ export class InventoryComponent implements OnInit {
             },
             error: (err) => {
               this.isSaving.set(false);
-              alert(err.error?.message || 'Erreur lors de la validation de l\'inventaire.');
+              const msg = err?.error?.message || (typeof err?.error === 'string' ? err.error : null) || err?.message || 'Erreur lors de la validation de l\'inventaire.';
+              alert(msg);
             }
           });
         } else {
@@ -283,7 +284,8 @@ export class InventoryComponent implements OnInit {
       },
       error: (err) => {
         this.isSaving.set(false);
-        alert(err.error?.message || 'Erreur lors de la création de l\'inventaire.');
+        const msg = err?.error?.message || (typeof err?.error === 'string' ? err.error : null) || err?.message || 'Erreur lors de la création de l\'inventaire.';
+        alert(msg);
       }
     });
   }
