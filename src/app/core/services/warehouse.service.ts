@@ -8,7 +8,7 @@ import { BoutiqueStockDTO, TransferStockRequest } from '../models/warehouse.mode
   providedIn: 'root'
 })
 export class WarehouseService {
-  private apiUrl = `${environment.apiUrl}/warehouses`;
+  private apiUrl = `${environment.apiUrl}/api/warehouses`;
 
   constructor(private http: HttpClient) {}
 

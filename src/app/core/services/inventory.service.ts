@@ -8,7 +8,7 @@ import { Inventory, CreateInventoryRequest } from '../models/inventory.model';
   providedIn: 'root'
 })
 export class InventoryService {
-  private apiUrl = `${environment.apiUrl}/inventories`;
+  private apiUrl = `${environment.apiUrl}/api/inventories`;
 
   constructor(private http: HttpClient) {}
 
