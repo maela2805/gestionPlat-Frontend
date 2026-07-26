@@ -5,6 +5,7 @@ import { ProductService } from '../../core/services/product.service';
 import { BoutiqueStockDTO, TransferStockRequest } from '../../core/models/warehouse.model';
 import { Boutique } from '../../core/models/boutique.model';
 import { Product } from '../../core/models/product.model';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-warehouses',
@@ -91,20 +92,28 @@ export class WarehousesComponent implements OnInit {
   constructor(
     private warehouseService: WarehouseService,
     private boutiqueService: BoutiqueService,
-    private productService: ProductService
+    private productService: ProductService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
-    this.loadBoutiques();
+    const param = this.route.snapshot.queryParamMap.get('boutiqueId');
+    const targetBoutiqueId = param ? Number(param) : null;
+    this.loadBoutiques(targetBoutiqueId);
     this.loadProducts();
   }
 
-  loadBoutiques(): void {
+  loadBoutiques(initialBoutiqueId: number | null = null): void {
     this.boutiqueService.getAllBoutiques().subscribe(data => {
       this.boutiques.set(data);
       if (data.length > 0) {
-        this.selectedWarehouseId.set(data[0].id);
-        this.loadWarehouseStock(data[0].id);
+        const idToSelect = initialBoutiqueId !== null && data.some(b => b.id === initialBoutiqueId)
+          ? initialBoutiqueId
+          : data[0].id;
+        this.selectedWarehouseId.set(idToSelect);
+        if (idToSelect !== null) {
+          this.loadWarehouseStock(idToSelect);
+        }
       }
     });
   }

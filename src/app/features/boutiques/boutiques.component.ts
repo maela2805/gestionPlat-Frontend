@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { BoutiqueService } from '../../core/services/boutique.service';
 import { Boutique, CreateBoutiqueRequest, BoutiquePrice } from '../../core/models/boutique.model';
 
+import { Router } from '@angular/router';
+
 @Component({
   selector: 'app-boutiques',
   templateUrl: './boutiques.component.html',
@@ -44,7 +46,8 @@ export class BoutiquesComponent implements OnInit {
 
   constructor(
     private boutiqueService: BoutiqueService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router
   ) {
     this.boutiqueForm = this.fb.group({
       code: [''],
@@ -55,6 +58,11 @@ export class BoutiquesComponent implements OnInit {
       managerName: [''],
       active: [true]
     });
+  }
+
+  viewBoutiqueArticles(boutique: Boutique, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.router.navigate(['/warehouses'], { queryParams: { boutiqueId: boutique.id } });
   }
 
   ngOnInit(): void {
