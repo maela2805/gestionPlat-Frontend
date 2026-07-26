@@ -10,6 +10,8 @@ export class SidebarComponent {
   public authService = inject(AuthService);
   user = this.authService.currentUser;
   isStockSubmenuOpen = signal<boolean>(true);
+  isWarehouseSubmenuOpen = signal<boolean>(true);
+  isPurchaseSubmenuOpen = signal<boolean>(false);
 
   toggleStockSubmenu(event?: Event): void {
     if (event) {
@@ -17,6 +19,22 @@ export class SidebarComponent {
       event.stopPropagation();
     }
     this.isStockSubmenuOpen.update(v => !v);
+  }
+
+  toggleWarehouseSubmenu(event?: Event): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    this.isWarehouseSubmenuOpen.update(v => !v);
+  }
+
+  togglePurchaseSubmenu(event?: Event): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    this.isPurchaseSubmenuOpen.update(v => !v);
   }
 
   getInitials(): string {

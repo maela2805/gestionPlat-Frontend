@@ -1,5 +1,6 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { PurchaseOrderService } from '../../core/services/purchase-order.service';
 import { ProductService } from '../../core/services/product.service';
 import { TiersService } from '../../core/services/tiers.service';
@@ -60,6 +61,7 @@ export class PurchaseOrdersComponent implements OnInit {
     private productService: ProductService,
     private tiersService: TiersService,
     private categoryService: CategoryService,
+    private route: ActivatedRoute,
     private fb: FormBuilder
   ) {
     this.orderForm = this.fb.group({
@@ -84,6 +86,14 @@ export class PurchaseOrdersComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['status']) {
+        this.statusFilter.set(params['status']);
+      } else {
+        this.statusFilter.set('');
+      }
+    });
+
     this.loadOrders();
     this.loadProducts();
     this.loadSuppliers();

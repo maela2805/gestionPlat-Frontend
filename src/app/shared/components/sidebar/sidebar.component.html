@@ -17,7 +17,7 @@
     <li class="menu-item has-submenu" [class.open]="isStockSubmenuOpen()">
       <a (click)="toggleStockSubmenu($event)" class="menu-link" style="cursor: pointer;">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/></svg>
-        <span>Stock / Inventaire</span>
+        <span>Stock</span>
         <span class="submenu-toggle">{{ isStockSubmenuOpen() ? '-' : '+' }}</span>
       </a>
       <ul class="submenu" [style.display]="isStockSubmenuOpen() ? 'flex' : 'none'">
@@ -25,12 +25,6 @@
           <a routerLink="/products" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px; width: 100%;">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
             <span>Liste des produits</span>
-          </a>
-        </li>
-        <li class="submenu-item" routerLinkActive="active">
-          <a routerLink="/stock" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px; width: 100%;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
-            <span>Historique mouvements</span>
           </a>
         </li>
         <li class="submenu-item" routerLinkActive="active">
@@ -42,11 +36,65 @@
       </ul>
     </li>
 
-    <li class="menu-item" routerLinkActive="active">
-      <a routerLink="/purchase-orders" class="menu-link">
+    <li class="menu-item has-submenu" [class.open]="isWarehouseSubmenuOpen()">
+      <a (click)="toggleWarehouseSubmenu($event)" class="menu-link" style="cursor: pointer;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7H3"/><path d="M5 21V10.85"/><path d="M19 21V10.85"/></svg>
+        <span>Entrepôt</span>
+        <span class="submenu-toggle">{{ isWarehouseSubmenuOpen() ? '-' : '+' }}</span>
+      </a>
+      <ul class="submenu" [style.display]="isWarehouseSubmenuOpen() ? 'flex' : 'none'">
+        <li class="submenu-item" routerLinkActive="active">
+          <a routerLink="/boutiques" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px; width: 100%;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V10.85"/></svg>
+            <span>Entrepôts par Boutique</span>
+          </a>
+        </li>
+        <li class="submenu-item" routerLinkActive="active">
+          <a routerLink="/stock" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px; width: 100%;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+            <span>Mouvements de stock</span>
+          </a>
+        </li>
+        <li class="submenu-item" routerLinkActive="active">
+          <a routerLink="/inventories" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px; width: 100%;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span>Inventaire</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <li class="menu-item has-submenu" [class.open]="isPurchaseSubmenuOpen()">
+      <a (click)="togglePurchaseSubmenu($event)" class="menu-link" style="cursor: pointer;">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
         <span>Commandes Fournisseurs</span>
+        <span class="submenu-toggle">{{ isPurchaseSubmenuOpen() ? '-' : '+' }}</span>
       </a>
+      <ul class="submenu" [style.display]="isPurchaseSubmenuOpen() ? 'flex' : 'none'">
+        <li class="submenu-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+          <a [routerLink]="['/purchase-orders']" [queryParams]="{}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px; width: 100%;">
+            <span>Toutes les commandes</span>
+          </a>
+        </li>
+        <li class="submenu-item" routerLinkActive="active">
+          <a [routerLink]="['/purchase-orders']" [queryParams]="{status: 'VALIDEE'}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px; width: 100%;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #1890ff;"></span>
+            <span>Validé</span>
+          </a>
+        </li>
+        <li class="submenu-item" routerLinkActive="active">
+          <a [routerLink]="['/purchase-orders']" [queryParams]="{status: 'LIVREE'}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px; width: 100%;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #52c41a;"></span>
+            <span>Réceptionné</span>
+          </a>
+        </li>
+        <li class="submenu-item" routerLinkActive="active">
+          <a [routerLink]="['/purchase-orders']" [queryParams]="{status: 'ANNULEE'}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px; width: 100%;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #ff4d4f;"></span>
+            <span>Annulé</span>
+          </a>
+        </li>
+      </ul>
     </li>
 
     <li class="menu-item" routerLinkActive="active">

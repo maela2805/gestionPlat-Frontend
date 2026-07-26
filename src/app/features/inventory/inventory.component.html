@@ -1,0 +1,172 @@
+<div class="page-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Inventaires des Entrepôts</h1>
+      <p class="page-subtitle">Réalisez les inventaires physiques périodiques pour chaque entrepôt de boutique</p>
+    </div>
+    <button class="btn btn-primary" (click)="openCreateModal()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nouvel Inventaire
+    </button>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+    <div class="card" style="padding: 16px; border-radius: 12px; background: white; border: 1px solid #e8e8e8;">
+      <div style="font-size: 13px; color: #666; font-weight: 500;">Total Inventaires</div>
+      <div style="font-size: 24px; font-weight: 700; color: #1890ff; margin-top: 4px;">{{ totalInventories() }}</div>
+    </div>
+    <div class="card" style="padding: 16px; border-radius: 12px; background: white; border: 1px solid #e8e8e8;">
+      <div style="font-size: 13px; color: #666; font-weight: 500;">Inventaires Validés</div>
+      <div style="font-size: 24px; font-weight: 700; color: #52c41a; margin-top: 4px;">{{ validatedInventories() }}</div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="card" style="padding: 16px; margin-bottom: 24px; background: white; border-radius: 12px; border: 1px solid #e8e8e8; display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+    <div style="font-weight: 600; color: #333;">Filtrer par Entrepôt :</div>
+    <select class="form-select" style="max-width: 280px;" [ngModel]="selectedBoutiqueFilter()" (ngModelChange)="selectedBoutiqueFilter.set($event ? Number($event) : null)">
+      <option [ngValue]="null">Tous les entrepôts</option>
+      <option *ngFor="let b of boutiques()" [value]="b.id">{{ b.name }} ({{ b.code }})</option>
+    </select>
+  </div>
+
+  <!-- Inventories Table -->
+  <div class="card" style="background: white; border-radius: 12px; border: 1px solid #e8e8e8; overflow: hidden;">
+    <div *ngIf="isLoading()" style="padding: 32px; text-align: center; color: #666;">Chargement des inventaires...</div>
+
+    <table *ngIf="!isLoading()" class="data-table" style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="background: #fafafa; border-bottom: 1px solid #e8e8e8; text-align: left; font-size: 13px; color: #666;">
+          <th style="padding: 14px 16px;">Référence</th>
+          <th style="padding: 14px 16px;">Entrepôt / Boutique</th>
+          <th style="padding: 14px 16px;">Statut</th>
+          <th style="padding: 14px 16px;">Date de création</th>
+          <th style="padding: 14px 16px;">Créé par</th>
+          <th style="padding: 14px 16px; text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let inv of filteredInventories()" style="border-bottom: 1px solid #f0f0f0; font-size: 14px;">
+          <td style="padding: 14px 16px; font-weight: 600; color: #1890ff;">{{ inv.reference }}</td>
+          <td style="padding: 14px 16px;">{{ inv.boutique ? inv.boutique.name : 'N/A' }}</td>
+          <td style="padding: 14px 16px;">
+            <span [ngClass]="{'badge-draft': inv.status === 'BROUILLON', 'badge-success': inv.status === 'VALIDE'}"
+                  style="padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+              {{ inv.status === 'BROUILLON' ? 'Brouillon' : 'Validé' }}
+            </span>
+          </td>
+          <td style="padding: 14px 16px; color: #666;">{{ inv.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td style="padding: 14px 16px; color: #666;">{{ inv.userEmail || 'System' }}</td>
+          <td style="padding: 14px 16px; text-align: right;">
+            <button class="btn btn-sm btn-outline-primary" style="margin-right: 8px;" (click)="openDetailModal(inv)">Voir Détails</button>
+            <button *ngIf="inv.status === 'BROUILLON'" class="btn btn-sm btn-success" (click)="validateInventory(inv, $event)">Valider</button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredInventories().length === 0">
+          <td colspan="6" style="padding: 32px; text-align: center; color: #999;">Aucun inventaire trouvé.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Création Inventaire -->
+<div *ngIf="showCreateModal()" class="modal-backdrop">
+  <div class="modal-content" style="max-width: 800px; width: 90%; background: white; border-radius: 12px; padding: 24px; max-height: 90vh; overflow-y: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 12px;">
+      <h2 style="font-size: 18px; font-weight: 700; margin: 0;">Nouveau Comptage d'Inventaire</h2>
+      <button (click)="closeCreateModal()" style="border: none; background: transparent; font-size: 20px; cursor: pointer;">&times;</button>
+    </div>
+
+    <div style="margin-bottom: 16px;">
+      <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Sélectionner l'Entrepôt / Boutique *</label>
+      <select class="form-select" [ngModel]="selectedBoutiqueId()" (ngModelChange)="selectedBoutiqueId.set(Number($event))" style="width: 100%;">
+        <option *ngFor="let b of boutiques()" [value]="b.id">{{ b.name }} ({{ b.code }})</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Note / Remarques</label>
+      <input type="text" class="form-input" [ngModel]="inventoryNote()" (ngModelChange)="inventoryNote.set($event)" placeholder="Ex: Inventaire mensuel de fin de mois" style="width: 100%;">
+    </div>
+
+    <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 12px;">Comptage Physique des Produits</h3>
+    <div style="max-height: 350px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; margin-bottom: 20px;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: #f7f9fa; border-bottom: 1px solid #eee; text-align: left; font-size: 12px; color: #555;">
+            <th style="padding: 10px 14px;">Produit</th>
+            <th style="padding: 10px 14px;">Stock Théorique</th>
+            <th style="padding: 10px 14px; width: 140px;">Quantité Comptée</th>
+            <th style="padding: 10px 14px;">Écart</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of inventoryCounts(); let i = index" style="border-bottom: 1px solid #f0f0f0; font-size: 13px;">
+            <td style="padding: 10px 14px; font-weight: 500;">{{ row.product.name }} ({{ row.product.reference }})</td>
+            <td style="padding: 10px 14px; color: #666;">{{ row.product.stock }}</td>
+            <td style="padding: 10px 14px;">
+              <input type="number" min="0" [ngModel]="row.countedQty" (ngModelChange)="updateCount(i, $event)" class="form-input" style="padding: 4px 8px; width: 100%;">
+            </td>
+            <td style="padding: 10px 14px; font-weight: 700;" [style.color]="row.countedQty - row.product.stock < 0 ? '#ff4d4f' : (row.countedQty - row.product.stock > 0 ? '#52c41a' : '#666')">
+              {{ row.countedQty - row.product.stock > 0 ? '+' : '' }}{{ row.countedQty - row.product.stock }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 12px;">
+      <button class="btn btn-outline" (click)="closeCreateModal()">Annuler</button>
+      <button class="btn btn-primary" (click)="submitInventory()" [disabled]="isSaving()">
+        {{ isSaving() ? 'Enregistrement...' : 'Enregistrer le Brouillon' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Détail Inventaire -->
+<div *ngIf="showDetailModal() && selectedInventoryDetail()" class="modal-backdrop">
+  <div class="modal-content" style="max-width: 800px; width: 90%; background: white; border-radius: 12px; padding: 24px; max-height: 90vh; overflow-y: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 12px;">
+      <div>
+        <h2 style="font-size: 18px; font-weight: 700; margin: 0;">Inventaire {{ selectedInventoryDetail()?.reference }}</h2>
+        <div style="font-size: 13px; color: #666; margin-top: 4px;">
+          Entrepôt : <strong>{{ selectedInventoryDetail()?.boutique?.name }}</strong> |
+          Date : {{ selectedInventoryDetail()?.createdAt | date:'dd/MM/yyyy HH:mm' }}
+        </div>
+      </div>
+      <button (click)="closeDetailModal()" style="border: none; background: transparent; font-size: 20px; cursor: pointer;">&times;</button>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+      <thead>
+        <tr style="background: #fafafa; border-bottom: 1px solid #eee; text-align: left; font-size: 13px; color: #666;">
+          <th style="padding: 10px 14px;">Produit</th>
+          <th style="padding: 10px 14px;">Stock Théorique</th>
+          <th style="padding: 10px 14px;">Stock Compté</th>
+          <th style="padding: 10px 14px;">Écart</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of selectedInventoryDetail()?.items" style="border-bottom: 1px solid #f0f0f0; font-size: 13px;">
+          <td style="padding: 10px 14px; font-weight: 500;">{{ item.product.name }}</td>
+          <td style="padding: 10px 14px;">{{ item.theoreticalQuantity }}</td>
+          <td style="padding: 10px 14px; font-weight: 600;">{{ item.countedQuantity }}</td>
+          <td style="padding: 10px 14px; font-weight: 700;" [style.color]="item.gap < 0 ? '#ff4d4f' : (item.gap > 0 ? '#52c41a' : '#666')">
+            {{ item.gap > 0 ? '+' : '' }}{{ item.gap }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="display: flex; justify-content: flex-end; gap: 12px;">
+      <button class="btn btn-outline" (click)="closeDetailModal()">Fermer</button>
+      <button *ngIf="selectedInventoryDetail()?.status === 'BROUILLON'" class="btn btn-success" (click)="validateInventory(selectedInventoryDetail()!)">
+        Valider cet Inventaire
+      </button>
+    </div>
+  </div>
+</div>
