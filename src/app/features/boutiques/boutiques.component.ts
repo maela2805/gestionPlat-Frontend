@@ -6,6 +6,8 @@ import { Boutique, CreateBoutiqueRequest, BoutiquePrice } from '../../core/model
 import { UserSystem } from '../../core/models/user.model';
 import { Router } from '@angular/router';
 
+import { AuthService } from '../../core/services/auth.service';
+
 @Component({
   selector: 'app-boutiques',
   templateUrl: './boutiques.component.html',
@@ -29,11 +31,20 @@ export class BoutiquesComponent implements OnInit {
 
   boutiqueForm: FormGroup;
 
-  totalBoutiques = computed(() => this.boutiquesList().length);
-  activeBoutiques = computed(() => this.boutiquesList().filter(b => b.active).length);
+  isEmployeeLocked = computed(() => {
+    const u = this.authService.currentUser();
+    return !!(u && u.boutiqueId && (u.roleName === 'ROLE_EMPLOYEE' || u.roleName === 'EMPLOYEE'));
+  });
 
   filteredBoutiques = computed(() => {
     let list = this.boutiquesList();
+    const user = this.authService.currentUser();
+    const isEmp = user && user.boutiqueId && (user.roleName === 'ROLE_EMPLOYEE' || user.roleName === 'EMPLOYEE');
+
+    if (isEmp) {
+      list = list.filter(b => b.id === user.boutiqueId);
+    }
+
     const search = this.searchTerm().toLowerCase().trim();
     if (search) {
       list = list.filter(b =>
@@ -47,9 +58,13 @@ export class BoutiquesComponent implements OnInit {
     return list;
   });
 
+  totalBoutiques = computed(() => this.filteredBoutiques().length);
+  activeBoutiques = computed(() => this.filteredBoutiques().filter(b => b.active).length);
+
   constructor(
     private boutiqueService: BoutiqueService,
     private userService: UserService,
+    public authService: AuthService,
     private fb: FormBuilder,
     private router: Router
   ) {
