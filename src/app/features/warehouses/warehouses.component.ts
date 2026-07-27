@@ -34,6 +34,8 @@ export class WarehousesComponent implements OnInit {
   selectedProductId = signal<number | null>(null);
   transferQuantity = signal<number>(1);
   transferNote = signal<string>('');
+  fromWarehouseStocks = signal<BoutiqueStockDTO[]>([]);
+  isLoadingFromWarehouseStocks = signal<boolean>(false);
 
   currentWarehouseName = computed(() => {
     const id = this.selectedWarehouseId();
@@ -141,13 +143,68 @@ export class WarehousesComponent implements OnInit {
     });
   }
 
+  onFromWarehouseChange(val: any): void {
+    const id = (val === null || val === 'null' || val === undefined) ? null : Number(val);
+    this.fromWarehouseId.set(id);
+
+    if (id === null) {
+      this.fromWarehouseStocks.set([]);
+      if (this.products().length > 0) {
+        this.selectedProductId.set(this.products()[0].id);
+      } else {
+        this.selectedProductId.set(null);
+      }
+    } else {
+      this.isLoadingFromWarehouseStocks.set(true);
+      this.warehouseService.getStocksByBoutique(id).subscribe({
+        next: (stocks) => {
+          // Afficher seulement les articles qui ont une quantité disponible (> 0) dans cet entrepôt secondaire
+          const availableStocks = stocks.filter(s => (s.quantity ?? 0) > 0);
+          this.fromWarehouseStocks.set(availableStocks);
+          this.isLoadingFromWarehouseStocks.set(false);
+
+          if (availableStocks.length > 0) {
+            this.selectedProductId.set(availableStocks[0].productId);
+          } else {
+            this.selectedProductId.set(null);
+          }
+        },
+        error: () => {
+          this.fromWarehouseStocks.set([]);
+          this.isLoadingFromWarehouseStocks.set(false);
+          this.selectedProductId.set(null);
+        }
+      });
+    }
+  }
+
+  onToWarehouseChange(val: any): void {
+    const id = (val === null || val === 'null' || val === undefined) ? null : Number(val);
+    this.toWarehouseId.set(id);
+  }
+
+  onProductChange(val: any): void {
+    const id = (val === null || val === 'null' || val === undefined) ? null : Number(val);
+    this.selectedProductId.set(id);
+  }
+
   openTransferModal(): void {
-    this.fromWarehouseId.set(null); // Entrepôt Central
-    this.toWarehouseId.set(this.boutiques().length > 0 ? this.boutiques()[0].id : null);
-    this.selectedProductId.set(this.products().length > 0 ? this.products()[0].id : null);
+    const currentWarehouse = this.selectedWarehouseId();
+    const defaultFrom = currentWarehouse;
+
+    let defaultTo: number | null = null;
+    if (defaultFrom === null) {
+      defaultTo = this.boutiques().length > 0 ? this.boutiques()[0].id : null;
+    } else {
+      defaultTo = null; // Entrepôt Central
+    }
+
+    this.toWarehouseId.set(defaultTo);
     this.transferQuantity.set(1);
     this.transferNote.set('');
     this.showTransferModal.set(true);
+
+    this.onFromWarehouseChange(defaultFrom);
   }
 
   closeTransferModal(): void {
@@ -159,7 +216,7 @@ export class WarehousesComponent implements OnInit {
     const qty = this.transferQuantity();
 
     if (!prodId || qty <= 0) {
-      alert('Veuillez sélectionner un produit et une quantité valide.');
+      alert('Veuillez sélectionner un produit valide et saisir une quantité supérieure à zero.');
       return;
     }
 
