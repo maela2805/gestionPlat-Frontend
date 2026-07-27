@@ -1,7 +1,9 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UserService } from '../../core/services/user.service';
+import { BoutiqueService } from '../../core/services/boutique.service';
 import { UserSystem, SystemRole, UserCreateRequest, UserUpdateRequest } from '../../core/models/user.model';
+import { Boutique } from '../../core/models/boutique.model';
 
 @Component({
   selector: 'app-users',
@@ -11,6 +13,7 @@ import { UserSystem, SystemRole, UserCreateRequest, UserUpdateRequest } from '..
 export class UsersComponent implements OnInit {
   users = signal<UserSystem[]>([]);
   roles = signal<SystemRole[]>([]);
+  boutiques = signal<Boutique[]>([]);
 
   searchTerm = signal<string>('');
   selectedRoleFilter = signal<string>('');
@@ -32,7 +35,8 @@ export class UsersComponent implements OnInit {
       list = list.filter(u => 
         u.email.toLowerCase().includes(search) || 
         (u.firstName && u.firstName.toLowerCase().includes(search)) ||
-        (u.lastName && u.lastName.toLowerCase().includes(search))
+        (u.lastName && u.lastName.toLowerCase().includes(search)) ||
+        (u.boutiqueName && u.boutiqueName.toLowerCase().includes(search))
       );
     }
     const role = this.selectedRoleFilter();
@@ -53,6 +57,7 @@ export class UsersComponent implements OnInit {
 
   constructor(
     private userService: UserService,
+    private boutiqueService: BoutiqueService,
     private fb: FormBuilder
   ) {
     this.userForm = this.fb.group({
@@ -60,13 +65,15 @@ export class UsersComponent implements OnInit {
       password: [''],
       firstName: [''],
       lastName: [''],
-      roleName: ['ROLE_EMPLOYEE', Validators.required]
+      roleName: ['ROLE_EMPLOYEE', Validators.required],
+      boutiqueId: [null]
     });
   }
 
   ngOnInit(): void {
     this.loadUsers();
     this.loadRoles();
+    this.loadBoutiques();
   }
 
   loadUsers(): void {
@@ -75,6 +82,10 @@ export class UsersComponent implements OnInit {
 
   loadRoles(): void {
     this.userService.getAllRoles().subscribe(r => this.roles.set(r));
+  }
+
+  loadBoutiques(): void {
+    this.boutiqueService.getAllBoutiques().subscribe(b => this.boutiques.set(b));
   }
 
   updateSearch(e: Event): void {
@@ -119,7 +130,8 @@ export class UsersComponent implements OnInit {
       password: '',
       firstName: '',
       lastName: '',
-      roleName: 'ROLE_EMPLOYEE'
+      roleName: 'ROLE_EMPLOYEE',
+      boutiqueId: null
     });
     this.userForm.get('email')?.enable();
     this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
@@ -135,7 +147,8 @@ export class UsersComponent implements OnInit {
       password: '',
       firstName: u.firstName || '',
       lastName: u.lastName || '',
-      roleName: u.roleName || 'ROLE_EMPLOYEE'
+      roleName: u.roleName || 'ROLE_EMPLOYEE',
+      boutiqueId: u.boutiqueId || null
     });
     this.userForm.get('email')?.disable();
     this.userForm.get('password')?.clearValidators();
@@ -163,13 +176,15 @@ export class UsersComponent implements OnInit {
 
     const formVal = this.userForm.getRawValue();
     const edit = this.editingUser();
+    const btqId = formVal.boutiqueId ? Number(formVal.boutiqueId) : -1;
 
     if (edit) {
       const updateReq: UserUpdateRequest = {
         firstName: formVal.firstName,
         lastName: formVal.lastName,
         roleName: formVal.roleName,
-        password: formVal.password ? formVal.password : undefined
+        password: formVal.password ? formVal.password : undefined,
+        boutiqueId: btqId
       };
 
       this.userService.updateUser(edit.id, updateReq).subscribe({
@@ -189,7 +204,8 @@ export class UsersComponent implements OnInit {
         password: formVal.password,
         firstName: formVal.firstName,
         lastName: formVal.lastName,
-        roleName: formVal.roleName
+        roleName: formVal.roleName,
+        boutiqueId: btqId > 0 ? btqId : undefined
       };
 
       this.userService.createUser(createReq).subscribe({

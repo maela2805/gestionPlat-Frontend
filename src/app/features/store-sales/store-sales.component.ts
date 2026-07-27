@@ -7,6 +7,8 @@ import { StoreSale, CreateStoreSaleRequest } from '../../core/models/store-sale.
 import { Product } from '../../core/models/product.model';
 import { Boutique, BoutiquePrice } from '../../core/models/boutique.model';
 
+import { AuthService } from '../../core/services/auth.service';
+
 @Component({
   selector: 'app-store-sales',
   templateUrl: './store-sales.component.html',
@@ -30,15 +32,22 @@ export class StoreSalesComponent implements OnInit {
 
   saleForm: FormGroup;
 
-  totalSales = computed(() => this.salesList().length);
-  validatedSales = computed(() => this.salesList().filter(s => s.status === 'VALIDEE').length);
-  totalRevenue = computed(() => this.salesList()
+  totalSales = computed(() => this.filteredSales().length);
+  validatedSales = computed(() => this.filteredSales().filter(s => s.status === 'VALIDEE').length);
+  totalRevenue = computed(() => this.filteredSales()
     .filter(s => s.status === 'VALIDEE')
     .reduce((sum, s) => sum + (s.totalAmount || 0), 0)
   );
 
   filteredSales = computed(() => {
     let list = this.salesList();
+    const user = this.authService.currentUser();
+    const isEmp = user && user.boutiqueId && (user.roleName === 'ROLE_EMPLOYEE' || user.roleName === 'EMPLOYEE');
+
+    if (isEmp) {
+      list = list.filter(s => s.boutiqueId === user.boutiqueId);
+    }
+
     const search = this.searchTerm().toLowerCase().trim();
     if (search) {
       list = list.filter(s =>
@@ -57,6 +66,7 @@ export class StoreSalesComponent implements OnInit {
     private storeSaleService: StoreSaleService,
     private productService: ProductService,
     private boutiqueService: BoutiqueService,
+    public authService: AuthService,
     private fb: FormBuilder
   ) {
     this.saleForm = this.fb.group({
@@ -136,9 +146,12 @@ export class StoreSalesComponent implements OnInit {
   }
 
   openCreateModal(): void {
+    const user = this.authService.currentUser();
+    const defaultBoutiqueId = (user && user.boutiqueId && (user.roleName === 'ROLE_EMPLOYEE' || user.roleName === 'EMPLOYEE')) ? user.boutiqueId : null;
+
     this.saleForm.reset({
       reference: '',
-      boutiqueId: null,
+      boutiqueId: defaultBoutiqueId,
       note: ''
     });
     this.itemsFormArray.clear();

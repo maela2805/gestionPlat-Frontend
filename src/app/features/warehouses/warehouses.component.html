@@ -15,8 +15,8 @@
   <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; margin-bottom: 24px; align-items: stretch;">
     <div class="card" style="padding: 20px; background: white; border-radius: 12px; border: 1px solid #e8e8e8; display: flex; flex-direction: column; justify-content: center;">
       <label style="font-size: 13px; font-weight: 600; color: #555; margin-bottom: 8px;">Sélectionner l'Entrepôt à consulter :</label>
-      <select class="form-select" [ngModel]="selectedWarehouseId()" (ngModelChange)="onWarehouseChange($event)" style="font-size: 15px; font-weight: 600; padding: 10px 14px;">
-        <option [value]="null">🏢 Entrepôt Central (Dépôt Principal)</option>
+      <select class="form-select" [ngModel]="selectedWarehouseId()" (ngModelChange)="onWarehouseChange($event)" [disabled]="isEmployeeLocked()" style="font-size: 15px; font-weight: 600; padding: 10px 14px;">
+        <option [value]="null" *ngIf="!isEmployeeLocked()">🏢 Entrepôt Central (Dépôt Principal)</option>
         <option *ngFor="let b of boutiques()" [value]="b.id">🏪 Entrepôt {{ b.name }} ({{ b.code }})</option>
       </select>
     </div>

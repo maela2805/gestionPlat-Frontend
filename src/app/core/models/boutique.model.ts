@@ -6,6 +6,8 @@ export interface Boutique {
   city?: string;
   phone?: string;
   managerName?: string;
+  employeeUserId?: number;
+  employeeUserName?: string;
   active: boolean;
   createdAt?: string;
 }
@@ -17,6 +19,7 @@ export interface CreateBoutiqueRequest {
   city?: string;
   phone?: string;
   managerName?: string;
+  employeeUserId?: number;
   active?: boolean;
 }
 

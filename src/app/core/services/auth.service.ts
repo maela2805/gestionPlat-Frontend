@@ -31,7 +31,9 @@ export class AuthService {
             firstName: response.firstName,
             lastName: response.lastName,
             active: true,
-            roleName: response.role || 'ROLE_EMPLOYEE'
+            roleName: response.role || 'ROLE_EMPLOYEE',
+            boutiqueId: response.boutiqueId,
+            boutiqueName: response.boutiqueName
           };
           this.currentUser.set(userObj);
           localStorage.setItem(this.USER_KEY, JSON.stringify(userObj));

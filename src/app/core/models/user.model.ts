@@ -6,6 +6,8 @@ export interface UserSystem {
   active: boolean;
   roleName: string;
   roleDescription?: string;
+  boutiqueId?: number;
+  boutiqueName?: string;
   createdAt?: string;
   role?: any;
 }
@@ -24,6 +26,7 @@ export interface UserCreateRequest {
   firstName?: string;
   lastName?: string;
   roleName: string;
+  boutiqueId?: number;
 }
 
 export interface UserUpdateRequest {
@@ -32,4 +35,5 @@ export interface UserUpdateRequest {
   roleName?: string;
   active?: boolean;
   password?: string;
+  boutiqueId?: number;
 }

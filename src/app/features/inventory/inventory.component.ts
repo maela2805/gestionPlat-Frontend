@@ -8,6 +8,8 @@ import { Boutique } from '../../core/models/boutique.model';
 import { Product } from '../../core/models/product.model';
 import { BoutiqueStockDTO } from '../../core/models/warehouse.model';
 
+import { AuthService } from '../../core/services/auth.service';
+
 export interface InventoryRow {
   productId: number;
   reference: string;
@@ -44,6 +46,11 @@ export class InventoryComponent implements OnInit {
   showNewInventoryModal = signal<boolean>(false);
   showDetailModal = signal<boolean>(false);
   selectedInventoryDetail = signal<Inventory | null>(null);
+
+  isEmployeeLocked = computed(() => {
+    const u = this.authService.currentUser();
+    return !!(u && u.boutiqueId && (u.roleName === 'ROLE_EMPLOYEE' || u.roleName === 'EMPLOYEE'));
+  });
 
   currentWarehouseName = computed(() => {
     const id = this.selectedWarehouseId();
@@ -113,10 +120,15 @@ export class InventoryComponent implements OnInit {
     private inventoryService: InventoryService,
     private boutiqueService: BoutiqueService,
     private productService: ProductService,
-    private warehouseService: WarehouseService
+    private warehouseService: WarehouseService,
+    public authService: AuthService
   ) {}
 
   ngOnInit(): void {
+    const user = this.authService.currentUser();
+    if (user && user.boutiqueId && (user.roleName === 'ROLE_EMPLOYEE' || user.roleName === 'EMPLOYEE')) {
+      this.selectedWarehouseId.set(user.boutiqueId);
+    }
     this.loadBoutiques();
     this.loadProducts();
     this.loadInventories();

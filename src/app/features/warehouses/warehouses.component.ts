@@ -5,6 +5,7 @@ import { ProductService } from '../../core/services/product.service';
 import { BoutiqueStockDTO, TransferStockRequest } from '../../core/models/warehouse.model';
 import { Boutique } from '../../core/models/boutique.model';
 import { Product } from '../../core/models/product.model';
+import { AuthService } from '../../core/services/auth.service';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -36,6 +37,11 @@ export class WarehousesComponent implements OnInit {
   transferNote = signal<string>('');
   fromWarehouseStocks = signal<BoutiqueStockDTO[]>([]);
   isLoadingFromWarehouseStocks = signal<boolean>(false);
+
+  isEmployeeLocked = computed(() => {
+    const u = this.authService.currentUser();
+    return !!(u && u.boutiqueId && (u.roleName === 'ROLE_EMPLOYEE' || u.roleName === 'EMPLOYEE'));
+  });
 
   currentWarehouseName = computed(() => {
     const id = this.selectedWarehouseId();
@@ -95,6 +101,7 @@ export class WarehousesComponent implements OnInit {
     private warehouseService: WarehouseService,
     private boutiqueService: BoutiqueService,
     private productService: ProductService,
+    public authService: AuthService,
     private route: ActivatedRoute
   ) {}
 
@@ -106,9 +113,16 @@ export class WarehousesComponent implements OnInit {
   }
 
   loadBoutiques(initialBoutiqueId: number | null = null): void {
+    const user = this.authService.currentUser();
+    const isEmp = user && user.boutiqueId && (user.roleName === 'ROLE_EMPLOYEE' || user.roleName === 'EMPLOYEE');
+
     this.boutiqueService.getAllBoutiques().subscribe(data => {
       this.boutiques.set(data);
-      if (data.length > 0) {
+
+      if (isEmp) {
+        this.selectedWarehouseId.set(user.boutiqueId!);
+        this.loadWarehouseStock(user.boutiqueId!);
+      } else if (data.length > 0) {
         const idToSelect = initialBoutiqueId !== null && data.some(b => b.id === initialBoutiqueId)
           ? initialBoutiqueId
           : data[0].id;

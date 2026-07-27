@@ -1,8 +1,9 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { BoutiqueService } from '../../core/services/boutique.service';
+import { UserService } from '../../core/services/user.service';
 import { Boutique, CreateBoutiqueRequest, BoutiquePrice } from '../../core/models/boutique.model';
-
+import { UserSystem } from '../../core/models/user.model';
 import { Router } from '@angular/router';
 
 @Component({
@@ -12,6 +13,7 @@ import { Router } from '@angular/router';
 })
 export class BoutiquesComponent implements OnInit {
   boutiquesList = signal<Boutique[]>([]);
+  usersList = signal<UserSystem[]>([]);
   isLoading = signal<boolean>(false);
   isSaving = signal<boolean>(false);
   successMessage = signal<string | null>(null);
@@ -38,7 +40,8 @@ export class BoutiquesComponent implements OnInit {
         b.name.toLowerCase().includes(search) ||
         b.code.toLowerCase().includes(search) ||
         (b.city && b.city.toLowerCase().includes(search)) ||
-        (b.managerName && b.managerName.toLowerCase().includes(search))
+        (b.managerName && b.managerName.toLowerCase().includes(search)) ||
+        (b.employeeUserName && b.employeeUserName.toLowerCase().includes(search))
       );
     }
     return list;
@@ -46,6 +49,7 @@ export class BoutiquesComponent implements OnInit {
 
   constructor(
     private boutiqueService: BoutiqueService,
+    private userService: UserService,
     private fb: FormBuilder,
     private router: Router
   ) {
@@ -56,6 +60,7 @@ export class BoutiquesComponent implements OnInit {
       city: [''],
       phone: [''],
       managerName: [''],
+      employeeUserId: [null],
       active: [true]
     });
   }
@@ -67,6 +72,7 @@ export class BoutiquesComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadBoutiques();
+    this.loadUsers();
   }
 
   loadBoutiques(): void {
@@ -83,6 +89,12 @@ export class BoutiquesComponent implements OnInit {
     });
   }
 
+  loadUsers(): void {
+    this.userService.getAllUsers().subscribe(users => {
+      this.usersList.set(users);
+    });
+  }
+
   updateSearch(e: Event): void {
     this.searchTerm.set((e.target as HTMLInputElement).value);
   }
@@ -96,6 +108,7 @@ export class BoutiquesComponent implements OnInit {
       city: '',
       phone: '',
       managerName: '',
+      employeeUserId: null,
       active: true
     });
     this.successMessage.set(null);
@@ -113,6 +126,7 @@ export class BoutiquesComponent implements OnInit {
       city: boutique.city || '',
       phone: boutique.phone || '',
       managerName: boutique.managerName || '',
+      employeeUserId: boutique.employeeUserId || null,
       active: boutique.active
     });
     this.successMessage.set(null);
@@ -178,6 +192,7 @@ export class BoutiquesComponent implements OnInit {
       city: val.city,
       phone: val.phone,
       managerName: val.managerName,
+      employeeUserId: val.employeeUserId ? Number(val.employeeUserId) : -1,
       active: val.active
     };
 
