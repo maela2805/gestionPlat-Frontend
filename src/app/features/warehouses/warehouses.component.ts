@@ -71,8 +71,8 @@ export class WarehousesComponent implements OnInit {
       }
       return list;
     } else {
-      // Boutique Warehouse
-      let list = this.warehouseStocks();
+      // Boutique Warehouse -> Seuls les articles ayant un stock dans cet entrepôt sont affichés
+      let list = this.warehouseStocks().filter(p => (p.quantity ?? 0) > 0);
       if (search) {
         list = list.filter(p =>
           p.productName.toLowerCase().includes(search) ||
