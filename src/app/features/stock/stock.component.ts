@@ -11,6 +11,8 @@ import { Category } from '../../core/models/category.model';
 import { BoutiqueService } from '../../core/services/boutique.service';
 import { Boutique } from '../../core/models/boutique.model';
 
+import { AuthService } from '../../core/services/auth.service';
+
 export interface MotifOption {
   value: MovementReason;
   label: string;
@@ -64,8 +66,30 @@ export class StockComponent implements OnInit {
   currentPage = signal<number>(1);
   itemsPerPage = signal<number>(4);
 
+  isEmployeeLocked = computed(() => {
+    const u = this.authService.currentUser();
+    return !!(u && u.boutiqueId && (u.roleName === 'ROLE_EMPLOYEE' || u.roleName === 'EMPLOYEE'));
+  });
+
   filteredMovements = computed(() => {
     let list = this.movements();
+    const user = this.authService.currentUser();
+    const isEmp = user && user.boutiqueId && (user.roleName === 'ROLE_EMPLOYEE' || user.roleName === 'EMPLOYEE');
+
+    if (isEmp) {
+      list = list.filter(m => m.boutique && m.boutique.id === user.boutiqueId);
+    } else {
+      const warehouse = this.warehouseFilter();
+      if (warehouse !== 'ALL') {
+        if (warehouse === 'CENTRAL') {
+          list = list.filter(m => !m.boutique);
+        } else {
+          const bId = Number(warehouse);
+          list = list.filter(m => m.boutique && m.boutique.id === bId);
+        }
+      }
+    }
+
     const search = this.historySearch().toLowerCase().trim();
     if (search) {
       list = list.filter(m => 
@@ -77,15 +101,6 @@ export class StockComponent implements OnInit {
     const type = this.historyTypeFilter();
     if (type) {
       list = list.filter(m => m.type === type);
-    }
-    const warehouse = this.warehouseFilter();
-    if (warehouse !== 'ALL') {
-      if (warehouse === 'CENTRAL') {
-        list = list.filter(m => !m.boutique);
-      } else {
-        const bId = Number(warehouse);
-        list = list.filter(m => m.boutique && m.boutique.id === bId);
-      }
     }
     const author = this.authorFilter();
     if (author) {
@@ -183,6 +198,7 @@ export class StockComponent implements OnInit {
     private movementService: StockMovementService,
     private categoryService: CategoryService,
     private boutiqueService: BoutiqueService,
+    public authService: AuthService,
     private fb: FormBuilder,
     private route: ActivatedRoute
   ) {

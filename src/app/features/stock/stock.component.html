@@ -42,7 +42,7 @@
       </select>
     </div>
 
-    <div class="filter-item" style="display: flex; align-items: center; gap: 10px; white-space: nowrap;">
+    <div class="filter-item" *ngIf="!isEmployeeLocked()" style="display: flex; align-items: center; gap: 10px; white-space: nowrap;">
       <label style="font-size: 12px; font-weight: 700; color: #0b1a30; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">ENTREPÔT&nbsp;:</label>
       <select [value]="warehouseFilter()" (change)="updateWarehouseFilter($event)" class="filter-select" style="padding: 8px 14px; border: 1px solid rgba(0, 0, 0, 0.15); border-radius: 6px; font-size: 13.5px; font-weight: 500; color: #0b1a30; background: #ffffff; outline: none; cursor: pointer; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);">
         <option value="ALL">Tous les entrepôts</option>
