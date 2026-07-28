@@ -329,7 +329,9 @@ export class CaissePosComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        this.showError(err.error?.message || 'Erreur lors de l\'ouverture de caisse');
+        const msg = typeof err.error === 'string' ? err.error : (err.error?.message || err.message || 'Erreur lors de l\'ouverture de caisse');
+        alert('⚠️ ' + msg);
+        this.showError(msg);
       }
     });
   }
@@ -348,12 +350,14 @@ export class CaissePosComponent implements OnInit {
         this.currentSession = session;
         this.showCloseModal = false;
         const diff = session.cashDifference || 0;
-        const diffText = diff === 0 ? 'Aucun écart' : (diff > 0 ? `Excédent: +${diff.toLocaleString()} FCFA` : `Perte/Manquant: ${diff.toLocaleString()} FCFA`);
-        this.showSuccess(`Caisse fermée avec succès. ${diffText}`);
+        const diffMsg = diff === 0 ? 'Caisse juste !' : (diff > 0 ? `Excédent: +${diff.toLocaleString()} FCFA` : `Manco: ${diff.toLocaleString()} FCFA`);
+        this.showSuccess(`Caisse CLÔTURÉE avec succès ! (${diffMsg})`);
       },
       error: (err) => {
         this.loading = false;
-        this.showError(err.error?.message || 'Erreur lors de la fermeture de caisse');
+        const msg = typeof err.error === 'string' ? err.error : (err.error?.message || err.message || 'Erreur lors de la clôture de caisse');
+        alert('⚠️ ' + msg);
+        this.showError(msg);
       }
     });
   }
