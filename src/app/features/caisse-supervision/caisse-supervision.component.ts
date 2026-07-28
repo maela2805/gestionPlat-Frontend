@@ -71,7 +71,9 @@ export class CaisseSupervisionComponent implements OnInit {
 
   get filteredSessions(): CashSession[] {
     return this.sessions.filter(s => {
-      const matchesBoutique = !this.selectedBoutiqueId || s.boutiqueId === this.selectedBoutiqueId;
+      const matchesBoutique = !this.selectedBoutiqueId || 
+                              String(this.selectedBoutiqueId) === 'null' || 
+                              Number(s.boutiqueId) === Number(this.selectedBoutiqueId);
       const matchesStatus = this.statusFilter === 'ALL' || s.status === this.statusFilter;
       return matchesBoutique && matchesStatus;
     });
@@ -79,25 +81,27 @@ export class CaisseSupervisionComponent implements OnInit {
 
   get filteredSales(): PosSale[] {
     return this.sales.filter(s => {
-      return !this.selectedBoutiqueId || s.boutiqueId === this.selectedBoutiqueId;
+      return !this.selectedBoutiqueId || 
+             String(this.selectedBoutiqueId) === 'null' || 
+             Number(s.boutiqueId) === Number(this.selectedBoutiqueId);
     });
   }
 
-  // KPIs
+  // KPIs (Calculés dynamiquement sur les sessions filtrées)
   get activeSessionsCount(): number {
-    return this.sessions.filter(s => s.status === 'OPEN').length;
+    return this.filteredSessions.filter(s => s.status === 'OPEN').length;
   }
 
   get totalCashToday(): number {
-    return this.sessions.reduce((sum, s) => sum + (s.totalSalesCash || 0), 0);
+    return this.filteredSessions.reduce((sum, s) => sum + (s.totalSalesCash || 0), 0);
   }
 
   get totalMobileMoneyToday(): number {
-    return this.sessions.reduce((sum, s) => sum + (s.totalSalesMobileMoney || 0), 0);
+    return this.filteredSessions.reduce((sum, s) => sum + (s.totalSalesMobileMoney || 0), 0);
   }
 
   get totalVariances(): number {
-    return this.sessions.reduce((sum, s) => sum + (s.cashDifference || 0), 0);
+    return this.filteredSessions.reduce((sum, s) => sum + (s.cashDifference || 0), 0);
   }
 
   openSessionDetails(session: CashSession): void {
