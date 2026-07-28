@@ -18,7 +18,7 @@
       <!-- Boutique Selector -->
       <div class="boutique-selector">
         <label>Boutique :</label>
-        <select [(ngModel)]="selectedBoutiqueId" (change)="onBoutiqueChange()">
+        <select [(ngModel)]="selectedBoutiqueId" (change)="onBoutiqueChange()" [disabled]="!isAdmin && boutiques.length <= 1">
           <option *ngFor="let b of boutiques" [value]="b.id">{{ b.name }} ({{ b.code }})</option>
         </select>
       </div>

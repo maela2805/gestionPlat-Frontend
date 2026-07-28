@@ -82,14 +82,24 @@ export class CaissePosComponent implements OnInit {
     this.loadClients();
   }
 
+  get isAdmin(): boolean {
+    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN']);
+  }
+
   loadBoutiques(): void {
     this.boutiqueService.getAllBoutiques().subscribe({
       next: (data) => {
-        this.boutiques = data;
-        if (data.length > 0) {
-          this.selectedBoutiqueId = data[0].id;
-          this.onBoutiqueChange();
+        const u = this.authService.currentUser();
+        if (!this.isAdmin && u && u.boutiqueId) {
+          this.boutiques = data.filter(b => b.id === u.boutiqueId);
+          this.selectedBoutiqueId = u.boutiqueId;
+        } else {
+          this.boutiques = data;
+          if (data.length > 0 && !this.selectedBoutiqueId) {
+            this.selectedBoutiqueId = (u && u.boutiqueId && data.some(b => b.id === u.boutiqueId)) ? u.boutiqueId : data[0].id;
+          }
         }
+        this.onBoutiqueChange();
       },
       error: (err) => this.showError('Erreur de chargement des boutiques')
     });
