@@ -429,7 +429,9 @@
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-  height: calc(100vh - 160px);
+  height: auto;
+  box-sizing: border-box;
+  overflow: hidden;
 
   .cart-header {
     display: flex;
@@ -498,6 +500,7 @@
       outline: none;
       font-size: 13px;
       width: 100%;
+      box-sizing: border-box;
 
       &:focus {
         border-color: #1890ff;
@@ -507,8 +510,8 @@
 
   .cart-items {
     flex: 1;
-    min-height: 140px;
-    max-height: 240px;
+    min-height: 100px;
+    max-height: 200px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -631,7 +634,8 @@
   .checkout-footer {
     border-top: 1px solid #F0F0F0;
     padding-top: 12px;
-    margin-top: auto;
+    margin-top: 12px;
+    box-sizing: border-box;
 
     .summary-line {
       display: flex;
@@ -651,6 +655,7 @@
           border-radius: 6px;
           text-align: right;
           font-weight: 600;
+          box-sizing: border-box;
         }
       }
 
@@ -671,7 +676,7 @@
     }
 
     .payment-methods {
-      margin: 12px 0;
+      margin: 10px 0;
 
       label {
         font-size: 12px;
@@ -690,9 +695,9 @@
           background: #FAFAFA;
           border: 1px solid #D9D9D9;
           color: #595959;
-          padding: 8px;
+          padding: 7px 4px;
           border-radius: 6px;
-          font-size: 12px;
+          font-size: 11.5px;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.2s;
@@ -709,10 +714,12 @@
 
     .cash-tender-box {
       background: #FAFAFA;
-      border: 1px solid #F0F0F0;
+      border: 1px solid #E8E8E8;
       padding: 10px;
       border-radius: 8px;
       margin-bottom: 12px;
+      box-sizing: border-box;
+      width: 100%;
 
       .tender-input {
         display: flex;
@@ -727,7 +734,9 @@
         }
 
         input {
-          width: 120px;
+          width: 110px;
+          max-width: 110px;
+          box-sizing: border-box;
           background: #FFFFFF;
           border: 1px solid #1890ff;
           color: #0b1a30;
@@ -742,7 +751,7 @@
         display: flex;
         gap: 4px;
         margin-bottom: 8px;
-        overflow-x: auto;
+        flex-wrap: wrap;
 
         button {
           background: #FFFFFF;
@@ -750,7 +759,7 @@
           color: #595959;
           font-size: 11px;
           font-weight: 600;
-          padding: 3px 8px;
+          padding: 3px 6px;
           border-radius: 4px;
           cursor: pointer;
           &:hover {
