@@ -14,6 +14,22 @@
 
     <li class="menu-divider"></li>
 
+    <li class="menu-item" routerLinkActive="active">
+      <a routerLink="/caisse-pos" class="menu-link" style="color: #FF6B35; font-weight: 700;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+        <span>Vente Caisse (POS)</span>
+      </a>
+    </li>
+
+    <li class="menu-item" routerLinkActive="active" *ngIf="canAccessSales()">
+      <a routerLink="/caisse-supervision" class="menu-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        <span>Supervision Caisses</span>
+      </a>
+    </li>
+
+    <li class="menu-divider"></li>
+
     <li class="menu-item has-submenu" [class.open]="isStockSubmenuOpen()">
       <a (click)="toggleStockSubmenu($event)" class="menu-link" style="cursor: pointer;">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/></svg>

@@ -59,6 +59,16 @@ const routes: Routes = [
     loadChildren: () => import('./features/store-sales/store-sales.module').then(m => m.StoreSalesModule) 
   },
   { 
+    path: 'caisse-pos', 
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/caisse-pos/caisse-pos.module').then(m => m.CaissePosModule) 
+  },
+  { 
+    path: 'caisse-supervision', 
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/caisse-supervision/caisse-supervision.module').then(m => m.CaisseSupervisionModule) 
+  },
+  { 
     path: 'profile', 
     canActivate: [authGuard],
     loadChildren: () => import('./features/profile/profile.module').then(m => m.ProfileModule) 

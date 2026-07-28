@@ -1,0 +1,295 @@
+<div class="supervision-container">
+  <!-- Alerts -->
+  <div class="alert alert-danger" *ngIf="errorMsg">
+    <span>⚠️ {{ errorMsg }}</span>
+  </div>
+  <div class="alert alert-success" *ngIf="successMsg">
+    <span>✅ {{ successMsg }}</span>
+  </div>
+
+  <!-- Header -->
+  <header class="supervision-header">
+    <div class="header-left">
+      <h1>📊 Supervision Multi-Boutiques des Caisses</h1>
+      <p>Suivi en temps réel des ouvertures, clôtures, espèces et transactions POS</p>
+    </div>
+
+    <div class="header-filters">
+      <div class="filter-group">
+        <label>Filtrer par Boutique :</label>
+        <select [(ngModel)]="selectedBoutiqueId">
+          <option [value]="null">Toutes les boutiques</option>
+          <option *ngFor="let b of boutiques" [value]="b.id">{{ b.name }} ({{ b.code }})</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Statut Caisse :</label>
+        <select [(ngModel)]="statusFilter">
+          <option value="ALL">Tous les statuts</option>
+          <option value="OPEN">🟢 Ouvertes uniquement</option>
+          <option value="CLOSED">🔴 Fermées uniquement</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card text-primary">
+      <div class="kpi-icon">🏬</div>
+      <div class="kpi-body">
+        <span class="kpi-title">Caisses Actives (Ouvertes)</span>
+        <span class="kpi-value">{{ activeSessionsCount }}</span>
+      </div>
+    </div>
+
+    <div class="kpi-card text-success">
+      <div class="kpi-icon">💵</div>
+      <div class="kpi-body">
+        <span class="kpi-title">Total Espèces en Caisse</span>
+        <span class="kpi-value">{{ totalCashToday | number }} <small>FCFA</small></span>
+      </div>
+    </div>
+
+    <div class="kpi-card text-info">
+      <div class="kpi-icon">📲</div>
+      <div class="kpi-body">
+        <span class="kpi-title">Total Wave / Mobile Money</span>
+        <span class="kpi-value">{{ totalMobileMoneyToday | number }} <small>FCFA</small></span>
+      </div>
+    </div>
+
+    <div class="kpi-card" [class.text-danger]="totalVariances < 0" [class.text-accent]="totalVariances >= 0">
+      <div class="kpi-icon">⚖️</div>
+      <div class="kpi-body">
+        <span class="kpi-title">Cumul des Écarts Constatés</span>
+        <span class="kpi-value">{{ totalVariances | number }} <small>FCFA</small></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs Nav -->
+  <div class="tab-nav">
+    <button [class.active]="activeTab === 'sessions'" (click)="activeTab = 'sessions'">
+      🗝️ Sessions de Caisse ({{ filteredSessions.length }})
+    </button>
+    <button [class.active]="activeTab === 'sales'" (click)="activeTab = 'sales'">
+      🧾 Historique des Ventes POS ({{ filteredSales.length }})
+    </button>
+  </div>
+
+  <!-- Tab 1: Sessions de Caisse -->
+  <div class="table-card" *ngIf="activeTab === 'sessions'">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Réf Session</th>
+          <th>Boutique</th>
+          <th>Caissier / Agent</th>
+          <th>Date Ouverture</th>
+          <th>Fond Initial</th>
+          <th>Espèces Ventes</th>
+          <th>Mobile Money</th>
+          <th>Solde Théorique</th>
+          <th>Solde Réel</th>
+          <th>Écart</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of filteredSessions">
+          <td><strong class="text-white">{{ s.sessionReference }}</strong></td>
+          <td>
+            <span class="boutique-badge">{{ s.boutiqueName }}</span>
+          </td>
+          <td>{{ s.userEmail }}</td>
+          <td>{{ s.openingDate | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ s.openingBalance | number }} FCFA</td>
+          <td class="text-accent">+{{ s.totalSalesCash | number }} FCFA</td>
+          <td>{{ s.totalSalesMobileMoney | number }} FCFA</td>
+          <td class="text-success font-bold">{{ s.closingBalanceExpected | number }} FCFA</td>
+          <td>
+            <span *ngIf="s.closingBalanceReal !== null && s.closingBalanceReal !== undefined">{{ s.closingBalanceReal | number }} FCFA</span>
+            <span *ngIf="s.closingBalanceReal === null || s.closingBalanceReal === undefined" class="text-muted">En cours</span>
+          </td>
+          <td>
+            <span *ngIf="s.status === 'CLOSED'" [class.text-danger]="(s.cashDifference || 0) < 0" [class.text-success]="(s.cashDifference || 0) >= 0" class="font-bold">
+              {{ (s.cashDifference || 0) > 0 ? '+' : '' }}{{ (s.cashDifference || 0) | number }} FCFA
+            </span>
+            <span *ngIf="s.status === 'OPEN'" class="text-muted">-</span>
+          </td>
+          <td>
+            <span class="status-pill" [class.open]="s.status === 'OPEN'" [class.closed]="s.status === 'CLOSED'">
+              {{ s.status === 'OPEN' ? 'OUVERTE' : 'FERMÉE' }}
+            </span>
+          </td>
+          <td>
+            <button class="action-btn" (click)="openSessionDetails(s)">
+              🔍 Audit & Mouvements
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="filteredSessions.length === 0">
+          <td colspan="12" class="text-center py-4 text-muted">
+            Aucune session de caisse trouvée.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Tab 2: Historique des Ventes POS -->
+  <div class="table-card" *ngIf="activeTab === 'sales'">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>N° Ticket</th>
+          <th>Boutique</th>
+          <th>Date & Heure</th>
+          <th>Client</th>
+          <th>Articles</th>
+          <th>Mode Règlement</th>
+          <th>Total Net</th>
+          <th>Caissier</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let v of filteredSales">
+          <td><strong class="text-white">{{ v.receiptNumber }}</strong></td>
+          <td><span class="boutique-badge">{{ v.boutiqueName }}</span></td>
+          <td>{{ v.saleDate | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ v.clientName || 'Client Passager' }}</td>
+          <td>{{ v.items ? v.items.length : 0 }} article(s)</td>
+          <td>
+            <span class="payment-badge" [class.cash]="v.paymentMethod === 'ESPECES'" [class.wave]="v.paymentMethod === 'WAVE' || v.paymentMethod === 'ORANGE_MONEY'">
+              {{ v.paymentMethod }}
+            </span>
+          </td>
+          <td><strong class="text-success">{{ v.netAmount | number }} FCFA</strong></td>
+          <td>{{ v.userEmail }}</td>
+          <td>
+            <span class="status-pill" [class.open]="v.status === 'PAYEE'" [class.closed]="v.status === 'ANNULEE'">
+              {{ v.status }}
+            </span>
+          </td>
+          <td>
+            <button class="action-btn" (click)="openSaleDetails(v)">
+              👁️ Aperçu
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="filteredSales.length === 0">
+          <td colspan="10" class="text-center py-4 text-muted">
+            Aucune vente enregistrée.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MODAL: Details Session -->
+  <div class="modal-backdrop" *ngIf="showDetailsModal && selectedSessionDetails">
+    <div class="modal-card wide">
+      <div class="modal-header">
+        <h3>🔍 Détails de la Session : {{ selectedSessionDetails.sessionReference }}</h3>
+        <button class="close-btn" (click)="showDetailsModal = false">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="details-summary-grid">
+          <div class="detail-box">
+            <span class="lbl">Boutique :</span>
+            <strong>{{ selectedSessionDetails.boutiqueName }}</strong>
+          </div>
+          <div class="detail-box">
+            <span class="lbl">Agent responsable :</span>
+            <strong>{{ selectedSessionDetails.userEmail }}</strong>
+          </div>
+          <div class="detail-box">
+            <span class="lbl">Date Ouverture :</span>
+            <strong>{{ selectedSessionDetails.openingDate | date:'dd/MM/yyyy HH:mm' }}</strong>
+          </div>
+          <div class="detail-box">
+            <span class="lbl">Date Clôture :</span>
+            <strong>{{ selectedSessionDetails.closingDate ? (selectedSessionDetails.closingDate | date:'dd/MM/yyyy HH:mm') : 'Caisse en cours' }}</strong>
+          </div>
+        </div>
+
+        <h4 class="mt-3 mb-2">📜 Journal des Mouvements de Caisse</h4>
+        <table class="data-table small">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Montant</th>
+              <th>Motif / Libellé</th>
+              <th>Agent</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let m of selectedSessionDetails.movements">
+              <td>{{ m.createdAt | date:'HH:mm:ss' }}</td>
+              <td>
+                <span class="type-pill" [class.in]="m.type === 'ENTREE'" [class.out]="m.type === 'SORTIE'">
+                  {{ m.type }}
+                </span>
+              </td>
+              <td><strong>{{ m.amount | number }} FCFA</strong></td>
+              <td>{{ m.reason }}</td>
+              <td>{{ m.userEmail }}</td>
+            </tr>
+            <tr *ngIf="!selectedSessionDetails.movements || selectedSessionDetails.movements.length === 0">
+              <td colspan="5" class="text-center py-2 text-muted">Aucun mouvement exceptionnel enregistré.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="showDetailsModal = false">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Details Vente -->
+  <div class="modal-backdrop" *ngIf="showSaleDetailsModal && selectedSaleDetails">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🧾 Détail Vente : {{ selectedSaleDetails.receiptNumber }}</h3>
+        <button class="close-btn" (click)="showSaleDetailsModal = false">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p><strong>Boutique :</strong> {{ selectedSaleDetails.boutiqueName }}</p>
+        <p><strong>Date :</strong> {{ selectedSaleDetails.saleDate | date:'dd/MM/yyyy HH:mm' }}</p>
+        <p><strong>Mode Règlement :</strong> {{ selectedSaleDetails.paymentMethod }}</p>
+
+        <h4 class="mt-3 mb-2">Articles commandés :</h4>
+        <ul class="items-list">
+          <li *ngFor="let item of selectedSaleDetails.items">
+            <span>{{ item.quantity }}x {{ item.productName }}</span>
+            <strong>{{ item.totalPrice | number }} FCFA</strong>
+          </li>
+        </ul>
+
+        <div class="total-row mt-3">
+          <span>NET TOTAL PAYÉ :</span>
+          <strong class="text-success" style="font-size: 1.2rem;">{{ selectedSaleDetails.netAmount | number }} FCFA</strong>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-danger" *ngIf="selectedSaleDetails.status === 'PAYEE'" (click)="cancelSale(selectedSaleDetails.id)">
+          🚫 Annuler cette vente
+        </button>
+        <button class="btn btn-secondary" (click)="showSaleDetailsModal = false">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>

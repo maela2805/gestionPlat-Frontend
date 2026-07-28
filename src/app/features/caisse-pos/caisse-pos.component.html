@@ -1,0 +1,417 @@
+<div class="pos-container">
+  <!-- Alerts -->
+  <div class="alert alert-danger" *ngIf="errorMsg">
+    <span>⚠️ {{ errorMsg }}</span>
+  </div>
+  <div class="alert alert-success" *ngIf="successMsg">
+    <span>✅ {{ successMsg }}</span>
+  </div>
+
+  <!-- Header Bar -->
+  <header class="pos-header">
+    <div class="header-left">
+      <div class="header-title">
+        <h1>🛒 Point de Vente & Caisse</h1>
+        <p class="subtitle">Saisie des ventes quotidiennes en boutique</p>
+      </div>
+
+      <!-- Boutique Selector -->
+      <div class="boutique-selector">
+        <label>Boutique :</label>
+        <select [(ngModel)]="selectedBoutiqueId" (change)="onBoutiqueChange()">
+          <option *ngFor="let b of boutiques" [value]="b.id">{{ b.name }} ({{ b.code }})</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Session Status & Actions -->
+    <div class="header-right">
+      <div class="session-badge" [class.open]="currentSession?.status === 'OPEN'" [class.closed]="!currentSession || currentSession.status === 'CLOSED'">
+        <span class="status-dot"></span>
+        <div class="status-info">
+          <span class="status-label">{{ currentSession?.status === 'OPEN' ? 'CAISSE OUVERTE' : 'CAISSE FERMÉE' }}</span>
+          <small *ngIf="currentSession?.status === 'OPEN'">Réf: {{ currentSession?.sessionReference }}</small>
+        </div>
+      </div>
+
+      <!-- Live Session Counters -->
+      <div class="session-metrics" *ngIf="currentSession?.status === 'OPEN'">
+        <div class="metric-item">
+          <span class="metric-title">Fond Initial</span>
+          <span class="metric-val">{{ currentSession?.openingBalance | number }} FCFA</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-title">Ventes Espèces</span>
+          <span class="metric-val text-accent">{{ currentSession?.totalSalesCash | number }} FCFA</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-title">Solde Espèces Est.</span>
+          <span class="metric-val text-success">{{ currentSession?.closingBalanceExpected | number }} FCFA</span>
+        </div>
+      </div>
+
+      <!-- Session Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn btn-open" *ngIf="!currentSession || currentSession.status === 'CLOSED'" (click)="showOpenModal = true">
+          🔓 Ouvrir la Caisse
+        </button>
+
+        <ng-container *ngIf="currentSession && currentSession.status === 'OPEN'">
+          <button class="btn btn-secondary" (click)="showMovementModal = true">
+            💵 Dépense / Mouvement
+          </button>
+          <button class="btn btn-danger" (click)="closeBalanceRealInput = currentSession.closingBalanceExpected; showCloseModal = true">
+            🔒 Fermer la Caisse
+          </button>
+        </ng-container>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main POS Grid -->
+  <div class="pos-layout">
+    <!-- Left Column: Catalog & Products -->
+    <main class="catalog-section">
+      <!-- Search & Filters -->
+      <div class="catalog-header">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un produit (Nom, Référence, Code)..." />
+        </div>
+
+        <div class="categories-pill">
+          <button class="pill" [class.active]="selectedCategoryId === null" (click)="selectedCategoryId = null">
+            Tous les produits
+          </button>
+          <button class="pill" *ngFor="let cat of categories" [class.active]="selectedCategoryId === cat.id" (click)="selectedCategoryId = cat.id">
+            {{ cat.name }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Product Grid -->
+      <div class="product-grid">
+        <div class="product-card" *ngFor="let p of filteredProducts" (click)="addToCart(p)">
+          <div class="card-image">
+            <img [src]="p.imageUrl || 'assets/images/default-product.png'" [alt]="p.name" (error)="$any($event.target).src = 'assets/images/default-product.png'" />
+            <span class="stock-badge" [class.low]="(p.stock || 0) < 5">
+              Stock: {{ p.stock || 0 }} unités
+            </span>
+          </div>
+          <div class="card-body">
+            <h3 class="product-title">{{ p.name }}</h3>
+            <span class="product-ref">Réf: {{ p.reference }}</span>
+            <div class="price-tag">
+              {{ (p.sellPrice || 0) | number }} <small>FCFA</small>
+            </div>
+          </div>
+          <button class="add-btn">+ Ajouter</button>
+        </div>
+
+        <div class="empty-products" *ngIf="filteredProducts.length === 0">
+          <p>Aucun produit ne correspond à votre recherche.</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right Column: Cart & Checkout -->
+    <aside class="cart-section">
+      <div class="cart-header">
+        <h2>🛍️ Panier de Vente</h2>
+        <button class="clear-btn" (click)="clearCart()" *ngIf="cart.length > 0">Vider</button>
+      </div>
+
+      <!-- Client Selector -->
+      <div class="client-selector">
+        <label>Client :</label>
+        <select [(ngModel)]="selectedClientId">
+          <option [value]="null">👥 Client Passager / Anonyme</option>
+          <option *ngFor="let c of clients" [value]="c.id">{{ c.name }} ({{ c.phone || 'Pas de tel' }})</option>
+        </select>
+      </div>
+
+      <!-- Cart Item List -->
+      <div class="cart-items">
+        <div class="cart-item" *ngFor="let item of cart">
+          <div class="item-info">
+            <h4>{{ item.product.name }}</h4>
+            <span class="item-unit-price">{{ item.unitPrice | number }} FCFA / u</span>
+          </div>
+
+          <div class="item-controls">
+            <button class="qty-btn" (click)="updateQuantity(item, -1)">-</button>
+            <span class="qty-val">{{ item.quantity }}</span>
+            <button class="qty-btn" (click)="updateQuantity(item, 1)">+</button>
+          </div>
+
+          <div class="item-total">
+            <span>{{ item.total | number }} FCFA</span>
+            <button class="remove-btn" (click)="removeFromCart(item)">✕</button>
+          </div>
+        </div>
+
+        <div class="empty-cart" *ngIf="cart.length === 0">
+          <div class="empty-icon">🛒</div>
+          <p>Le panier est vide</p>
+          <small>Cliquez sur un produit de la liste pour l'ajouter</small>
+        </div>
+      </div>
+
+      <!-- Totals & Payment Section -->
+      <div class="checkout-footer" *ngIf="cart.length > 0">
+        <!-- Totals Breakdown -->
+        <div class="summary-line">
+          <span>Sous-total HT :</span>
+          <span>{{ subTotal | number }} FCFA</span>
+        </div>
+
+        <div class="summary-line discount-line">
+          <span>Remise globale (FCFA) :</span>
+          <input type="number" [(ngModel)]="discountAmount" min="0" placeholder="0" />
+        </div>
+
+        <div class="summary-line total-line">
+          <span>NET À PAYER :</span>
+          <span class="net-amount">{{ netTotal | number }} FCFA</span>
+        </div>
+
+        <!-- Payment Method Selection -->
+        <div class="payment-methods">
+          <label>Mode de Règlement :</label>
+          <div class="method-grid">
+            <button [class.active]="paymentMethod === 'ESPECES'" (click)="paymentMethod = 'ESPECES'">
+              💵 Espèces
+            </button>
+            <button [class.active]="paymentMethod === 'WAVE'" (click)="paymentMethod = 'WAVE'">
+              🌊 Wave
+            </button>
+            <button [class.active]="paymentMethod === 'ORANGE_MONEY'" (click)="paymentMethod = 'ORANGE_MONEY'">
+              🍊 Orange Money
+            </button>
+            <button [class.active]="paymentMethod === 'CARTE'" (click)="paymentMethod = 'CARTE'">
+              💳 Carte / Virement
+            </button>
+          </div>
+        </div>
+
+        <!-- Cash Tendered & Change Returned (for ESPECES) -->
+        <div class="cash-tender-box" *ngIf="paymentMethod === 'ESPECES'">
+          <div class="tender-input">
+            <label>Montant Reçu du Client :</label>
+            <input type="number" [(ngModel)]="amountPaid" [placeholder]="netTotal.toString()" />
+          </div>
+
+          <div class="quick-tender-pills">
+            <button (click)="setQuickTender(netTotal)">Exact</button>
+            <button (click)="setQuickTender(1000)">1 000</button>
+            <button (click)="setQuickTender(2000)">2 000</button>
+            <button (click)="setQuickTender(5000)">5 000</button>
+            <button (click)="setQuickTender(10000)">10 000</button>
+            <button (click)="setQuickTender(20000)">20 000</button>
+          </div>
+
+          <div class="change-box" [class.has-change]="changeReturned > 0">
+            <span>MONNAIE À RENDRE :</span>
+            <span class="change-val">{{ changeReturned | number }} FCFA</span>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button class="btn-checkout" (click)="submitSale()" [disabled]="loading || !currentSession || currentSession.status !== 'OPEN'">
+          <span *ngIf="!loading">✅ Valider & Imprimer Ticket ({{ netTotal | number }} FCFA)</span>
+          <span *ngIf="loading">Validation en cours...</span>
+        </button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- MODAL: Ouverture de Caisse -->
+  <div class="modal-backdrop" *ngIf="showOpenModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🔓 Ouverture de la Caisse</h3>
+        <button class="close-btn" (click)="showOpenModal = false">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Saisissez le fond de caisse initial disponible dans le tiroir ce matin :</p>
+        <div class="form-group">
+          <label>Fond de Caisse Initial (FCFA) :</label>
+          <input type="number" [(ngModel)]="openBalanceInput" placeholder="Ex: 20000" />
+        </div>
+        <div class="form-group">
+          <label>Notes / Remarques :</label>
+          <textarea [(ngModel)]="openNotesInput" rows="2" placeholder="Facultatif..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="showOpenModal = false">Annuler</button>
+        <button class="btn btn-primary" (click)="openSession()" [disabled]="loading">Confirmer l'Ouverture</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Fermeture de Caisse -->
+  <div class="modal-backdrop" *ngIf="showCloseModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🔒 Clôture de la Caisse</h3>
+        <button class="close-btn" (click)="showCloseModal = false">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="session-summary-box">
+          <div class="sum-row">
+            <span>Fond initial :</span>
+            <strong>{{ currentSession?.openingBalance | number }} FCFA</strong>
+          </div>
+          <div class="sum-row">
+            <span>Total Ventes Espèces :</span>
+            <strong class="text-accent">+{{ currentSession?.totalSalesCash | number }} FCFA</strong>
+          </div>
+          <div class="sum-row">
+            <span>Total Wave / Mobile Money :</span>
+            <strong>{{ currentSession?.totalSalesMobileMoney | number }} FCFA</strong>
+          </div>
+          <div class="sum-row total-expected">
+            <span>SOLDE THÉORIQUE ESPÈCES EN CAISSE :</span>
+            <strong class="text-success">{{ currentSession?.closingBalanceExpected | number }} FCFA</strong>
+          </div>
+        </div>
+
+        <div class="form-group mt-3">
+          <label>Montant Espèces Compté dans le Tiroir (FCFA) :</label>
+          <input type="number" [(ngModel)]="closeBalanceRealInput" placeholder="Saisir le total des pièces/billets..." />
+        </div>
+
+        <div class="variance-preview" [class.positive]="(closeBalanceRealInput - (currentSession?.closingBalanceExpected || 0)) >= 0" [class.negative]="(closeBalanceRealInput - (currentSession?.closingBalanceExpected || 0)) < 0">
+          <span>ÉCART DE CAISSE CONSTATÉ :</span>
+          <strong>
+            {{ ((closeBalanceRealInput || 0) - (currentSession?.closingBalanceExpected || 0)) | number }} FCFA
+          </strong>
+        </div>
+
+        <div class="form-group mt-2">
+          <label>Explication si écart / Notes :</label>
+          <textarea [(ngModel)]="closeNotesInput" rows="2" placeholder="Motif de l'écart si présent..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="showCloseModal = false">Annuler</button>
+        <button class="btn btn-danger" (click)="closeSession()" [disabled]="loading">Valider la Fermeture</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Mouvement de Caisse -->
+  <div class="modal-backdrop" *ngIf="showMovementModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>💵 Mouvement de Caisse (Dépense / Entrée)</h3>
+        <button class="close-btn" (click)="showMovementModal = false">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Type de mouvement :</label>
+          <select [(ngModel)]="movementType">
+            <option value="SORTIE">🔻 Dépense / Sortie de Caisse</option>
+            <option value="ENTREE">🔺 Entrée de Caisse / Apport</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Montant (FCFA) :</label>
+          <input type="number" [(ngModel)]="movementAmount" placeholder="Ex: 2500" />
+        </div>
+
+        <div class="form-group">
+          <label>Motif / Justificatif :</label>
+          <input type="text" [(ngModel)]="movementReason" placeholder="Ex: Achat fournitures de nettoyage..." />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="showMovementModal = false">Annuler</button>
+        <button class="btn btn-primary" (click)="addMovement()" [disabled]="loading">Enregistrer Mouvement</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Ticket de Caisse / Reçu Imprimable -->
+  <div class="modal-backdrop" *ngIf="showReceiptModal && lastSale">
+    <div class="modal-card receipt-modal">
+      <div class="modal-header no-print">
+        <h3>🧾 Ticket de Caisse</h3>
+        <button class="close-btn" (click)="showReceiptModal = false">✕</button>
+      </div>
+
+      <div class="printable-receipt" id="printableReceipt">
+        <div class="receipt-header">
+          <h2>KIKI TRAITEUR</h2>
+          <p>Boutique: {{ lastSale.boutiqueName }} ({{ lastSale.boutiqueCode }})</p>
+          <p>Ticket N°: <strong>{{ lastSale.receiptNumber }}</strong></p>
+          <p>Date: {{ lastSale.saleDate | date:'dd/MM/yyyy HH:mm' }}</p>
+          <p>Caissier: {{ lastSale.userEmail }}</p>
+          <p *ngIf="lastSale.clientName">Client: {{ lastSale.clientName }}</p>
+        </div>
+
+        <div class="receipt-divider">--------------------------------</div>
+
+        <table class="receipt-table">
+          <thead>
+            <tr>
+              <th>Art.</th>
+              <th>Qté</th>
+              <th>P.U</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of lastSale.items">
+              <td>{{ item.productName }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.unitPrice | number }}</td>
+              <td>{{ item.totalPrice | number }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="receipt-divider">--------------------------------</div>
+
+        <div class="receipt-totals">
+          <div class="row">
+            <span>Sous-total:</span>
+            <span>{{ lastSale.subTotal | number }} FCFA</span>
+          </div>
+          <div class="row" *ngIf="lastSale.discountAmount > 0">
+            <span>Remise:</span>
+            <span>-{{ lastSale.discountAmount | number }} FCFA</span>
+          </div>
+          <div class="row grand-total">
+            <span>TOTAL PAYÉ:</span>
+            <span>{{ lastSale.netAmount | number }} FCFA</span>
+          </div>
+          <div class="row">
+            <span>Mode Règlement:</span>
+            <span>{{ lastSale.paymentMethod }}</span>
+          </div>
+          <div class="row" *ngIf="lastSale.paymentMethod === 'ESPECES'">
+            <span>Montant Reçu:</span>
+            <span>{{ lastSale.amountPaid | number }} FCFA</span>
+          </div>
+          <div class="row" *ngIf="lastSale.changeReturned > 0">
+            <span>Monnaie Rendue:</span>
+            <span>{{ lastSale.changeReturned | number }} FCFA</span>
+          </div>
+        </div>
+
+        <div class="receipt-footer">
+          <p>Merci pour votre visite !</p>
+          <p>À bientôt chez KIKI TRAITEUR</p>
+        </div>
+      </div>
+
+      <div class="modal-footer no-print">
+        <button class="btn btn-secondary" (click)="showReceiptModal = false">Fermer</button>
+        <button class="btn btn-primary" (click)="printReceipt()">🖨️ Imprimer Ticket</button>
+      </div>
+    </div>
+  </div>
+</div>
