@@ -121,13 +121,21 @@
         <button class="clear-btn" (click)="clearCart()" *ngIf="cart.length > 0">Vider</button>
       </div>
 
-      <!-- Client Selector -->
+      <!-- Client Selector & Free Input -->
       <div class="client-selector">
-        <label>Client :</label>
-        <select [(ngModel)]="selectedClientId">
+        <div class="client-header">
+          <label>Client :</label>
+          <button type="button" class="toggle-client-btn" (click)="toggleClientMode()">
+            {{ isCustomClient ? '📋 Sélectionner dans la liste' : '✏️ Saisir un nom libre' }}
+          </button>
+        </div>
+
+        <select *ngIf="!isCustomClient" [(ngModel)]="selectedClientId">
           <option [value]="null">👥 Client Passager / Anonyme</option>
           <option *ngFor="let c of clients" [value]="c.id">{{ c.name }} ({{ c.phone || 'Pas de tel' }})</option>
         </select>
+
+        <input *ngIf="isCustomClient" type="text" class="custom-client-input" [(ngModel)]="customClientName" placeholder="Taper le nom du client (ex: M. Diallo)..." />
       </div>
 
       <!-- Cart Item List -->
@@ -140,7 +148,7 @@
 
           <div class="item-controls">
             <button class="qty-btn" (click)="updateQuantity(item, -1)">-</button>
-            <span class="qty-val">{{ item.quantity }}</span>
+            <input type="number" class="qty-input" [(ngModel)]="item.quantity" (ngModelChange)="onQuantityInputChange(item)" min="1" />
             <button class="qty-btn" (click)="updateQuantity(item, 1)">+</button>
           </div>
 

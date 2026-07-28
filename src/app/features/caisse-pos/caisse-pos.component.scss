@@ -385,29 +385,55 @@
   }
 
   .client-selector {
-    margin: 1rem 0;
+    margin: 0.75rem 0 1rem 0;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 
-    label {
-      font-size: 0.8rem;
-      color: #8A8A9E;
-      font-weight: 600;
+    .client-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      label {
+        font-size: 0.8rem;
+        color: #8A8A9E;
+        font-weight: 700;
+      }
+
+      .toggle-client-btn {
+        background: transparent;
+        border: none;
+        color: #FF6B35;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
     }
 
-    select {
+    select, .custom-client-input {
       background: #14141E;
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 8px;
-      padding: 0.5rem;
+      padding: 0.5rem 0.75rem;
       color: #FFF;
       outline: none;
+      font-size: 0.85rem;
+      width: 100%;
+
+      &:focus {
+        border-color: #FF6B35;
+      }
     }
   }
 
   .cart-items {
     flex: 1;
+    min-height: 140px;
+    max-height: 240px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -422,7 +448,7 @@
       background: #14141F;
       padding: 0.75rem;
       border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
 
       .item-info {
         h4 {
@@ -440,27 +466,53 @@
       .item-controls {
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 4px;
         background: #1A1A28;
-        border-radius: 6px;
-        padding: 2px 6px;
+        border-radius: 8px;
+        padding: 3px 6px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
 
         .qty-btn {
           background: transparent;
           border: none;
           color: #FF6B35;
           font-weight: 800;
-          font-size: 1rem;
+          font-size: 1.1rem;
           cursor: pointer;
-          width: 24px;
-          height: 24px;
+          width: 26px;
+          height: 26px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 4px;
+
+          &:hover {
+            background: rgba(255, 107, 53, 0.2);
+          }
         }
 
-        .qty-val {
-          font-size: 0.85rem;
+        .qty-input {
+          width: 48px;
+          background: #0F0F14;
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          color: #FFD166;
           font-weight: 800;
-          min-width: 18px;
+          font-size: 0.9rem;
           text-align: center;
+          border-radius: 4px;
+          padding: 2px 4px;
+          outline: none;
+
+          &:focus {
+            border-color: #FF6B35;
+          }
+
+          /* Hide spin buttons */
+          &::-webkit-inner-spin-button,
+          &::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+          }
         }
       }
 

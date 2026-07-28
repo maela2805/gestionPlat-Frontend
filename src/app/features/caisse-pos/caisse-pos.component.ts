@@ -47,6 +47,8 @@ export class CaissePosComponent implements OnInit {
   selectedCategoryId: number | null = null;
   searchTerm: string = '';
   selectedClientId: number | null = null;
+  isCustomClient: boolean = false;
+  customClientName: string = '';
 
   // Cart
   cart: CartItem[] = [];
@@ -177,14 +179,30 @@ export class CaissePosComponent implements OnInit {
     }
   }
 
+  toggleClientMode(): void {
+    this.isCustomClient = !this.isCustomClient;
+    if (this.isCustomClient) {
+      this.selectedClientId = null;
+    } else {
+      this.customClientName = '';
+    }
+  }
+
   updateQuantity(item: CartItem, delta: number): void {
-    const newQty = item.quantity + delta;
+    const newQty = (item.quantity || 1) + delta;
     if (newQty <= 0) {
       this.removeFromCart(item);
     } else {
       item.quantity = newQty;
       item.total = (item.quantity * item.unitPrice) - item.discount;
     }
+  }
+
+  onQuantityInputChange(item: CartItem): void {
+    if (!item.quantity || item.quantity < 1) {
+      item.quantity = 1;
+    }
+    item.total = (item.quantity * item.unitPrice) - item.discount;
   }
 
   removeFromCart(item: CartItem): void {
@@ -196,6 +214,8 @@ export class CaissePosComponent implements OnInit {
     this.discountAmount = 0;
     this.amountPaid = 0;
     this.notes = '';
+    this.customClientName = '';
+    this.selectedClientId = null;
   }
 
   get subTotal(): number {
@@ -235,7 +255,8 @@ export class CaissePosComponent implements OnInit {
     const req: CreatePosSaleRequest = {
       boutiqueId: this.selectedBoutiqueId,
       cashSessionId: this.currentSession.id,
-      clientId: this.selectedClientId || undefined,
+      clientId: (!this.isCustomClient && this.selectedClientId) ? this.selectedClientId : undefined,
+      customClientName: (this.isCustomClient && this.customClientName) ? this.customClientName : undefined,
       discountAmount: this.discountAmount || 0,
       taxAmount: 0,
       amountPaid: this.paymentMethod === 'ESPECES' ? (this.amountPaid || this.netTotal) : this.netTotal,

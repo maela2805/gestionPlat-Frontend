@@ -12,6 +12,7 @@ export interface CreatePosSaleRequest {
   boutiqueId: number;
   cashSessionId?: number;
   clientId?: number;
+  customClientName?: string;
   discountAmount?: number;
   taxAmount?: number;
   amountPaid?: number;
@@ -40,6 +41,7 @@ export interface PosSale {
   boutiqueCode: string;
   boutiqueName: string;
   clientId?: number;
+  customClientName?: string;
   clientName?: string;
   saleDate: string;
   subTotal: number;
