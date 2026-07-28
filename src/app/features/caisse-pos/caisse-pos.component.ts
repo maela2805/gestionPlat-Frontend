@@ -283,7 +283,8 @@ export class CaissePosComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        const msg = err.error?.message || 'Erreur lors de la validation de la vente';
+        const msg = typeof err.error === 'string' ? err.error : (err.error?.message || err.message || 'Erreur lors de la validation de la vente');
+        alert('⚠️ ' + msg);
         this.showError(msg);
       }
     });
