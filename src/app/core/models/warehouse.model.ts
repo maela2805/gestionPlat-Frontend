@@ -9,6 +9,9 @@ export interface BoutiqueStockDTO {
   buyPrice: number;
   sellPrice?: number;
   alertThreshold?: number;
+  categoryId?: number;
+  categoryName?: string;
+  imageUrl?: string;
 }
 
 export interface TransferStockRequest {

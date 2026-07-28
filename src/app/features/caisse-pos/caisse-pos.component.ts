@@ -5,6 +5,7 @@ import { BoutiqueService } from '../../core/services/boutique.service';
 import { ProductService } from '../../core/services/product.service';
 import { CategoryService } from '../../core/services/category.service';
 import { TiersService } from '../../core/services/tiers.service';
+import { WarehouseService } from '../../core/services/warehouse.service';
 import { AuthService } from '../../core/services/auth.service';
 
 import { CashSession, CashMovementType } from '../../core/models/cash-session.model';
@@ -34,6 +35,7 @@ export class CaissePosComponent implements OnInit {
   private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
   private tiersService = inject(TiersService);
+  private warehouseService = inject(WarehouseService);
   public authService = inject(AuthService);
 
   boutiques: Boutique[] = [];
@@ -124,11 +126,27 @@ export class CaissePosComponent implements OnInit {
   }
 
   loadProducts(): void {
-    this.productService.getAllProducts().subscribe({
-      next: (data) => {
-        this.products = data;
+    if (!this.selectedBoutiqueId) return;
+    this.loading = true;
+    this.warehouseService.getStocksByBoutique(this.selectedBoutiqueId).subscribe({
+      next: (boutiqueStocks) => {
+        this.loading = false;
+        this.products = boutiqueStocks.map(bs => ({
+          id: bs.productId,
+          reference: bs.productReference,
+          name: bs.productName,
+          buyPrice: bs.buyPrice,
+          sellPrice: bs.sellPrice || 0,
+          stock: bs.quantity,
+          alertThreshold: bs.alertThreshold || 0,
+          imageUrl: bs.imageUrl,
+          category: bs.categoryId ? { id: bs.categoryId, name: bs.categoryName || '' } : undefined
+        }));
       },
-      error: (err) => this.showError('Erreur lors du chargement des produits')
+      error: (err) => {
+        this.loading = false;
+        this.showError('Erreur lors du chargement des produits en stock dans la boutique');
+      }
     });
   }
 
