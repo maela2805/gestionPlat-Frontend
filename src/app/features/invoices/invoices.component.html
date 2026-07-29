@@ -229,8 +229,8 @@
             </div>
 
             <div class="form-group col-6" *ngIf="newInvoiceType === 'VENTE'">
-              <label>Boutique (Optionnel)</label>
-              <select class="form-control" [(ngModel)]="newInvoiceBoutiqueId">
+              <label>Boutique (Filtrage des prix & produits)</label>
+              <select class="form-control" [(ngModel)]="newInvoiceBoutiqueId" (change)="onBoutiqueChange()">
                 <option [ngValue]="undefined">Toutes les boutiques / Client direct</option>
                 <option *ngFor="let b of boutiquesList" [value]="b.id">{{ b.name }}</option>
               </select>
@@ -253,7 +253,7 @@
           <table class="table-items">
             <thead>
               <tr>
-                <th>Désignation</th>
+                <th>Désignation / Sélection du Produit</th>
                 <th width="120">Quantité</th>
                 <th width="160">Prix Unitaire HT</th>
                 <th width="160">Total HT</th>
@@ -263,7 +263,17 @@
             <tbody>
               <tr *ngFor="let item of newInvoiceItems; let i = index">
                 <td>
-                  <input type="text" class="form-control" [(ngModel)]="item.description" placeholder="Description de l'article ou du plat" />
+                  <select
+                    class="form-control mb-1"
+                    [ngModel]="item.selectedProductId"
+                    (change)="onProductSelect(item, $any($event.target).value)"
+                    style="font-weight: 600; color: #1890ff;">
+                    <option [ngValue]="undefined">-- Choisir un produit ({{ availableProducts.length }} dispo) --</option>
+                    <option *ngFor="let p of availableProducts" [value]="p.id">
+                      {{ p.name }} - {{ p.price | number:'1.0-0' }} FCFA
+                    </option>
+                  </select>
+                  <input type="text" class="form-control" [(ngModel)]="item.description" placeholder="Description ou libellé du produit..." />
                 </td>
                 <td>
                   <input type="number" class="form-control" [(ngModel)]="item.quantity" min="1" />

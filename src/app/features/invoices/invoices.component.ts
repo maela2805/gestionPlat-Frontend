@@ -1,9 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { InvoiceService } from '../../core/services/invoice.service';
-import { TiersService } from '../../core/services/tiers.service';
-import { BoutiqueService } from '../../core/services/boutique.service';
-import { StoreSaleService } from '../../core/services/store-sale.service';
-import { PurchaseOrderService } from '../../core/services/purchase-order.service';
+import { ProductService } from '../../core/services/product.service';
+import { Product } from '../../core/models/product.model';
+import { BoutiquePrice } from '../../core/models/boutique.model';
 import {
   Invoice,
   InvoiceType,
@@ -38,6 +35,9 @@ export class InvoicesComponent implements OnInit {
   boutiquesList: Boutique[] = [];
   completedSales: any[] = [];
   completedPurchases: any[] = [];
+  allProducts: Product[] = [];
+  availableProducts: { id: number; name: string; price: number }[] = [];
+  boutiquePrices: BoutiquePrice[] = [];
 
   // Modals state
   showCreateModal: boolean = false;
@@ -51,7 +51,7 @@ export class InvoicesComponent implements OnInit {
   newInvoiceBoutiqueId: number | undefined;
   newInvoiceTaxRate: number = 0;
   newInvoiceNote: string = '';
-  newInvoiceItems: { description: string; quantity: number; unitPriceHt: number; taxRate: number }[] = [];
+  newInvoiceItems: { selectedProductId?: number; description: string; quantity: number; unitPriceHt: number; taxRate: number }[] = [];
 
   // Payment Form State
   paymentAmount: number = 0;
@@ -69,7 +69,8 @@ export class InvoicesComponent implements OnInit {
     private tiersService: TiersService,
     private boutiqueService: BoutiqueService,
     private storeSaleService: StoreSaleService,
-    private purchaseOrderService: PurchaseOrderService
+    private purchaseOrderService: PurchaseOrderService,
+    private productService: ProductService
   ) {}
 
   ngOnInit(): void {
@@ -99,6 +100,51 @@ export class InvoicesComponent implements OnInit {
     this.boutiqueService.getAllBoutiques().subscribe(b => this.boutiquesList = b);
     this.storeSaleService.getAllStoreSales().subscribe(sales => this.completedSales = sales);
     this.purchaseOrderService.getAllPurchaseOrders().subscribe(pos => this.completedPurchases = pos);
+    this.productService.getAllProducts().subscribe(prods => {
+      this.allProducts = prods;
+      this.updateAvailableProducts();
+    });
+  }
+
+  onBoutiqueChange(): void {
+    if (this.newInvoiceBoutiqueId) {
+      this.boutiqueService.getBoutiquePrices(this.newInvoiceBoutiqueId).subscribe({
+        next: (prices) => {
+          this.boutiquePrices = prices.filter(p => p.active);
+          this.updateAvailableProducts();
+        },
+        error: () => this.updateAvailableProducts()
+      });
+    } else {
+      this.boutiquePrices = [];
+      this.updateAvailableProducts();
+    }
+  }
+
+  updateAvailableProducts(): void {
+    if (this.newInvoiceType === InvoiceType.VENTE && this.newInvoiceBoutiqueId && this.boutiquePrices.length > 0) {
+      this.availableProducts = this.boutiquePrices.map(p => ({
+        id: p.productId,
+        name: p.productName,
+        price: p.wholesalePrice || p.defaultSellPrice || 0
+      }));
+    } else {
+      this.availableProducts = this.allProducts.map(p => ({
+        id: p.id,
+        name: p.name,
+        price: this.newInvoiceType === InvoiceType.ACHAT ? (p.buyPrice || 0) : (p.sellPrice || p.buyPrice || 0)
+      }));
+    }
+  }
+
+  onProductSelect(item: { selectedProductId?: number; description: string; unitPriceHt: number }, productIdStr: any): void {
+    const prodId = Number(productIdStr);
+    const found = this.availableProducts.find(p => p.id === prodId);
+    if (found) {
+      item.selectedProductId = found.id;
+      item.description = found.name;
+      item.unitPriceHt = found.price;
+    }
   }
 
   collectAllPayments(): void {
@@ -150,6 +196,7 @@ export class InvoicesComponent implements OnInit {
     this.newInvoiceTaxRate = 0;
     this.newInvoiceNote = '';
     this.newInvoiceItems = [{ description: '', quantity: 1, unitPriceHt: 0, taxRate: 0 }];
+    this.onBoutiqueChange();
     this.showCreateModal = true;
   }
 
