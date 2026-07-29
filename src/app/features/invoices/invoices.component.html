@@ -1,0 +1,394 @@
+<div class="page-header">
+  <div class="header-content">
+    <h1>Facturation & Règlements</h1>
+    <p class="subtitle">Gestion des factures clients, factures fournisseurs, encaissements et décaissements.</p>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-primary" (click)="openCreateModal()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nouvelle Facture
+    </button>
+  </div>
+</div>
+
+<div *ngIf="successMsg" class="alert alert-success">
+  {{ successMsg }}
+</div>
+
+<!-- Navigation Tabs & Filters -->
+<div class="card tabs-card">
+  <div class="tabs-header">
+    <div class="nav-tabs">
+      <button class="tab-btn" [class.active]="activeTab === 'VENTE'" (click)="setTab('VENTE')">
+        Factures Ventes (Clients)
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'ACHAT'" (click)="setTab('ACHAT')">
+        Factures Achats (Fournisseurs)
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'PAYMENTS'" (click)="setTab('PAYMENTS')">
+        Historique des Règlements
+      </button>
+    </div>
+
+    <div class="search-filter-box" *ngIf="activeTab !== 'PAYMENTS'">
+      <input
+        type="text"
+        class="form-control search-input"
+        placeholder="Rechercher par N°, Client, Boutique..."
+        [(ngModel)]="searchQuery"
+        (input)="applyFilter()"
+      />
+      <select class="form-control status-select" [(ngModel)]="selectedStatus" (change)="filterByStatus(selectedStatus)">
+        <option value="">Tous les statuts</option>
+        <option value="BROUILLON">Brouillons</option>
+        <option value="VALIDEE">Validées (Impayées)</option>
+        <option value="PAYEE_PARTIEL">Partiellement Payées</option>
+        <option value="PAYEE">Payées</option>
+        <option value="ANNULEE">Annulées</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Invoices Table View -->
+<div class="card" *ngIf="activeTab !== 'PAYMENTS'">
+  <div class="card-body p-0">
+    <div *ngIf="loading" class="loading-spinner">
+      <span>Chargement des factures...</span>
+    </div>
+
+    <div *ngIf="!loading && filteredInvoices.length === 0" class="empty-state">
+      <p>Aucune facture trouvée pour ces critères.</p>
+    </div>
+
+    <div class="table-responsive" *ngIf="!loading && filteredInvoices.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>N° Facture</th>
+            <th>Date</th>
+            <th>Partenaire / Boutique</th>
+            <th>Total HT</th>
+            <th>TVA</th>
+            <th>Total TTC</th>
+            <th>Reste à Payer</th>
+            <th>Statut</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let invoice of filteredInvoices">
+            <td class="font-weight-bold" (click)="openDetailModal(invoice)" style="cursor: pointer; color: #1890ff;">
+              {{ invoice.invoiceNumber }}
+            </td>
+            <td>{{ invoice.invoiceDate | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <span *ngIf="invoice.tiersName">{{ invoice.tiersName }}</span>
+              <span *ngIf="invoice.boutiqueName" class="badge badge-info">{{ invoice.boutiqueName }}</span>
+              <span *ngIf="!invoice.tiersName && !invoice.boutiqueName" class="text-muted">-</span>
+            </td>
+            <td>{{ invoice.subtotalHt | number:'1.0-0' }} FCFA</td>
+            <td>{{ invoice.taxAmount | number:'1.0-0' }} FCFA</td>
+            <td class="font-weight-bold">{{ invoice.totalTtc | number:'1.0-0' }} FCFA</td>
+            <td class="text-danger font-weight-bold">{{ invoice.remainingAmount | number:'1.0-0' }} FCFA</td>
+            <td>
+              <span class="badge" [ngClass]="getStatusBadgeClass(invoice.status)">
+                {{ getStatusLabel(invoice.status) }}
+              </span>
+            </td>
+            <td class="text-right action-buttons">
+              <button class="btn btn-sm btn-icon" title="Voir / Imprimer" (click)="openDetailModal(invoice)">
+                👁️
+              </button>
+              <button
+                *ngIf="invoice.status === 'BROUILLON'"
+                class="btn btn-sm btn-outline-success"
+                (click)="validateInvoice(invoice)">
+                Valider
+              </button>
+              <button
+                *ngIf="invoice.status !== 'PAYEE' && invoice.status !== 'ANNULEE' && invoice.status !== 'BROUILLON'"
+                class="btn btn-sm btn-success"
+                (click)="openPaymentModal(invoice)">
+                Régler
+              </button>
+              <button
+                *ngIf="invoice.status !== 'ANNULEE' && invoice.status !== 'PAYEE'"
+                class="btn btn-sm btn-outline-danger"
+                (click)="cancelInvoice(invoice)">
+                Annuler
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Payments History Table -->
+<div class="card" *ngIf="activeTab === 'PAYMENTS'">
+  <div class="card-header">
+    <h3>Historique de tous les Règlements</h3>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>N° Règlement</th>
+            <th>Facture Associée</th>
+            <th>Date & Heure</th>
+            <th>Mode de Paiement</th>
+            <th>Montant</th>
+            <th>Référence</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let payment of allPayments">
+            <td class="font-weight-bold">{{ payment.paymentNumber }}</td>
+            <td>{{ payment.invoiceNumber }}</td>
+            <td>{{ payment.paymentDate | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td><span class="badge badge-primary">{{ payment.paymentMethod }}</span></td>
+            <td class="font-weight-bold text-success">{{ payment.amount | number:'1.0-0' }} FCFA</td>
+            <td>{{ payment.reference || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Creation Facture -->
+<div class="modal-backdrop" *ngIf="showCreateModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Créer une Facture ({{ newInvoiceType === 'VENTE' ? 'Vente Client' : 'Achat Fournisseur' }})</h3>
+        <button class="close-btn" (click)="closeCreateModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label>Type de Facture</label>
+            <select class="form-control" [(ngModel)]="newInvoiceType">
+              <option value="VENTE">Vente (Client / Boutique)</option>
+              <option value="ACHAT">Achat (Fournisseur)</option>
+            </select>
+          </div>
+
+          <div class="form-group col-6" *ngIf="newInvoiceType === 'ACHAT' || (tiersList && tiersList.length > 0)">
+            <label>Partenaire / Tiers</label>
+            <select class="form-control" [(ngModel)]="newInvoiceTiersId">
+              <option [ngValue]="undefined">Sélectionner un tiers...</option>
+              <option *ngFor="let t of tiersList" [value]="t.id">{{ t.name }} ({{ t.type }})</option>
+            </select>
+          </div>
+
+          <div class="form-group col-6" *ngIf="newInvoiceType === 'VENTE'">
+            <label>Boutique (Optionnel)</label>
+            <select class="form-control" [(ngModel)]="newInvoiceBoutiqueId">
+              <option [ngValue]="undefined">Toutes les boutiques / Client direct</option>
+              <option *ngFor="let b of boutiquesList" [value]="b.id">{{ b.name }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label>Taux TVA (%)</label>
+            <input type="number" class="form-control" [(ngModel)]="newInvoiceTaxRate" min="0" max="100" />
+          </div>
+          <div class="form-group col-6">
+            <label>Notes / Remarques</label>
+            <input type="text" class="form-control" [(ngModel)]="newInvoiceNote" placeholder="Notes ou conditions de paiement..." />
+          </div>
+        </div>
+
+        <hr />
+        <h4>Articles / Prestations</h4>
+        <table class="table-items">
+          <thead>
+            <tr>
+              <th>Désignation</th>
+              <th width="120">Quantité</th>
+              <th width="160">Prix Unitaire HT</th>
+              <th width="160">Total HT</th>
+              <th width="50"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of newInvoiceItems; let i = index">
+              <td>
+                <input type="text" class="form-control" [(ngModel)]="item.description" placeholder="Description de l'article ou du plat" />
+              </td>
+              <td>
+                <input type="number" class="form-control" [(ngModel)]="item.quantity" min="1" />
+              </td>
+              <td>
+                <input type="number" class="form-control" [(ngModel)]="item.unitPriceHt" min="0" />
+              </td>
+              <td class="font-weight-bold">
+                {{ (item.quantity * item.unitPriceHt) | number:'1.0-0' }} FCFA
+              </td>
+              <td>
+                <button class="btn-delete" (click)="removeItemLine(i)">&times;</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <button class="btn btn-sm btn-outline-primary mt-2" (click)="addItemLine()">+ Ajouter une ligne</button>
+
+        <div class="invoice-summary-box">
+          <div>Sous-total HT : <strong>{{ calculateNewInvoiceSubtotal() | number:'1.0-0' }} FCFA</strong></div>
+          <div>Montant TVA ({{ newInvoiceTaxRate }}%) : <strong>{{ calculateNewInvoiceTax() | number:'1.0-0' }} FCFA</strong></div>
+          <div class="total-ttc">TOTAL TTC : <strong>{{ calculateNewInvoiceTotal() | number:'1.0-0' }} FCFA</strong></div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeCreateModal()">Annuler</button>
+        <button class="btn btn-primary" (click)="saveInvoice()">Enregistrer la Facture</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Règlement -->
+<div class="modal-backdrop" *ngIf="showPaymentModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Enregistrer un Règlement</h3>
+        <button class="close-btn" (click)="closePaymentModal()">&times;</button>
+      </div>
+      <div class="modal-body" *ngIf="selectedInvoice">
+        <p>Règlement pour la facture <strong>{{ selectedInvoice.invoiceNumber }}</strong></p>
+        <div class="alert alert-info">
+          Reste à payer actuel : <strong>{{ selectedInvoice.remainingAmount | number:'1.0-0' }} FCFA</strong>
+        </div>
+
+        <div class="form-group">
+          <label>Montant du Règlement (FCFA)</label>
+          <input type="number" class="form-control" [(ngModel)]="paymentAmount" [max]="selectedInvoice.remainingAmount" />
+        </div>
+
+        <div class="form-group">
+          <label>Mode de Paiement</label>
+          <select class="form-control" [(ngModel)]="paymentMethod">
+            <option value="ESPECES">Espèces</option>
+            <option value="WAVE">Wave</option>
+            <option value="ORANGE_MONEY">Orange Money</option>
+            <option value="VIREMENT">Virement Bancaire</option>
+            <option value="CHEQUE">Chèque</option>
+            <option value="CARTE_BANCAIRE">Carte Bancaire</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Référence / Transaction ID (Optionnel)</label>
+          <input type="text" class="form-control" [(ngModel)]="paymentReference" placeholder="Ex: N° de reçu, ID Wave, N° Chèque..." />
+        </div>
+
+        <div class="form-group">
+          <label>Notes</label>
+          <input type="text" class="form-control" [(ngModel)]="paymentNote" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closePaymentModal()">Annuler</button>
+        <button class="btn btn-success" (click)="savePayment()">Confirmer le Règlement</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Vue & Impression Facture -->
+<div class="modal-backdrop" *ngIf="showDetailModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content print-content">
+      <div class="modal-header no-print">
+        <h3>Aperçu de la Facture</h3>
+        <div>
+          <button class="btn btn-primary mr-2" (click)="printInvoice()">🖨️ Imprimer</button>
+          <button class="close-btn" (click)="closeDetailModal()">&times;</button>
+        </div>
+      </div>
+
+      <div class="modal-body printable-invoice" *ngIf="selectedInvoice">
+        <div class="invoice-header">
+          <div class="company-brand">
+            <h2>Tawfekh Vaisselle</h2>
+            <p>Gestion de Traiteur & Vaisselle</p>
+            <p>Téléphone : 77 675 94 94</p>
+          </div>
+          <div class="invoice-title-block">
+            <h1>FACTURE</h1>
+            <p>N° : <strong>{{ selectedInvoice.invoiceNumber }}</strong></p>
+            <p>Date : {{ selectedInvoice.invoiceDate | date:'dd/MM/yyyy' }}</p>
+            <p *ngIf="selectedInvoice.dueDate">Échéance : {{ selectedInvoice.dueDate | date:'dd/MM/yyyy' }}</p>
+          </div>
+        </div>
+
+        <div class="invoice-parties">
+          <div class="party-box" *ngIf="selectedInvoice.tiersName">
+            <h4>Facturé à :</h4>
+            <p><strong>{{ selectedInvoice.tiersName }}</strong></p>
+            <p *ngIf="selectedInvoice.tiersCode">Code : {{ selectedInvoice.tiersCode }}</p>
+          </div>
+          <div class="party-box" *ngIf="selectedInvoice.boutiqueName">
+            <h4>Boutique / Point de vente :</h4>
+            <p><strong>{{ selectedInvoice.boutiqueName }}</strong></p>
+          </div>
+        </div>
+
+        <table class="invoice-items-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th class="text-center">Quantité</th>
+              <th class="text-right">Prix Unitaire HT</th>
+              <th class="text-right">Total HT</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of selectedInvoice.items">
+              <td>{{ item.description }}</td>
+              <td class="text-center">{{ item.quantity }}</td>
+              <td class="text-right">{{ item.unitPriceHt | number:'1.0-0' }} FCFA</td>
+              <td class="text-right">{{ item.totalHt | number:'1.0-0' }} FCFA</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="invoice-totals">
+          <div class="total-row">
+            <span>Sous-Total HT :</span>
+            <span>{{ selectedInvoice.subtotalHt | number:'1.0-0' }} FCFA</span>
+          </div>
+          <div class="total-row">
+            <span>TVA ({{ selectedInvoice.taxRate || 0 }}%) :</span>
+            <span>{{ selectedInvoice.taxAmount | number:'1.0-0' }} FCFA</span>
+          </div>
+          <div class="total-row grand-total">
+            <span>TOTAL TTC :</span>
+            <span>{{ selectedInvoice.totalTtc | number:'1.0-0' }} FCFA</span>
+          </div>
+          <div class="total-row">
+            <span>Montant Payé :</span>
+            <span>{{ selectedInvoice.paidAmount | number:'1.0-0' }} FCFA</span>
+          </div>
+          <div class="total-row due-total">
+            <span>Reste à Payer :</span>
+            <span>{{ selectedInvoice.remainingAmount | number:'1.0-0' }} FCFA</span>
+          </div>
+        </div>
+
+        <div class="invoice-footer">
+          <p>Merci pour votre confiance - Tawfekh Vaisselle</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

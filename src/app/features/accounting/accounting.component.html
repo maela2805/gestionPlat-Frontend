@@ -1,0 +1,213 @@
+<div class="page-header">
+  <div class="header-content">
+    <h1>Comptabilité & Bilan Financier</h1>
+    <p class="subtitle">Tableau de bord financier, compte de résultat (P&L), journal des recettes et dépenses.</p>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-outline-danger mr-2" (click)="openEntryModal(EntryTypeEnum.DEPENSE)">
+      - Saisir une Dépense
+    </button>
+    <button class="btn btn-success" (click)="openEntryModal(EntryTypeEnum.RECETTE)">
+      + Saisir une Recette
+    </button>
+  </div>
+</div>
+
+<div *ngIf="successMsg" class="alert alert-success">
+  {{ successMsg }}
+</div>
+
+<!-- KPI Financial Cards -->
+<div class="kpi-grid" *ngIf="summary">
+  <div class="kpi-card card-revenue">
+    <div class="kpi-icon">📈</div>
+    <div class="kpi-content">
+      <span class="kpi-title">Chiffre d'Affaires (Recettes)</span>
+      <h2 class="kpi-value text-success">{{ summary.totalRevenue | number:'1.0-0' }} FCFA</h2>
+    </div>
+  </div>
+
+  <div class="kpi-card card-expenses">
+    <div class="kpi-icon">📉</div>
+    <div class="kpi-content">
+      <span class="kpi-title">Total Charges & Dépenses</span>
+      <h2 class="kpi-value text-danger">{{ summary.totalExpense | number:'1.0-0' }} FCFA</h2>
+    </div>
+  </div>
+
+  <div class="kpi-card card-profit" [class.negative]="summary.netProfit < 0">
+    <div class="kpi-icon">⚖️</div>
+    <div class="kpi-content">
+      <span class="kpi-title">Résultat Net (P&L)</span>
+      <h2 class="kpi-value" [ngClass]="summary.netProfit >= 0 ? 'text-success' : 'text-danger'">
+        {{ summary.netProfit | number:'1.0-0' }} FCFA
+      </h2>
+      <span class="kpi-badge" [ngClass]="summary.netProfit >= 0 ? 'bg-success' : 'bg-danger'">
+        {{ summary.netProfit >= 0 ? 'Bénéfice' : 'Perte' }}
+      </span>
+    </div>
+  </div>
+
+  <div class="kpi-card card-cash">
+    <div class="kpi-icon">💰</div>
+    <div class="kpi-content">
+      <span class="kpi-title">Solde Trésorerie Global</span>
+      <h2 class="kpi-value text-primary">{{ summary.cashBalance | number:'1.0-0' }} FCFA</h2>
+    </div>
+  </div>
+</div>
+
+<div class="kpi-subgrid" *ngIf="summary">
+  <div class="kpi-subcard">
+    <span>Créances Clients (Factures dues)</span>
+    <strong class="text-warning">{{ summary.clientReceivables | number:'1.0-0' }} FCFA</strong>
+  </div>
+  <div class="kpi-subcard">
+    <span>Dettes Fournisseurs (Factures à payer)</span>
+    <strong class="text-danger">{{ summary.supplierPayables | number:'1.0-0' }} FCFA</strong>
+  </div>
+</div>
+
+<!-- Chart & Journal Section -->
+<div class="row mt-4">
+  <!-- Chart Card -->
+  <div class="col-4">
+    <div class="card h-100">
+      <div class="card-header">
+        <h3>Répartition des Dépenses</h3>
+      </div>
+      <div class="card-body">
+        <div class="chart-container" style="position: relative; height: 260px;">
+          <canvas #expensesChart></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Journal Card -->
+  <div class="col-8">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h3>Journal des Écritures Comptables</h3>
+        <div class="filters-inline">
+          <select class="form-control form-control-sm" [(ngModel)]="selectedType" (change)="applyFilter()">
+            <option value="">Tous les flux</option>
+            <option value="RECETTE">Recettes uniquement</option>
+            <option value="DEPENSE">Dépenses uniquement</option>
+          </select>
+          <input
+            type="text"
+            class="form-control form-control-sm search-input"
+            placeholder="Filtrer..."
+            [(ngModel)]="searchQuery"
+            (input)="applyFilter()"
+          />
+        </div>
+      </div>
+
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Réf. Code</th>
+                <th>Date</th>
+                <th>Flux</th>
+                <th>Catégorie</th>
+                <th>Description</th>
+                <th>Mode</th>
+                <th class="text-right">Montant</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let entry of filteredEntries">
+                <td class="font-weight-bold">{{ entry.entryCode }}</td>
+                <td>{{ entry.entryDate | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="entry.type === 'RECETTE' ? 'badge-success' : 'badge-danger'">
+                    {{ entry.type }}
+                  </span>
+                </td>
+                <td>{{ getCategoryLabel(entry.category) }}</td>
+                <td>
+                  {{ entry.description }}
+                  <small *ngIf="entry.tiersName" class="text-muted d-block">Tiers : {{ entry.tiersName }}</small>
+                </td>
+                <td><span class="badge badge-secondary">{{ entry.paymentMethod || 'Autre' }}</span></td>
+                <td class="text-right font-weight-bold" [ngClass]="entry.type === 'RECETTE' ? 'text-success' : 'text-danger'">
+                  {{ entry.type === 'RECETTE' ? '+' : '-' }}{{ entry.amount | number:'1.0-0' }} FCFA
+                </td>
+              </tr>
+              <tr *ngIf="filteredEntries.length === 0">
+                <td colspan="7" class="text-center py-4 text-muted">Aucune écriture comptable trouvée.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Saisie Manuelle (Dépense / Recette) -->
+<div class="modal-backdrop" *ngIf="showEntryModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Saisir une {{ entryType === 'DEPENSE' ? 'Dépense' : 'Recette' }} Manuelle</h3>
+        <button class="close-btn" (click)="closeEntryModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Type de Mouvement</label>
+          <select class="form-control" [(ngModel)]="entryType">
+            <option value="DEPENSE">Dépense (Charge)</option>
+            <option value="RECETTE">Recette (Produit)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Catégorie Comptable</label>
+          <select class="form-control" [(ngModel)]="entryCategory">
+            <option *ngFor="let cat of categoriesList" [value]="cat.key">{{ cat.label }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Montant (FCFA)</label>
+          <input type="number" class="form-control" [(ngModel)]="entryAmount" min="1" placeholder="Ex: 50000" />
+        </div>
+
+        <div class="form-group">
+          <label>Mode de Paiement</label>
+          <select class="form-control" [(ngModel)]="entryPaymentMethod">
+            <option value="ESPECES">Espèces</option>
+            <option value="WAVE">Wave</option>
+            <option value="ORANGE_MONEY">Orange Money</option>
+            <option value="VIREMENT">Virement Bancaire</option>
+            <option value="CHEQUE">Chèque</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Description / Motif</label>
+          <input type="text" class="form-control" [(ngModel)]="entryDescription" placeholder="Ex: Règlement facture d'électricité juillet, Achat fournitures..." />
+        </div>
+
+        <div class="form-group">
+          <label>Partenaire / Tiers (Optionnel)</label>
+          <select class="form-control" [(ngModel)]="entryTiersId">
+            <option [ngValue]="undefined">Aucun tiers</option>
+            <option *ngFor="let t of tiersList" [value]="t.id">{{ t.name }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeEntryModal()">Annuler</button>
+        <button class="btn btn-primary" (click)="saveManualEntry()">Enregistrer l'Écriture</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -73,6 +73,16 @@ export const routes: Routes = [
     loadChildren: () => import('./features/caisse-supervision/caisse-supervision.module').then(m => m.CaisseSupervisionModule) 
   },
   { 
+    path: 'invoices', 
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/invoices/invoices.module').then(m => m.InvoicesModule) 
+  },
+  { 
+    path: 'accounting', 
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/accounting/accounting.module').then(m => m.AccountingModule) 
+  },
+  { 
     path: 'profile', 
     canActivate: [authGuard],
     loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) 
