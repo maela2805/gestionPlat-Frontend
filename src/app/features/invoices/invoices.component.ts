@@ -1,3 +1,9 @@
+import { Component, OnInit } from '@angular/core';
+import { InvoiceService } from '../../core/services/invoice.service';
+import { TiersService } from '../../core/services/tiers.service';
+import { BoutiqueService } from '../../core/services/boutique.service';
+import { StoreSaleService } from '../../core/services/store-sale.service';
+import { PurchaseOrderService } from '../../core/services/purchase-order.service';
 import { ProductService } from '../../core/services/product.service';
 import { Product } from '../../core/models/product.model';
 import { BoutiquePrice } from '../../core/models/boutique.model';
