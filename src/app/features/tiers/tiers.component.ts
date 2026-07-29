@@ -94,6 +94,19 @@ export class TiersComponent implements OnInit {
     });
   }
 
+  get currentType(): string {
+    return this.tiersForm ? this.tiersForm.get('type')?.value : 'FOURNISSEUR';
+  }
+
+  getTypeLabel(type: string): string {
+    switch (type) {
+      case 'FOURNISSEUR': return '🏢 Fournisseur (Matières & Matériel)';
+      case 'CLIENT': return '👤 Client (Particulier / Entreprise)';
+      case 'PARTENAIRE': return '🤝 Partenaire / Prestataire de services';
+      default: return type;
+    }
+  }
+
   ngOnInit(): void {
     this.loadTiers();
   }

@@ -215,13 +215,22 @@
       </div>
 
       <form [formGroup]="tiersForm" (ngSubmit)="submitForm()" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+        <!-- Banner d'information selon le type -->
+        <div style="padding: 10px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;"
+             [style.background]="currentType === 'FOURNISSEUR' ? 'rgba(114,46,209,0.08)' : (currentType === 'CLIENT' ? 'rgba(82,196,26,0.08)' : 'rgba(250,140,22,0.08)')"
+             [style.color]="currentType === 'FOURNISSEUR' ? '#722ed1' : (currentType === 'CLIENT' ? '#389e0d' : '#d46b08')">
+          <span *ngIf="currentType === 'FOURNISSEUR'">🏢 Configuration Fournisseur : Saisie de la Raison Sociale, coordonnées et Identifiant Fiscal (NIF).</span>
+          <span *ngIf="currentType === 'CLIENT'">👤 Configuration Client : Saisie du Nom client, numéro de téléphone direct et adresse de livraison.</span>
+          <span *ngIf="currentType === 'PARTENAIRE'">🤝 Configuration Partenaire / Prestataire : Coordonnées du partenaire et détails du service.</span>
+        </div>
+
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
           <div style="display: flex; flex-direction: column; gap: 6px;">
             <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Type de Tiers *</label>
-            <select formControlName="type" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;">
-              <option value="FOURNISSEUR">FOURNISSEUR</option>
-              <option value="CLIENT">CLIENT</option>
-              <option value="PARTENAIRE">PARTENAIRE / PRESTATAIRE</option>
+            <select formControlName="type" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; font-weight: 600;">
+              <option value="FOURNISSEUR">🏢 FOURNISSEUR (Matières & Matériel)</option>
+              <option value="CLIENT">👤 CLIENT (Particulier / Entreprise)</option>
+              <option value="PARTENAIRE">🤝 PARTENAIRE / PRESTATAIRE</option>
             </select>
           </div>
 
@@ -236,32 +245,43 @@
 
         <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 16px;">
           <div style="display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Code Tiers (ex: FRS-001)</label>
-            <input type="text" formControlName="code" placeholder="Génération auto si vide" [readOnly]="!!editingTiers()" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Code Tiers (généré auto)</label>
+            <input type="text" formControlName="code" placeholder="Génération auto si vide" [readOnly]="!!editingTiers()" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; background: #f8fafc;" />
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Nom / Raison Sociale *</label>
-            <input type="text" formControlName="name" placeholder="Nom de l'entreprise ou contact" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">
+              <span *ngIf="currentType === 'FOURNISSEUR'">Raison Sociale / Entreprise Fournisseur *</span>
+              <span *ngIf="currentType === 'CLIENT'">Nom & Prénom du Client *</span>
+              <span *ngIf="currentType === 'PARTENAIRE'">Nom du Partenaire / Prestataire *</span>
+            </label>
+            <input type="text" formControlName="name"
+                   [placeholder]="currentType === 'FOURNISSEUR' ? 'Ex: Les Grands Moulins de Dakar' : (currentType === 'CLIENT' ? 'Ex: Amadou Ndiaye' : 'Ex: Société de Transport X')"
+                   style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
           </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
           <div style="display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Email</label>
-            <input type="email" formControlName="email" placeholder="contact@domaine.com" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">
+              Téléphone <span *ngIf="currentType === 'CLIENT'" style="color: #1890ff;">(Essentiel pour livraison)</span>
+            </label>
+            <input type="text" formControlName="phone" placeholder="+221 77 000 00 00" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Téléphone</label>
-            <input type="text" formControlName="phone" placeholder="+221 77 000 00 00" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Adresse Email</label>
+            <input type="email" formControlName="email" placeholder="contact@domaine.com" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
           </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
           <div style="display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Adresse</label>
-            <input type="text" formControlName="address" placeholder="Rue, quartier, avenue..." style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">
+              <span *ngIf="currentType === 'CLIENT'">Adresse de Livraison / Résidence</span>
+              <span *ngIf="currentType !== 'CLIENT'">Adresse du Siège / Bureau</span>
+            </label>
+            <input type="text" formControlName="address" placeholder="Quartier, Rue, N° villa..." style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 6px;">
@@ -270,14 +290,24 @@
           </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-          <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">NIF / Numéro de Registre (SIRET/NIF)</label>
-          <input type="text" formControlName="taxId" placeholder="Numéro fiscal / NIF" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+        <!-- Champ NIF / SIRET : Affiché principalement pour FOURNISSEUR et PARTENAIRE, optionnel pour CLIENT -->
+        <div style="display: flex; flex-direction: column; gap: 6px;" *ngIf="currentType !== 'CLIENT'">
+          <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">
+            <span *ngIf="currentType === 'FOURNISSEUR'">NIF / N° Registre de Commerce (Important pour Facturation)</span>
+            <span *ngIf="currentType === 'PARTENAIRE'">Identifiant Fiscal / NIF</span>
+          </label>
+          <input type="text" formControlName="taxId" placeholder="Ex: NIF-2026-987654" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 6px;">
-          <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Note / Observations</label>
-          <textarea formControlName="note" rows="2" placeholder="Informations complémentaires..." style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;"></textarea>
+          <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">
+            <span *ngIf="currentType === 'FOURNISSEUR'">Conditions de paiement & Notes</span>
+            <span *ngIf="currentType === 'CLIENT'">Remarques & Préférences de Livraison</span>
+            <span *ngIf="currentType === 'PARTENAIRE'">Modalités de partenariat & Notes</span>
+          </label>
+          <textarea formControlName="note" rows="2"
+                    [placeholder]="currentType === 'FOURNISSEUR' ? 'Ex: Délai 30 jours, Franco de port...' : (currentType === 'CLIENT' ? 'Ex: Client fidèle, Préfère appel avant livraison...' : 'Ex: Contrat cadre...')"
+                    style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;"></textarea>
         </div>
 
         <div *ngIf="errorMessage()" style="background: rgba(255,77,79,0.1); color: #ff4d4f; padding: 10px 14px; border-radius: 6px; font-size: 13px;">
