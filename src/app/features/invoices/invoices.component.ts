@@ -137,8 +137,14 @@ export class InvoicesComponent implements OnInit {
     });
   }
 
+  // Creation Modal mode
+  creationMode: 'FROM_PO' | 'MANUAL' = 'MANUAL';
+  selectedPurchaseOrderId: number | undefined;
+
   openCreateModal(type?: InvoiceType): void {
     this.newInvoiceType = type || (this.activeTab === 'ACHAT' ? InvoiceType.ACHAT : InvoiceType.VENTE);
+    this.creationMode = this.newInvoiceType === InvoiceType.ACHAT && this.completedPurchases.length > 0 ? 'FROM_PO' : 'MANUAL';
+    this.selectedPurchaseOrderId = undefined;
     this.newInvoiceTiersId = undefined;
     this.newInvoiceBoutiqueId = undefined;
     this.newInvoiceTaxRate = 0;
@@ -218,6 +224,21 @@ export class InvoicesComponent implements OnInit {
     this.invoiceService.createInvoiceFromPurchaseOrder(poId).subscribe({
       next: () => {
         this.showSuccess('Facture générée avec succès depuis la commande fournisseur.');
+        this.loadInvoices();
+      },
+      error: () => alert('Erreur lors de la génération de la facture.')
+    });
+  }
+
+  generateFromSelectedPO(): void {
+    if (!this.selectedPurchaseOrderId) {
+      alert('Veuillez sélectionner une commande fournisseur.');
+      return;
+    }
+    this.invoiceService.createInvoiceFromPurchaseOrder(this.selectedPurchaseOrderId).subscribe({
+      next: () => {
+        this.showSuccess('Facture d\'achat générée avec succès depuis la commande fournisseur.');
+        this.closeCreateModal();
         this.loadInvoices();
       },
       error: () => alert('Erreur lors de la génération de la facture.')

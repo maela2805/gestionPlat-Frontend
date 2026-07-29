@@ -169,7 +169,8 @@
       </div>
 
       <div class="modal-body">
-        <div class="form-row">
+        <!-- Type Selection & Mode Switcher -->
+        <div class="form-row mb-3">
           <div class="form-group col-6">
             <label>Type de Facture</label>
             <select class="form-control" [(ngModel)]="newInvoiceType">
@@ -178,76 +179,118 @@
             </select>
           </div>
 
-          <div class="form-group col-6" *ngIf="newInvoiceType === 'ACHAT' || (tiersList && tiersList.length > 0)">
-            <label>Partenaire / Tiers</label>
-            <select class="form-control" [(ngModel)]="newInvoiceTiersId">
-              <option [ngValue]="undefined">Sélectionner un tiers...</option>
-              <option *ngFor="let t of tiersList" [value]="t.id">{{ t.name }} ({{ t.type }})</option>
-            </select>
-          </div>
-
-          <div class="form-group col-6" *ngIf="newInvoiceType === 'VENTE'">
-            <label>Boutique (Optionnel)</label>
-            <select class="form-control" [(ngModel)]="newInvoiceBoutiqueId">
-              <option [ngValue]="undefined">Toutes les boutiques / Client direct</option>
-              <option *ngFor="let b of boutiquesList" [value]="b.id">{{ b.name }}</option>
+          <div class="form-group col-6" *ngIf="newInvoiceType === 'ACHAT'">
+            <label>Mode de Création</label>
+            <select class="form-control" [(ngModel)]="creationMode">
+              <option value="FROM_PO">📦 À partir d'une Commande Fournisseur</option>
+              <option value="MANUAL">📝 Saisie Manuelle (Libre)</option>
             </select>
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="form-group col-6">
-            <label>Taux TVA (%)</label>
-            <input type="number" class="form-control" [(ngModel)]="newInvoiceTaxRate" min="0" max="100" />
+        <!-- MODE 1: DEPUIS UNE COMMANDE FOURNISSEUR -->
+        <div *ngIf="newInvoiceType === 'ACHAT' && creationMode === 'FROM_PO'" class="po-selection-section">
+          <div class="alert alert-info">
+            Sélectionnez une commande d'achat enregistrée pour générer la facture correspondante en un clic.
           </div>
-          <div class="form-group col-6">
-            <label>Notes / Remarques</label>
-            <input type="text" class="form-control" [(ngModel)]="newInvoiceNote" placeholder="Notes ou conditions de paiement..." />
+
+          <div class="form-group">
+            <label>Sélectionner la Commande Fournisseur</label>
+            <select class="form-control form-control-lg" [(ngModel)]="selectedPurchaseOrderId">
+              <option [ngValue]="undefined">--- Choisir une commande d'achat ---</option>
+              <option *ngFor="let po of completedPurchases" [value]="po.id">
+                Réf: {{ po.reference }} | Fournisseur: {{ po.supplier?.name || po.supplierName }} | Total: {{ po.totalAmount | number:'1.0-0' }} FCFA ({{ po.status }})
+              </option>
+            </select>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+            <a routerLink="/purchase-orders" (click)="closeCreateModal()" class="btn btn-link p-0 text-primary">
+              + Nouvelle commande d'achat (dans Commandes Fournisseurs)
+            </a>
+            <button
+              class="btn btn-success btn-lg"
+              [disabled]="!selectedPurchaseOrderId"
+              (click)="generateFromSelectedPO()">
+              ✔ Générer la Facture d'Achat
+            </button>
           </div>
         </div>
 
-        <hr />
-        <h4>Articles / Prestations</h4>
-        <table class="table-items">
-          <thead>
-            <tr>
-              <th>Désignation</th>
-              <th width="120">Quantité</th>
-              <th width="160">Prix Unitaire HT</th>
-              <th width="160">Total HT</th>
-              <th width="50"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of newInvoiceItems; let i = index">
-              <td>
-                <input type="text" class="form-control" [(ngModel)]="item.description" placeholder="Description de l'article ou du plat" />
-              </td>
-              <td>
-                <input type="number" class="form-control" [(ngModel)]="item.quantity" min="1" />
-              </td>
-              <td>
-                <input type="number" class="form-control" [(ngModel)]="item.unitPriceHt" min="0" />
-              </td>
-              <td class="font-weight-bold">
-                {{ (item.quantity * item.unitPriceHt) | number:'1.0-0' }} FCFA
-              </td>
-              <td>
-                <button class="btn-delete" (click)="removeItemLine(i)">&times;</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <button class="btn btn-sm btn-outline-primary mt-2" (click)="addItemLine()">+ Ajouter une ligne</button>
+        <!-- MODE 2: SAISIE MANUELLE -->
+        <div *ngIf="newInvoiceType === 'VENTE' || creationMode === 'MANUAL'">
+          <div class="form-row">
+            <div class="form-group col-6" *ngIf="newInvoiceType === 'ACHAT' || (tiersList && tiersList.length > 0)">
+              <label>Partenaire / Tiers</label>
+              <select class="form-control" [(ngModel)]="newInvoiceTiersId">
+                <option [ngValue]="undefined">Sélectionner un tiers...</option>
+                <option *ngFor="let t of tiersList" [value]="t.id">{{ t.name }} ({{ t.type }})</option>
+              </select>
+            </div>
 
-        <div class="invoice-summary-box">
-          <div>Sous-total HT : <strong>{{ calculateNewInvoiceSubtotal() | number:'1.0-0' }} FCFA</strong></div>
-          <div>Montant TVA ({{ newInvoiceTaxRate }}%) : <strong>{{ calculateNewInvoiceTax() | number:'1.0-0' }} FCFA</strong></div>
-          <div class="total-ttc">TOTAL TTC : <strong>{{ calculateNewInvoiceTotal() | number:'1.0-0' }} FCFA</strong></div>
+            <div class="form-group col-6" *ngIf="newInvoiceType === 'VENTE'">
+              <label>Boutique (Optionnel)</label>
+              <select class="form-control" [(ngModel)]="newInvoiceBoutiqueId">
+                <option [ngValue]="undefined">Toutes les boutiques / Client direct</option>
+                <option *ngFor="let b of boutiquesList" [value]="b.id">{{ b.name }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label>Taux TVA (%)</label>
+              <input type="number" class="form-control" [(ngModel)]="newInvoiceTaxRate" min="0" max="100" />
+            </div>
+            <div class="form-group col-6">
+              <label>Notes / Remarques</label>
+              <input type="text" class="form-control" [(ngModel)]="newInvoiceNote" placeholder="Notes ou conditions de paiement..." />
+            </div>
+          </div>
+
+          <hr />
+          <h4>Articles / Prestations</h4>
+          <table class="table-items">
+            <thead>
+              <tr>
+                <th>Désignation</th>
+                <th width="120">Quantité</th>
+                <th width="160">Prix Unitaire HT</th>
+                <th width="160">Total HT</th>
+                <th width="50"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of newInvoiceItems; let i = index">
+                <td>
+                  <input type="text" class="form-control" [(ngModel)]="item.description" placeholder="Description de l'article ou du plat" />
+                </td>
+                <td>
+                  <input type="number" class="form-control" [(ngModel)]="item.quantity" min="1" />
+                </td>
+                <td>
+                  <input type="number" class="form-control" [(ngModel)]="item.unitPriceHt" min="0" />
+                </td>
+                <td class="font-weight-bold">
+                  {{ (item.quantity * item.unitPriceHt) | number:'1.0-0' }} FCFA
+                </td>
+                <td>
+                  <button class="btn-delete" (click)="removeItemLine(i)">&times;</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <button class="btn btn-sm btn-outline-primary mt-2" (click)="addItemLine()">+ Ajouter une ligne</button>
+
+          <div class="invoice-summary-box">
+            <div>Sous-total HT : <strong>{{ calculateNewInvoiceSubtotal() | number:'1.0-0' }} FCFA</strong></div>
+            <div>Montant TVA ({{ newInvoiceTaxRate }}%) : <strong>{{ calculateNewInvoiceTax() | number:'1.0-0' }} FCFA</strong></div>
+            <div class="total-ttc">TOTAL TTC : <strong>{{ calculateNewInvoiceTotal() | number:'1.0-0' }} FCFA</strong></div>
+          </div>
         </div>
       </div>
 
-      <div class="modal-footer">
+      <div class="modal-footer" *ngIf="newInvoiceType === 'VENTE' || creationMode === 'MANUAL'">
         <button class="btn btn-secondary" (click)="closeCreateModal()">Annuler</button>
         <button class="btn btn-primary" (click)="saveInvoice()">Enregistrer la Facture</button>
       </div>
