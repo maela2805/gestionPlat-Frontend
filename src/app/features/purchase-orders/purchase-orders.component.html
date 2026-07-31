@@ -469,19 +469,25 @@
   </div>
 </div>
 
-<!-- MODALE DE CONFIRMATION CRÉATION FACTURE -->
-<div *ngIf="createdInvoiceSuccess()" class="modal-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px;">
-  <div class="modal-card" style="background: white; border-radius: 12px; width: 100%; max-width: 500px; padding: 28px; text-align: center;">
-    <div style="font-size: 48px; margin-bottom: 12px;">✅</div>
-    <h3 style="margin: 0 0 10px 0; font-size: 18px; font-weight: 700; color: #52c41a;">Facture Générée avec Succès !</h3>
-    <p style="font-size: 13.5px; color: #595959; margin-bottom: 22px; line-height: 1.5;">
-      La facture <strong>N° {{ createdInvoiceSuccess()?.invoiceNumber }}</strong> a été créée pour la commande <strong>{{ createdInvoiceSuccess()?.orderNumber }}</strong>.<br/><br/>
-      Vous pouvez la retrouver dans le module <strong>Factures</strong> pour générer et imprimer son Bon de Livraison (BL).
-    </p>
-    <div style="display: flex; gap: 12px; justify-content: center;">
+<!-- MODALE POP-UP DE CONFIRMATION CRÉATION FACTURE -->
+<div *ngIf="createdInvoiceSuccess()" class="modal-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px;">
+  <div class="modal-card" style="background: white; border-radius: 12px; width: 100%; max-width: 520px; padding: 28px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+    <div style="font-size: 48px; margin-bottom: 12px;">🧾</div>
+    <h3 style="margin: 0 0 10px 0; font-size: 19px; font-weight: 700; color: #0b1a30;">Facture de Cession Créée avec Succès !</h3>
+    
+    <div style="background: #fffbe6; border: 1px solid #ffe58f; padding: 14px; border-radius: 8px; font-size: 13.5px; color: #d48800; margin: 16px 0; text-align: left;">
+      <p style="margin: 0 0 6px 0;">📌 <strong>N° Facture :</strong> {{ createdInvoiceSuccess()?.invoiceNumber }}</p>
+      <p style="margin: 0 0 6px 0;">🚚 <strong>Commande Associée :</strong> {{ createdInvoiceSuccess()?.orderNumber }}</p>
+      <p style="margin: 0 0 6px 0;">💰 <strong>Reste à Payer (Compte Boutique) :</strong> {{ createdInvoiceSuccess()?.totalAmount | fcfa }}</p>
+      <p style="margin: 8px 0 0 0; font-size: 12px; font-style: italic; color: #8c8c8c; border-top: 1px dashed rgba(0,0,0,0.15); padding-top: 6px;">
+        ℹ️ La facture est enregistrée au statut <strong>Impayée</strong>. Le règlement s'effectuera au Dépôt au fur et à mesure des ventes réalisées par la boutique.
+      </p>
+    </div>
+
+    <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
       <button type="button" class="btn btn-secondary" (click)="closeCreatedInvoiceSuccessModal()">Fermer</button>
       <a [routerLink]="['/invoices']" class="btn btn-primary" (click)="closeCreatedInvoiceSuccessModal()" style="text-decoration: none; font-weight: 700;">
-        🧾 Aller au Module Factures
+        🧾 Voir dans Factures & Imprimer BL
       </a>
     </div>
   </div>

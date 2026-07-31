@@ -423,7 +423,7 @@ export class PurchaseOrdersComponent implements OnInit {
     this.showBoutiqueDetailModal.set(false);
   }
 
-  createdInvoiceSuccess = signal<{ invoiceNumber: string; orderNumber: string } | null>(null);
+  createdInvoiceSuccess = signal<{ invoiceNumber: string; orderNumber: string; totalAmount?: number } | null>(null);
 
   // --- Création de Facture Directe depuis une Commande ---
   createInvoiceForOrder(order: BoutiqueOrder, event?: Event): void {
@@ -441,7 +441,8 @@ export class PurchaseOrdersComponent implements OnInit {
         order.invoiceNumber = inv.invoiceNumber;
         this.createdInvoiceSuccess.set({
           invoiceNumber: inv.invoiceNumber || `FAC-${order.orderNumber}`,
-          orderNumber: order.orderNumber
+          orderNumber: order.orderNumber,
+          totalAmount: order.totalAmount
         });
         this.loadBoutiqueOrders();
       },

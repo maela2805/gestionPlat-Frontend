@@ -429,8 +429,8 @@ export class InvoicesComponent implements OnInit {
   getStatusBadgeClass(status: string): string {
     switch (status) {
       case 'BROUILLON': return 'badge-secondary';
-      case 'VALIDEE': return 'badge-info';
-      case 'PAYEE_PARTIEL': return 'badge-warning';
+      case 'VALIDEE': return 'badge-warning';
+      case 'PAYEE_PARTIEL': return 'badge-info';
       case 'PAYEE': return 'badge-success';
       case 'ANNULEE': return 'badge-danger';
       default: return 'badge-primary';
@@ -440,7 +440,7 @@ export class InvoicesComponent implements OnInit {
   getStatusLabel(status: string): string {
     switch (status) {
       case 'BROUILLON': return 'Brouillon';
-      case 'VALIDEE': return 'Validée (Impayée)';
+      case 'VALIDEE': return 'Validée (Impayée - Cession)';
       case 'PAYEE_PARTIEL': return 'Partiellement Payée';
       case 'PAYEE': return 'Payée';
       case 'ANNULEE': return 'Annulée';
