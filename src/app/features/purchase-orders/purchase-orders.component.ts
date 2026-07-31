@@ -267,6 +267,23 @@ export class PurchaseOrdersComponent implements OnInit {
     });
   }
 
+  // --- FormArray Articles Modifiables (Modifier & Approuver) ---
+  get modifiedItemsArray(): FormArray {
+    return this.approveForm.get('modifiedItems') as FormArray;
+  }
+
+  addModifiedItemRow(productId?: number, quantity: number = 1): void {
+    const itemGroup = this.fb.group({
+      productId: [productId || null, Validators.required],
+      quantity: [quantity, [Validators.required, Validators.min(1)]]
+    });
+    this.modifiedItemsArray.push(itemGroup);
+  }
+
+  removeModifiedItemRow(index: number): void {
+    this.modifiedItemsArray.removeAt(index);
+  }
+
   // --- Approbation de la commande boutique avec infos de livraison ---
   openApproveModal(order: BoutiqueOrder, isModifyMode: boolean = false, event?: Event): void {
     if (event) event.stopPropagation();
