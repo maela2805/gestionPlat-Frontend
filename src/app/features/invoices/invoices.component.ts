@@ -360,6 +360,8 @@ export class InvoicesComponent implements OnInit {
     });
   }
 
+  showBlModal: boolean = false;
+
   openDetailModal(invoice: Invoice): void {
     this.selectedInvoice = invoice;
     this.showDetailModal = true;
@@ -367,6 +369,16 @@ export class InvoicesComponent implements OnInit {
 
   closeDetailModal(): void {
     this.showDetailModal = false;
+    this.selectedInvoice = null;
+  }
+
+  openBlModal(invoice: Invoice): void {
+    this.selectedInvoice = invoice;
+    this.showBlModal = true;
+  }
+
+  closeBlModal(): void {
+    this.showBlModal = false;
     this.selectedInvoice = null;
   }
 

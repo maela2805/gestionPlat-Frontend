@@ -122,48 +122,53 @@
               </span>
             </td>
             <td style="padding: 12px 16px; text-align: center;">
-              <div style="display: flex; align-items: center; justify-content: center; gap: 6px;" (click)="$event.stopPropagation()">
-                <!-- Bouton Approuver avec Saisie Livraison (Admin) -->
+              <div style="display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap;" (click)="$event.stopPropagation()">
+                <!-- Bouton Approuver -->
                 <button 
                   *ngIf="order.status === 'PENDING' && !authService.currentUser()?.boutiqueId"
                   type="button" 
                   class="btn btn-sm btn-success" 
-                  (click)="openApproveModal(order, $event)"
+                  (click)="openApproveModal(order, false, $event)"
                   title="Approuver la commande et fixer la livraison"
                   style="background: #52c41a; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11.5px; font-weight: 600;"
                 >
-                  Approuver & Livrer
+                  Approuver
                 </button>
 
-                <!-- Bouton Créer Facture & BL PDF -->
+                <!-- Bouton Modifier & Approuver -->
+                <button 
+                  *ngIf="order.status === 'PENDING' && !authService.currentUser()?.boutiqueId"
+                  type="button" 
+                  class="btn btn-sm btn-warning" 
+                  (click)="openApproveModal(order, true, $event)"
+                  title="Modifier les articles et approuver directement"
+                  style="background: #fa8c16; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11.5px; font-weight: 600;"
+                >
+                  Modifier & Approuver
+                </button>
+
+                <!-- Bouton Créer Facture -->
                 <button 
                   *ngIf="order.status === 'APPROVED' || order.status === 'MODIFIED_AND_APPROVED'"
                   type="button" 
                   class="btn btn-sm btn-primary" 
                   (click)="createAndPrintInvoice(order, $event)"
-                  title="Créer / Imprimer la Facture et le Bon de Livraison"
+                  title="Créer la facture de cette commande"
                   style="background: #1890ff; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11.5px; font-weight: 600;"
                 >
-                  📄 Facture / BL PDF
+                  📄 {{ order.invoiceCreated ? 'Voir Facture' : 'Créer Facture' }}
                 </button>
 
-                <!-- Bouton Refuser -->
+                <!-- Bouton Supprimer (Admin) -->
                 <button 
-                  *ngIf="order.status === 'PENDING' && !authService.currentUser()?.boutiqueId"
+                  *ngIf="!authService.currentUser()?.boutiqueId"
                   type="button" 
-                  (click)="rejectBoutiqueOrder(order, $event)"
-                  title="Refuser la commande"
-                  style="background: rgba(255, 77, 79, 0.1); color: #ff4d4f; border: 1px solid rgba(255, 77, 79, 0.2); width: 28px; height: 28px; border-radius: 4px;"
-                >✕</button>
-
-                <!-- Bouton Annuler (Boutique ou Admin) -->
-                <button 
-                  *ngIf="order.status === 'PENDING'"
-                  type="button" 
-                  (click)="cancelBoutiqueOrder(order, $event)"
-                  title="Annuler la commande"
-                  style="background: rgba(140, 140, 140, 0.1); color: #595959; border: 1px solid rgba(140, 140, 140, 0.2); width: 28px; height: 28px; border-radius: 4px;"
-                >🚫</button>
+                  (click)="deleteBoutiqueOrder(order, $event)"
+                  title="Supprimer la commande"
+                  style="background: rgba(255, 77, 79, 0.1); color: #ff4d4f; border: 1px solid rgba(255, 77, 79, 0.2); padding: 4px 8px; border-radius: 4px; font-size: 11.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"
+                >
+                  🗑️ Supprimer
+                </button>
               </div>
             </td>
           </tr>
@@ -283,15 +288,35 @@
 
   <!-- MODALE : APPROBATION ADMIN & INFORMATIONS DE LIVRAISON -->
   <div *ngIf="showApproveModal()" class="modal-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;">
-    <div class="modal-card" style="background: white; border-radius: 12px; width: 100%; max-width: 540px; padding: 24px;">
+    <div class="modal-card" style="background: white; border-radius: 12px; width: 100%; max-width: 620px; padding: 24px;">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 12px;">
-        <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #0b1a30;">Approuver & Organiser la Livraison</h3>
+        <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #0b1a30;">
+          {{ approveForm.get('isModifyMode')?.value ? 'Modifier & Approuver la Commande' : 'Approuver & Organiser la Livraison' }}
+        </h3>
         <button type="button" (click)="closeApproveModal()" style="border: none; background: transparent; font-size: 18px;">✕</button>
       </div>
 
       <form [formGroup]="approveForm" (ngSubmit)="submitApproval()" style="display: flex; flex-direction: column; gap: 14px;">
         <div style="background: #e6f7ff; color: #1890ff; padding: 10px; border-radius: 6px; font-size: 12.5px; font-weight: 600;">
           📌 Commande N° : <strong>{{ selectedBoutiqueOrder()?.orderNumber }}</strong> ({{ selectedBoutiqueOrder()?.boutiqueName }})
+        </div>
+
+        <!-- Section de modification des articles (si Modifier & Approuver est cliqué) -->
+        <div *ngIf="approveForm.get('isModifyMode')?.value" style="background: #fffbe6; border: 1px solid #ffe58f; padding: 12px; border-radius: 6px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <label style="font-size: 13px; font-weight: 700; color: #d48800;">✏️ Ajuster les articles / quantités à approuver :</label>
+            <button type="button" class="btn btn-sm btn-secondary" (click)="addModifiedItemRow()">+ Produit</button>
+          </div>
+          <div formArrayName="modifiedItems" style="display: flex; flex-direction: column; gap: 8px;">
+            <div *ngFor="let itemGroup of modifiedItemsArray.controls; let i=index" [formGroupName]="i" style="display: flex; align-items: center; gap: 8px; background: white; padding: 8px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1);">
+              <select formControlName="productId" style="flex: 1; padding: 6px; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px; font-size: 12px;">
+                <option [value]="null">-- Produit --</option>
+                <option *ngFor="let p of products()" [value]="p.id">{{ p.name }} - Prix Gros: {{ (p.wholesalePrice || p.sellPrice || p.buyPrice) | fcfa }}</option>
+              </select>
+              <input type="number" formControlName="quantity" min="1" placeholder="Qté" style="width: 75px; padding: 6px; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px; font-size: 12px;" />
+              <button type="button" (click)="removeModifiedItemRow(i)" style="background: rgba(255,77,79,0.1); color: #ff4d4f; border: none; width: 26px; height: 26px; border-radius: 4px;">✕</button>
+            </div>
+          </div>
         </div>
 
         <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">

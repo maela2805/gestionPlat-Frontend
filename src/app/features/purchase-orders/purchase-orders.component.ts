@@ -268,16 +268,24 @@ export class PurchaseOrdersComponent implements OnInit {
   }
 
   // --- Approbation de la commande boutique avec infos de livraison ---
-  openApproveModal(order: BoutiqueOrder, event?: Event): void {
+  openApproveModal(order: BoutiqueOrder, isModifyMode: boolean = false, event?: Event): void {
     if (event) event.stopPropagation();
     this.selectedBoutiqueOrder.set(order);
+    
+    this.modifiedItemsArray.clear();
+    if (isModifyMode && order.items) {
+      order.items.forEach(i => this.addModifiedItemRow(i.productId, i.quantity));
+    }
+
     this.approveForm.reset({
       deliveryDate: new Date().toISOString().substring(0, 10),
       vehicleRegistration: '',
       driverName: '',
       driverPhone: '',
-      attachmentUrl: ''
+      attachmentUrl: '',
+      isModifyMode: isModifyMode
     });
+
     this.showApproveModal.set(true);
   }
 
@@ -291,12 +299,22 @@ export class PurchaseOrdersComponent implements OnInit {
 
     this.isSaving.set(true);
     const formVal = this.approveForm.value;
+
+    let modifiedItemsList = undefined;
+    if (formVal.isModifyMode && this.modifiedItemsArray.length > 0) {
+      modifiedItemsList = formVal.modifiedItems.map((i: any) => ({
+        productId: Number(i.productId),
+        quantity: Number(i.quantity)
+      }));
+    }
+
     const req: ApproveBoutiqueOrderRequest = {
       deliveryDate: formVal.deliveryDate ? new Date(formVal.deliveryDate).toISOString() : undefined,
       vehicleRegistration: formVal.vehicleRegistration,
       driverName: formVal.driverName,
       driverPhone: formVal.driverPhone,
-      attachmentUrl: formVal.attachmentUrl
+      attachmentUrl: formVal.attachmentUrl,
+      modifiedItems: modifiedItemsList
     };
 
     this.boutiqueOrderService.approveOrder(order.id, req).subscribe({
