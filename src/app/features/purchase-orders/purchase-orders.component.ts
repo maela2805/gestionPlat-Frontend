@@ -425,18 +425,21 @@ export class PurchaseOrdersComponent implements OnInit {
 
   // --- Facture & Bon de Livraison (BL) PDF ---
   createAndPrintInvoice(order: BoutiqueOrder, event?: Event): void {
-    if (event) event.stopPropagation();
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    this.selectedBoutiqueOrder.set(order);
+    this.showInvoiceBlPrintModal.set(true);
+
     this.boutiqueOrderService.createInvoiceForOrder(order.id).subscribe({
       next: (inv) => {
         order.invoiceCreated = true;
         order.invoiceNumber = inv.invoiceNumber;
-        this.selectedBoutiqueOrder.set(order);
-        this.showInvoiceBlPrintModal.set(true);
+        this.selectedBoutiqueOrder.set({ ...order });
       },
       error: (err) => {
-        // Même si la facture existe déjà, on ouvre la vue d'impression
-        this.selectedBoutiqueOrder.set(order);
-        this.showInvoiceBlPrintModal.set(true);
+        console.warn('Facture existante ou création en tâche de fond :', err);
       }
     });
   }
