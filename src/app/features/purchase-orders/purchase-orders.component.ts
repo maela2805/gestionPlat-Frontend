@@ -440,7 +440,7 @@ export class PurchaseOrdersComponent implements OnInit {
         order.invoiceCreated = true;
         order.invoiceNumber = inv.invoiceNumber;
         this.createdInvoiceSuccess.set({
-          invoiceNumber: inv.invoiceNumber,
+          invoiceNumber: inv.invoiceNumber || `FAC-${order.orderNumber}`,
           orderNumber: order.orderNumber
         });
         this.loadBoutiqueOrders();
