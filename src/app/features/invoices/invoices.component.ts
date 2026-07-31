@@ -26,7 +26,7 @@ import { Boutique } from '../../core/models/boutique.model';
 })
 export class InvoicesComponent implements OnInit {
 
-  activeTab: 'VENTE' | 'ACHAT' | 'PAYMENTS' = 'VENTE';
+
   selectedStatus: string = '';
   searchQuery: string = '';
   loading: boolean = false;
@@ -163,7 +163,9 @@ export class InvoicesComponent implements OnInit {
     this.allPayments = list.sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime());
   }
 
-  setTab(tab: 'VENTE' | 'ACHAT' | 'PAYMENTS'): void {
+  activeTab: 'CESSION' | 'VENTE' | 'ACHAT' | 'PAYMENTS' = 'CESSION';
+
+  setTab(tab: 'CESSION' | 'VENTE' | 'ACHAT' | 'PAYMENTS'): void {
     this.activeTab = tab;
     this.applyFilter();
   }
@@ -177,7 +179,15 @@ export class InvoicesComponent implements OnInit {
     if (this.activeTab === 'PAYMENTS') return;
 
     this.filteredInvoices = this.invoices.filter(inv => {
-      const matchType = inv.type === (this.activeTab as any);
+      let matchType = false;
+      if (this.activeTab === 'CESSION') {
+        matchType = inv.type === ('CESSION_BOUTIQUE' as any);
+      } else if (this.activeTab === 'VENTE') {
+        matchType = inv.type === InvoiceType.VENTE;
+      } else if (this.activeTab === 'ACHAT') {
+        matchType = inv.type === InvoiceType.ACHAT;
+      }
+
       const matchStatus = !this.selectedStatus || inv.status === this.selectedStatus;
       const q = this.searchQuery.toLowerCase().trim();
       const matchQuery = !q ||

@@ -19,14 +19,17 @@
 <div class="card tabs-card">
   <div class="tabs-header">
     <div class="nav-tabs">
+      <button class="tab-btn" [class.active]="activeTab === 'CESSION'" (click)="setTab('CESSION')">
+        🚚 Factures de Cession (Inter-Boutiques)
+      </button>
       <button class="tab-btn" [class.active]="activeTab === 'VENTE'" (click)="setTab('VENTE')">
-        Factures Ventes (Clients)
+        🛒 Factures Ventes (Clients)
       </button>
       <button class="tab-btn" [class.active]="activeTab === 'ACHAT'" (click)="setTab('ACHAT')">
-        Factures Achats (Fournisseurs)
+        🏢 Factures Achats (Fournisseurs)
       </button>
       <button class="tab-btn" [class.active]="activeTab === 'PAYMENTS'" (click)="setTab('PAYMENTS')">
-        Historique des Règlements
+        💳 Historique des Règlements
       </button>
     </div>
 
