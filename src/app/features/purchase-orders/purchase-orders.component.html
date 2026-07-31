@@ -147,8 +147,9 @@
                   Modifier & Approuver
                 </button>
 
-                <!-- Bouton Créer Facture / Voir Facture (Toujours disponible) -->
+                <!-- Bouton Créer Facture / Voir Facture (Uniquement sur commande approuvée) -->
                 <button 
+                  *ngIf="order.status === 'APPROVED' || order.status === 'MODIFIED_AND_APPROVED' || order.invoiceCreated"
                   type="button" 
                   class="btn btn-sm btn-primary" 
                   (click)="createAndPrintInvoice(order, $event)"
