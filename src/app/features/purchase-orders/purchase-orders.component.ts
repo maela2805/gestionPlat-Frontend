@@ -290,13 +290,36 @@ export class PurchaseOrdersComponent implements OnInit {
     }
   }
 
-  // --- Approbation de la commande boutique avec infos de livraison ---
+  selectedAttachmentFileName = signal<string | null>(null);
+
+  onAttachmentFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this.selectedAttachmentFileName.set(file.name);
+      
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.approveForm.patchValue({
+          attachmentUrl: e.target.result
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  removeAttachmentFile(): void {
+    this.selectedAttachmentFileName.set(null);
+    this.approveForm.patchValue({ attachmentUrl: '' });
+  }
+
   openApproveModal(order: BoutiqueOrder, isModifyMode: boolean = false, event?: Event): void {
     if (event) {
       event.preventDefault();
       event.stopPropagation();
     }
     this.selectedBoutiqueOrder.set(order);
+    this.selectedAttachmentFileName.set(null);
     
     if (this.modifiedItemsArray) {
       this.modifiedItemsArray.clear();
