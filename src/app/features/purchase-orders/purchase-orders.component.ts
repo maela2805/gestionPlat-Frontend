@@ -82,7 +82,9 @@ export class PurchaseOrdersComponent implements OnInit {
       vehicleRegistration: ['', Validators.required],
       driverName: ['', Validators.required],
       driverPhone: ['', Validators.required],
-      attachmentUrl: ['']
+      attachmentUrl: [''],
+      isModifyMode: [false],
+      modifiedItems: this.fb.array([])
     });
   }
 
@@ -269,7 +271,7 @@ export class PurchaseOrdersComponent implements OnInit {
 
   // --- FormArray Articles Modifiables (Modifier & Approuver) ---
   get modifiedItemsArray(): FormArray {
-    return this.approveForm.get('modifiedItems') as FormArray;
+    return (this.approveForm?.get('modifiedItems') as FormArray);
   }
 
   addModifiedItemRow(productId?: number, quantity: number = 1): void {
@@ -277,24 +279,34 @@ export class PurchaseOrdersComponent implements OnInit {
       productId: [productId || null, Validators.required],
       quantity: [quantity, [Validators.required, Validators.min(1)]]
     });
-    this.modifiedItemsArray.push(itemGroup);
+    if (this.modifiedItemsArray) {
+      this.modifiedItemsArray.push(itemGroup);
+    }
   }
 
   removeModifiedItemRow(index: number): void {
-    this.modifiedItemsArray.removeAt(index);
+    if (this.modifiedItemsArray) {
+      this.modifiedItemsArray.removeAt(index);
+    }
   }
 
   // --- Approbation de la commande boutique avec infos de livraison ---
   openApproveModal(order: BoutiqueOrder, isModifyMode: boolean = false, event?: Event): void {
-    if (event) event.stopPropagation();
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     this.selectedBoutiqueOrder.set(order);
     
-    this.modifiedItemsArray.clear();
+    if (this.modifiedItemsArray) {
+      this.modifiedItemsArray.clear();
+    }
+
     if (isModifyMode && order.items) {
       order.items.forEach(i => this.addModifiedItemRow(i.productId, i.quantity));
     }
 
-    this.approveForm.reset({
+    this.approveForm.patchValue({
       deliveryDate: new Date().toISOString().substring(0, 10),
       vehicleRegistration: '',
       driverName: '',
