@@ -440,9 +440,9 @@ export class InvoicesComponent implements OnInit {
   getStatusLabel(status: string): string {
     switch (status) {
       case 'BROUILLON': return 'Brouillon';
-      case 'VALIDEE': return 'Validée (Impayée - Cession)';
+      case 'VALIDEE': return 'À PAYER';
       case 'PAYEE_PARTIEL': return 'Partiellement Payée';
-      case 'PAYEE': return 'Payée';
+      case 'PAYEE': return 'PAYÉE';
       case 'ANNULEE': return 'Annulée';
       default: return status;
     }
