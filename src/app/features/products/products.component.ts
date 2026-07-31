@@ -74,6 +74,8 @@ export class ProductsComponent implements OnInit {
       name: ['', Validators.required],
       description: [''],
       buyPrice: [0, [Validators.required, Validators.min(0)]],
+      wholesalePrice: [0, [Validators.required, Validators.min(0)]],
+      boutiquePrice: [0, [Validators.required, Validators.min(0)]],
       sellPrice: [null],
       initialStock: [0],
       alertThreshold: [5],
@@ -114,16 +116,22 @@ export class ProductsComponent implements OnInit {
     this.currentPage.set(1);
   }
 
-  // Permission Checks (Cahier des charges GEI2)
+  // Permission Checks : La boutique ne peut pas ajouter/modifier un produit
   canCreateProduct(): boolean {
+    const user = this.authService.currentUser();
+    if (user?.boutiqueId) return false;
     return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN', 'MANAGER']);
   }
 
   canEditProduct(): boolean {
+    const user = this.authService.currentUser();
+    if (user?.boutiqueId) return false;
     return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN', 'MANAGER']);
   }
 
   canDeleteProduct(): boolean {
+    const user = this.authService.currentUser();
+    if (user?.boutiqueId) return false;
     return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN']);
   }
 
@@ -163,6 +171,8 @@ export class ProductsComponent implements OnInit {
     this.productForm.reset({
       reference: autoRef,
       buyPrice: 0,
+      wholesalePrice: 0,
+      boutiquePrice: 0,
       sellPrice: 0,
       initialStock: 0,
       alertThreshold: 5,
@@ -180,6 +190,8 @@ export class ProductsComponent implements OnInit {
       name: p.name,
       description: p.description || '',
       buyPrice: p.buyPrice,
+      wholesalePrice: p.wholesalePrice || p.sellPrice || p.buyPrice,
+      boutiquePrice: p.boutiquePrice || p.sellPrice || p.buyPrice,
       sellPrice: p.sellPrice,
       alertThreshold: p.alertThreshold,
       barcode: p.barcode || '',
@@ -206,7 +218,9 @@ export class ProductsComponent implements OnInit {
       name: formVal.name,
       description: formVal.description,
       buyPrice: Number(formVal.buyPrice),
-      sellPrice: Number(formVal.sellPrice),
+      wholesalePrice: Number(formVal.wholesalePrice),
+      boutiquePrice: Number(formVal.boutiquePrice),
+      sellPrice: Number(formVal.boutiquePrice),
       initialStock: formVal.initialStock ? Number(formVal.initialStock) : 0,
       alertThreshold: Number(formVal.alertThreshold),
       barcode: formVal.barcode,

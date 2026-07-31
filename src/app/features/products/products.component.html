@@ -56,7 +56,8 @@
             <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">DÉSIGNATION</th>
             <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">CATÉGORIE</th>
             <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">PRIX ACHAT</th>
-            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">PRIX VENTE</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">PRIX GROS (CESSION)</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">PRIX BOUTIQUE</th>
             <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">STOCK DISPO</th>
             <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">SEUIL ALERTE</th>
             <th *ngIf="canEditProduct() || canDeleteProduct()" style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase; text-align: center;">ACTIONS</th>
@@ -78,7 +79,8 @@
               </span>
             </td>
             <td style="padding: 8px 16px; font-size: 12.5px; color: #595959;">{{ p.buyPrice | fcfa }}</td>
-            <td style="padding: 8px 16px; font-size: 13px; font-weight: 700; color: #1890ff;">{{ p.sellPrice | fcfa }}</td>
+            <td style="padding: 8px 16px; font-size: 13px; font-weight: 700; color: #fa8c16;">{{ (p.wholesalePrice || p.sellPrice || p.buyPrice) | fcfa }}</td>
+            <td style="padding: 8px 16px; font-size: 13px; font-weight: 700; color: #1890ff;">{{ (p.boutiquePrice || p.sellPrice || p.buyPrice) | fcfa }}</td>
             <td style="padding: 8px 16px;">
               <span class="badge" [style.background]="p.stock <= p.alertThreshold ? 'rgba(255, 77, 79, 0.15)' : 'rgba(82, 196, 26, 0.15)'" [style.color]="p.stock <= p.alertThreshold ? '#ff4d4f' : '#52c41a'" style="padding: 2px 8px; border-radius: 12px; font-size: 11.5px; font-weight: 700;">
                 {{ p.stock }}
@@ -200,14 +202,18 @@
           <textarea class="form-control" formControlName="description" rows="2" placeholder="Description du produit..." style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;"></textarea>
         </div>
 
-        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
           <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Prix d'achat / Coût de revient *</label>
+            <label style="font-size: 12.5px; font-weight: 600; color: #0b1a30;">Prix d'achat *</label>
             <input type="number" class="form-control" formControlName="buyPrice" placeholder="0" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
           </div>
           <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Prix de vente de réf. (Optionnel)</label>
-            <input type="number" class="form-control" formControlName="sellPrice" placeholder="Indicatif (facultatif)" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+            <label style="font-size: 12.5px; font-weight: 600; color: #0b1a30;">Prix Gros (Cession) *</label>
+            <input type="number" class="form-control" formControlName="wholesalePrice" placeholder="0" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
+          </div>
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12.5px; font-weight: 600; color: #0b1a30;">Prix Boutique *</label>
+            <input type="number" class="form-control" formControlName="boutiquePrice" placeholder="0" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
           </div>
         </div>
 

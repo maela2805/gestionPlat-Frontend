@@ -6,6 +6,8 @@ export interface Product {
   name: string;
   description?: string;
   buyPrice: number;
+  wholesalePrice?: number;
+  boutiquePrice?: number;
   sellPrice?: number;
   stock: number;
   alertThreshold: number;
@@ -21,6 +23,8 @@ export interface ProductRequest {
   name: string;
   description?: string;
   buyPrice: number;
+  wholesalePrice?: number;
+  boutiquePrice?: number;
   sellPrice?: number;
   initialStock?: number;
   alertThreshold?: number;
