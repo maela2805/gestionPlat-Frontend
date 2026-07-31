@@ -228,14 +228,24 @@ export class PurchaseOrdersComponent implements OnInit {
   }
 
   submitBoutiqueOrder(): void {
-    if (this.boutiqueOrderForm.invalid || this.boutiqueItemsArray.length === 0) return;
+    if (this.boutiqueItemsArray.length === 0) return;
+
+    const currentUser = this.authService.currentUser();
+    const formVal = this.boutiqueOrderForm.value;
+    const boutiqueId = formVal.boutiqueId 
+      ? Number(formVal.boutiqueId) 
+      : (currentUser?.boutiqueId ? Number(currentUser.boutiqueId) : null);
+
+    if (!boutiqueId) {
+      this.errorMessage.set("Veuillez sélectionner une boutique valide.");
+      return;
+    }
 
     this.isSaving.set(true);
     this.errorMessage.set(null);
 
-    const formVal = this.boutiqueOrderForm.value;
     const req: CreateBoutiqueOrderRequest = {
-      boutiqueId: Number(formVal.boutiqueId),
+      boutiqueId: boutiqueId,
       note: formVal.note,
       items: formVal.items.map((i: any) => ({
         productId: Number(i.productId),
@@ -251,7 +261,8 @@ export class PurchaseOrdersComponent implements OnInit {
       },
       error: (err) => {
         this.isSaving.set(false);
-        this.errorMessage.set(err.error?.message || 'Erreur lors de la création de la commande.');
+        const errorDetail = typeof err.error === 'string' ? err.error : (err.error?.message || err.message || 'Erreur lors de la création de la commande.');
+        this.errorMessage.set(errorDetail);
       }
     });
   }

@@ -231,6 +231,7 @@
       </div>
 
       <form [formGroup]="boutiqueOrderForm" (ngSubmit)="submitBoutiqueOrder()" style="display: flex; flex-direction: column; gap: 16px;">
+        <input type="hidden" formControlName="boutiqueId" />
         <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
           <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Boutique Demandeuse *</label>
           <div *ngIf="isBoutiqueUser()" style="padding: 10px 14px; background: rgba(24, 144, 255, 0.08); color: #1890ff; border-radius: 6px; font-weight: 700; font-size: 13.5px; border: 1px solid rgba(24, 144, 255, 0.2); display: flex; align-items: center; gap: 8px;">
