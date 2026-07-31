@@ -468,3 +468,21 @@
     </div>
   </div>
 </div>
+
+<!-- MODALE DE CONFIRMATION CRÉATION FACTURE -->
+<div *ngIf="createdInvoiceSuccess()" class="modal-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px;">
+  <div class="modal-card" style="background: white; border-radius: 12px; width: 100%; max-width: 500px; padding: 28px; text-align: center;">
+    <div style="font-size: 48px; margin-bottom: 12px;">✅</div>
+    <h3 style="margin: 0 0 10px 0; font-size: 18px; font-weight: 700; color: #52c41a;">Facture Générée avec Succès !</h3>
+    <p style="font-size: 13.5px; color: #595959; margin-bottom: 22px; line-height: 1.5;">
+      La facture <strong>N° {{ createdInvoiceSuccess()?.invoiceNumber }}</strong> a été créée pour la commande <strong>{{ createdInvoiceSuccess()?.orderNumber }}</strong>.<br/><br/>
+      Vous pouvez la retrouver dans le module <strong>Factures</strong> pour générer et imprimer son Bon de Livraison (BL).
+    </p>
+    <div style="display: flex; gap: 12px; justify-content: center;">
+      <button type="button" class="btn btn-secondary" (click)="closeCreatedInvoiceSuccessModal()">Fermer</button>
+      <a [routerLink]="['/invoices']" class="btn btn-primary" (click)="closeCreatedInvoiceSuccessModal()" style="text-decoration: none; font-weight: 700;">
+        🧾 Aller au Module Factures
+      </a>
+    </div>
+  </div>
+</div>

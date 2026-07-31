@@ -423,6 +423,8 @@ export class PurchaseOrdersComponent implements OnInit {
     this.showBoutiqueDetailModal.set(false);
   }
 
+  createdInvoiceSuccess = signal<{ invoiceNumber: string; orderNumber: string } | null>(null);
+
   // --- Création de Facture Directe depuis une Commande ---
   createInvoiceForOrder(order: BoutiqueOrder, event?: Event): void {
     if (event) {
@@ -430,21 +432,29 @@ export class PurchaseOrdersComponent implements OnInit {
       event.stopPropagation();
     }
     this.isSaving.set(true);
+    this.errorMessage.set(null);
 
     this.boutiqueOrderService.createInvoiceForOrder(order.id).subscribe({
       next: (inv) => {
         this.isSaving.set(false);
         order.invoiceCreated = true;
         order.invoiceNumber = inv.invoiceNumber;
-        alert(`✅ Facture N° ${inv.invoiceNumber} créée avec succès pour la commande ${order.orderNumber} !\n\nVous pouvez la consulter et imprimer son Bon de Livraison dans le module Factures.`);
+        this.createdInvoiceSuccess.set({
+          invoiceNumber: inv.invoiceNumber,
+          orderNumber: order.orderNumber
+        });
         this.loadBoutiqueOrders();
       },
       error: (err) => {
         this.isSaving.set(false);
         const msg = typeof err.error === 'string' ? err.error : (err.error?.message || err.message || 'Erreur lors de la création de la facture.');
-        alert(msg);
+        this.errorMessage.set(msg);
       }
     });
+  }
+
+  closeCreatedInvoiceSuccessModal(): void {
+    this.createdInvoiceSuccess.set(null);
   }
 
   closeInvoiceBlPrintModal(): void {
