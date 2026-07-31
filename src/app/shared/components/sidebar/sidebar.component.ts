@@ -55,7 +55,7 @@ export class SidebarComponent {
   }
 
   canAccessPurchases(): boolean {
-    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN', 'MANAGER']);
+    return true;
   }
 
   canAccessBoutiques(): boolean {
