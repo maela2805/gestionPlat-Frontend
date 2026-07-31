@@ -147,16 +147,16 @@
                   Modifier & Approuver
                 </button>
 
-                <!-- Bouton Créer Facture / Voir Facture (Uniquement sur commande approuvée) -->
+                <!-- Bouton Créer Facture (Uniquement sur commande approuvée) -->
                 <button 
                   *ngIf="order.status === 'APPROVED' || order.status === 'MODIFIED_AND_APPROVED' || order.invoiceCreated"
                   type="button" 
                   class="btn btn-sm btn-primary" 
-                  (click)="createAndPrintInvoice(order, $event)"
-                  title="Créer ou consulter la facture de cette commande"
+                  (click)="createInvoiceForOrder(order, $event)"
+                  title="Générer directement la facture de cette commande"
                   style="background: #1890ff; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11.5px; font-weight: 600;"
                 >
-                  📄 {{ order.invoiceCreated ? 'Voir Facture' : 'Créer Facture' }}
+                  📄 {{ order.invoiceCreated ? 'Facture Créée' : 'Créer Facture' }}
                 </button>
 
                 <!-- Bouton Annuler -->

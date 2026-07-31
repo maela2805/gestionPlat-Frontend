@@ -361,6 +361,13 @@ export class InvoicesComponent implements OnInit {
   }
 
   showBlModal: boolean = false;
+  showBlFormStep: boolean = true;
+  blDeliveryDate: string = new Date().toISOString().substring(0, 10);
+  blVehicleRegistration: string = '';
+  blDriverName: string = '';
+  blDriverPhone: string = '';
+  blAttachmentUrl: string = '';
+  blAttachmentFileName: string | null = null;
 
   openDetailModal(invoice: Invoice): void {
     this.selectedInvoice = invoice;
@@ -374,12 +381,40 @@ export class InvoicesComponent implements OnInit {
 
   openBlModal(invoice: Invoice): void {
     this.selectedInvoice = invoice;
+    this.showBlFormStep = true;
     this.showBlModal = true;
   }
 
   closeBlModal(): void {
     this.showBlModal = false;
     this.selectedInvoice = null;
+  }
+
+  onBlFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this.blAttachmentFileName = file.name;
+      
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.blAttachmentUrl = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  removeBlAttachmentFile(): void {
+    this.blAttachmentFileName = null;
+    this.blAttachmentUrl = '';
+  }
+
+  confirmBlPrint(): void {
+    this.showBlFormStep = false;
+  }
+
+  editBlInfo(): void {
+    this.showBlFormStep = true;
   }
 
   printInvoice(): void {

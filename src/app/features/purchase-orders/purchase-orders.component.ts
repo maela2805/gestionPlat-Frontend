@@ -423,23 +423,26 @@ export class PurchaseOrdersComponent implements OnInit {
     this.showBoutiqueDetailModal.set(false);
   }
 
-  // --- Facture & Bon de Livraison (BL) PDF ---
-  createAndPrintInvoice(order: BoutiqueOrder, event?: Event): void {
+  // --- Création de Facture Directe depuis une Commande ---
+  createInvoiceForOrder(order: BoutiqueOrder, event?: Event): void {
     if (event) {
       event.preventDefault();
       event.stopPropagation();
     }
-    this.selectedBoutiqueOrder.set(order);
-    this.showInvoiceBlPrintModal.set(true);
+    this.isSaving.set(true);
 
     this.boutiqueOrderService.createInvoiceForOrder(order.id).subscribe({
       next: (inv) => {
+        this.isSaving.set(false);
         order.invoiceCreated = true;
         order.invoiceNumber = inv.invoiceNumber;
-        this.selectedBoutiqueOrder.set({ ...order });
+        alert(`✅ Facture N° ${inv.invoiceNumber} créée avec succès pour la commande ${order.orderNumber} !\n\nVous pouvez la consulter et imprimer son Bon de Livraison dans le module Factures.`);
+        this.loadBoutiqueOrders();
       },
       error: (err) => {
-        console.warn('Facture existante ou création en tâche de fond :', err);
+        this.isSaving.set(false);
+        const msg = typeof err.error === 'string' ? err.error : (err.error?.message || err.message || 'Erreur lors de la création de la facture.');
+        alert(msg);
       }
     });
   }
