@@ -201,6 +201,16 @@ export class PurchaseOrdersComponent implements OnInit {
     this.boutiqueItemsArray.removeAt(index);
   }
 
+  isBoutiqueUser(): boolean {
+    const user = this.authService.currentUser();
+    return !!(user?.boutiqueId);
+  }
+
+  isGlobalAdmin(): boolean {
+    const user = this.authService.currentUser();
+    return !user?.boutiqueId;
+  }
+
   openBoutiqueCreateModal(): void {
     const currentUser = this.authService.currentUser();
     this.boutiqueOrderForm.reset({
