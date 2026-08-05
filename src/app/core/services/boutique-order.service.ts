@@ -47,11 +47,19 @@ export class BoutiqueOrderService {
     return this.http.put<BoutiqueOrder>(`${this.apiUrl}/${id}/cancel`, null);
   }
 
+  confirmDelivery(id: number): Observable<BoutiqueOrder> {
+    return this.http.put<BoutiqueOrder>(`${this.apiUrl}/${id}/confirm-delivery`, null);
+  }
+
   deleteOrder(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
   createInvoiceForOrder(orderId: number): Observable<Invoice> {
     return this.http.post<Invoice>(`${this.apiUrl}/${orderId}/create-invoice`, null);
+  }
+
+  updateDeliveryInfo(id: number, req: ApproveBoutiqueOrderRequest): Observable<BoutiqueOrder> {
+    return this.http.put<BoutiqueOrder>(`${this.apiUrl}/${id}/update-delivery-info`, req);
   }
 }

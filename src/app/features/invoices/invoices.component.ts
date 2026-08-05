@@ -19,13 +19,14 @@ import {
 import { Tiers } from '../../core/models/tiers.model';
 import { Boutique } from '../../core/models/boutique.model';
 
+import { AuthService } from '../../core/services/auth.service';
+
 @Component({
   selector: 'app-invoices',
   templateUrl: './invoices.component.html',
   styleUrls: ['./invoices.component.scss']
 })
 export class InvoicesComponent implements OnInit {
-
 
   selectedStatus: string = '';
   searchQuery: string = '';
@@ -53,6 +54,7 @@ export class InvoicesComponent implements OnInit {
 
   // New Invoice Form State
   newInvoiceType: InvoiceType = InvoiceType.VENTE;
+  newInvoiceDate: string = new Date().toISOString().substring(0, 10);
   newInvoiceTiersId: number | undefined;
   newInvoiceBoutiqueId: number | undefined;
   newInvoiceTaxRate: number = 0;
@@ -65,6 +67,17 @@ export class InvoicesComponent implements OnInit {
   paymentReference: string = '';
   paymentNote: string = '';
 
+  // Edit Invoice Form State
+  editInvoiceId: number | null = null;
+  editInvoiceDate: string = '';
+  editDueDate: string = '';
+  editTaxRate: number = 0;
+  editNote: string = '';
+  editPaidAmount: number = 0;
+  editStatus: string = 'VALIDEE';
+  editItems: { description: string; quantity: number; unitPriceHt: number; taxRate: number }[] = [];
+  showEditModal: boolean = false;
+
   // Enums for Template
   InvoiceTypeEnum = InvoiceType;
   InvoiceStatusEnum = InvoiceStatus;
@@ -76,8 +89,20 @@ export class InvoicesComponent implements OnInit {
     private boutiqueService: BoutiqueService,
     private storeSaleService: StoreSaleService,
     private purchaseOrderService: PurchaseOrderService,
-    private productService: ProductService
+    private productService: ProductService,
+    public authService: AuthService
   ) {}
+
+  isEmployee(): boolean {
+    const user = this.authService.currentUser();
+    if (!user) return false;
+    const r = user.roleName || (user.role && typeof user.role === 'object' ? user.role.name : user.role) || '';
+    return r === 'ROLE_EMPLOYEE' || r === 'EMPLOYEE' || r === 'ROLE_CAISSIER' || r === 'CAISSIER' || !!user.boutiqueId;
+  }
+
+  canCreateInvoice(): boolean {
+    return !this.isEmployee();
+  }
 
   ngOnInit(): void {
     this.loadInvoices();
@@ -163,9 +188,9 @@ export class InvoicesComponent implements OnInit {
     this.allPayments = list.sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime());
   }
 
-  activeTab: 'CESSION' | 'VENTE' | 'ACHAT' | 'PAYMENTS' = 'CESSION';
+  activeTab: 'ALL' | 'CESSION' | 'VENTE' | 'ACHAT' | 'PAYMENTS' = 'ALL';
 
-  setTab(tab: 'CESSION' | 'VENTE' | 'ACHAT' | 'PAYMENTS'): void {
+  setTab(tab: 'ALL' | 'CESSION' | 'VENTE' | 'ACHAT' | 'PAYMENTS'): void {
     this.activeTab = tab;
     this.applyFilter();
   }
@@ -180,8 +205,10 @@ export class InvoicesComponent implements OnInit {
 
     this.filteredInvoices = this.invoices.filter(inv => {
       let matchType = false;
-      if (this.activeTab === 'CESSION') {
-        matchType = inv.type === ('CESSION_BOUTIQUE' as any);
+      if (this.activeTab === 'ALL') {
+        matchType = true;
+      } else if (this.activeTab === 'CESSION') {
+        matchType = inv.type === InvoiceType.CESSION_BOUTIQUE || (inv.type as any) === 'CESSION_BOUTIQUE';
       } else if (this.activeTab === 'VENTE') {
         matchType = inv.type === InvoiceType.VENTE;
       } else if (this.activeTab === 'ACHAT') {
@@ -207,6 +234,7 @@ export class InvoicesComponent implements OnInit {
     this.newInvoiceType = type || (this.activeTab === 'ACHAT' ? InvoiceType.ACHAT : InvoiceType.VENTE);
     this.creationMode = this.newInvoiceType === InvoiceType.ACHAT && this.completedPurchases.length > 0 ? 'FROM_PO' : 'MANUAL';
     this.selectedPurchaseOrderId = undefined;
+    this.newInvoiceDate = new Date().toISOString().substring(0, 10);
     this.newInvoiceTiersId = undefined;
     this.newInvoiceBoutiqueId = undefined;
     this.newInvoiceTaxRate = 0;
@@ -251,6 +279,7 @@ export class InvoicesComponent implements OnInit {
 
     const req: CreateInvoiceRequest = {
       type: this.newInvoiceType,
+      invoiceDate: this.newInvoiceDate ? new Date(this.newInvoiceDate).toISOString() : undefined,
       tiersId: this.newInvoiceTiersId,
       boutiqueId: this.newInvoiceBoutiqueId,
       taxRate: this.newInvoiceTaxRate,
@@ -265,8 +294,11 @@ export class InvoicesComponent implements OnInit {
 
     this.invoiceService.createInvoice(req).subscribe({
       next: (created) => {
-        this.showSuccess('Facture créée avec succès.');
+        this.showSuccess(`Facture N° ${created.invoiceNumber || ''} créée avec succès.`);
         this.closeCreateModal();
+        this.searchQuery = '';
+        this.selectedStatus = '';
+        this.activeTab = 'ALL';
         this.loadInvoices();
       },
       error: (err) => alert('Erreur lors de la création de la facture.')
@@ -275,8 +307,11 @@ export class InvoicesComponent implements OnInit {
 
   generateFromSale(saleId: number): void {
     this.invoiceService.createInvoiceFromSale(saleId).subscribe({
-      next: () => {
+      next: (created) => {
         this.showSuccess('Facture générée avec succès depuis la vente.');
+        this.searchQuery = '';
+        this.selectedStatus = '';
+        this.activeTab = 'ALL';
         this.loadInvoices();
       },
       error: () => alert('Erreur lors de la génération de la facture.')
@@ -285,8 +320,11 @@ export class InvoicesComponent implements OnInit {
 
   generateFromPurchaseOrder(poId: number): void {
     this.invoiceService.createInvoiceFromPurchaseOrder(poId).subscribe({
-      next: () => {
+      next: (created) => {
         this.showSuccess('Facture générée avec succès depuis la commande fournisseur.');
+        this.searchQuery = '';
+        this.selectedStatus = '';
+        this.activeTab = 'ALL';
         this.loadInvoices();
       },
       error: () => alert('Erreur lors de la génération de la facture.')
@@ -379,6 +417,93 @@ export class InvoicesComponent implements OnInit {
   blAttachmentUrl: string = '';
   blAttachmentFileName: string | null = null;
 
+
+  confirmDelivery(invoice: Invoice): void {
+    if (!invoice.id) return;
+    if (!confirm(`Confirmer que la livraison de la facture N° ${invoice.invoiceNumber} a bien été effectuée ?`)) return;
+
+    this.invoiceService.confirmDelivery(invoice.id).subscribe({
+      next: (updated) => {
+        this.showSuccess(`Livraison confirmée pour la facture N° ${updated.invoiceNumber}.`);
+        if (this.selectedInvoice && this.selectedInvoice.id === updated.id) {
+          this.selectedInvoice = updated;
+        }
+        this.loadInvoices();
+      },
+      error: () => alert('Erreur lors de la confirmation de livraison.')
+    });
+  }
+
+  openEditModal(invoice: Invoice): void {
+    this.selectedInvoice = invoice;
+    this.editInvoiceId = invoice.id || null;
+    this.editInvoiceDate = invoice.invoiceDate ? invoice.invoiceDate.substring(0, 10) : '';
+    this.editDueDate = invoice.dueDate ? invoice.dueDate.substring(0, 10) : '';
+    this.editTaxRate = invoice.taxRate || 0;
+    this.editNote = invoice.note || '';
+    this.editPaidAmount = invoice.paidAmount || 0;
+    this.editStatus = invoice.status || 'VALIDEE';
+    this.editItems = invoice.items && invoice.items.length > 0
+      ? invoice.items.map(i => ({ description: i.description, quantity: i.quantity, unitPriceHt: i.unitPriceHt, taxRate: i.taxRate || 0 }))
+      : [{ description: '', quantity: 1, unitPriceHt: 0, taxRate: 0 }];
+    this.showEditModal = true;
+  }
+
+  closeEditModal(): void {
+    this.showEditModal = false;
+    this.editInvoiceId = null;
+  }
+
+  addEditItemLine(): void {
+    this.editItems.push({ description: '', quantity: 1, unitPriceHt: 0, taxRate: 0 });
+  }
+
+  removeEditItemLine(index: number): void {
+    if (this.editItems.length > 1) {
+      this.editItems.splice(index, 1);
+    }
+  }
+
+  calculateEditSubtotal(): number {
+    return this.editItems.reduce((acc, item) => acc + (item.quantity * item.unitPriceHt), 0);
+  }
+
+  calculateEditTax(): number {
+    return (this.calculateEditSubtotal() * this.editTaxRate) / 100;
+  }
+
+  calculateEditTotal(): number {
+    return this.calculateEditSubtotal() + this.calculateEditTax();
+  }
+
+  saveEditInvoice(): void {
+    if (!this.editInvoiceId) return;
+
+    const req = {
+      invoiceDate: this.editInvoiceDate ? new Date(this.editInvoiceDate).toISOString() : undefined,
+      dueDate: this.editDueDate ? new Date(this.editDueDate).toISOString() : undefined,
+      taxRate: this.editTaxRate,
+      note: this.editNote,
+      paidAmount: this.editPaidAmount,
+      status: this.editStatus,
+      items: this.editItems.map(item => ({
+        description: item.description,
+        quantity: item.quantity,
+        unitPriceHt: item.unitPriceHt,
+        taxRate: item.taxRate || this.editTaxRate
+      }))
+    };
+
+    this.invoiceService.updateInvoice(this.editInvoiceId, req).subscribe({
+      next: (updated) => {
+        this.showSuccess('Facture mise à jour avec succès.');
+        this.closeEditModal();
+        this.loadInvoices();
+      },
+      error: () => alert('Erreur lors de la modification de la facture.')
+    });
+  }
+
   openDetailModal(invoice: Invoice): void {
     this.selectedInvoice = invoice;
     this.showDetailModal = true;
@@ -391,7 +516,20 @@ export class InvoicesComponent implements OnInit {
 
   openBlModal(invoice: Invoice): void {
     this.selectedInvoice = invoice;
-    this.showBlFormStep = true;
+    this.blDeliveryDate = invoice.deliveryDate ? new Date(invoice.deliveryDate).toISOString().substring(0, 10) : new Date().toISOString().substring(0, 10);
+    this.blVehicleRegistration = invoice.vehicleRegistration || '';
+    this.blDriverName = invoice.driverName || '';
+    this.blDriverPhone = invoice.driverPhone || '';
+    this.blAttachmentUrl = invoice.attachmentUrl || '';
+
+    // Si les infos ont déjà été renseignées (ou pour un employé), afficher DIRECTEMENT l'aperçu du document (capture d'écran).
+    // Si c'est la toute 1ère fois (aucune info saisie), afficher le formulaire de saisie initiale.
+    const hasBeenFilled = !!(invoice.driverName || invoice.vehicleRegistration || invoice.deliveryDate);
+    if (hasBeenFilled || this.isEmployee()) {
+      this.showBlFormStep = false; // Directement la vue Aperçu du Document
+    } else {
+      this.showBlFormStep = true;  // 1ère fois : Formulaire de saisie
+    }
     this.showBlModal = true;
   }
 
@@ -420,15 +558,47 @@ export class InvoicesComponent implements OnInit {
   }
 
   confirmBlPrint(): void {
-    this.showBlFormStep = false;
+    if (!this.selectedInvoice || !this.selectedInvoice.id) {
+      this.showBlFormStep = false;
+      return;
+    }
+
+    const req: any = {
+      deliveryDate: this.blDeliveryDate ? new Date(this.blDeliveryDate).toISOString() : undefined,
+      vehicleRegistration: this.blVehicleRegistration,
+      driverName: this.blDriverName,
+      driverPhone: this.blDriverPhone,
+      attachmentUrl: this.blAttachmentUrl
+    };
+
+    this.invoiceService.updateInvoice(this.selectedInvoice.id, req).subscribe({
+      next: (updated) => {
+        this.selectedInvoice = updated;
+        if (updated.driverName) this.blDriverName = updated.driverName;
+        if (updated.driverPhone) this.blDriverPhone = updated.driverPhone;
+        if (updated.vehicleRegistration) this.blVehicleRegistration = updated.vehicleRegistration;
+        if (updated.attachmentUrl) this.blAttachmentUrl = updated.attachmentUrl;
+        this.showBlFormStep = false;
+        this.loadInvoices();
+      },
+      error: () => {
+        this.showBlFormStep = false;
+      }
+    });
   }
 
   editBlInfo(): void {
     this.showBlFormStep = true;
   }
 
-  printInvoice(): void {
-    window.print();
+  printInvoice(invoice?: Invoice): void {
+    if (invoice) {
+      this.selectedInvoice = invoice;
+      this.showDetailModal = true;
+      setTimeout(() => window.print(), 350);
+    } else {
+      window.print();
+    }
   }
 
   showSuccess(msg: string): void {
@@ -439,8 +609,8 @@ export class InvoicesComponent implements OnInit {
   getStatusBadgeClass(status: string): string {
     switch (status) {
       case 'BROUILLON': return 'badge-secondary';
-      case 'VALIDEE': return 'badge-warning';
-      case 'PAYEE_PARTIEL': return 'badge-info';
+      case 'VALIDEE': return 'badge-info';
+      case 'PAYEE_PARTIEL': return 'badge-warning';
       case 'PAYEE': return 'badge-success';
       case 'ANNULEE': return 'badge-danger';
       default: return 'badge-primary';
@@ -450,7 +620,7 @@ export class InvoicesComponent implements OnInit {
   getStatusLabel(status: string): string {
     switch (status) {
       case 'BROUILLON': return 'Brouillon';
-      case 'VALIDEE': return 'À PAYER';
+      case 'VALIDEE': return 'VALIDÉE';
       case 'PAYEE_PARTIEL': return 'Partiellement Payée';
       case 'PAYEE': return 'PAYÉE';
       case 'ANNULEE': return 'Annulée';

@@ -13,6 +13,11 @@ export interface CreatePosSaleRequest {
   cashSessionId?: number;
   clientId?: number;
   customClientName?: string;
+  customClientPhone?: string;
+  customClientEmail?: string;
+  customClientAddress?: string;
+  customClientCity?: string;
+  saveClient?: boolean;
   discountAmount?: number;
   taxAmount?: number;
   amountPaid?: number;

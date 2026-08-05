@@ -7,6 +7,7 @@ import { ProductService } from '../../core/services/product.service';
 import { TiersService } from '../../core/services/tiers.service';
 import { BoutiqueService } from '../../core/services/boutique.service';
 import { AuthService } from '../../core/services/auth.service';
+import { InvoiceService } from '../../core/services/invoice.service';
 import { PurchaseOrder, CreatePurchaseOrderRequest } from '../../core/models/purchase-order.model';
 import { BoutiqueOrder, ApproveBoutiqueOrderRequest, CreateBoutiqueOrderRequest } from '../../core/models/boutique-order.model';
 import { Product } from '../../core/models/product.model';
@@ -50,6 +51,14 @@ export class PurchaseOrdersComponent implements OnInit {
   boutiqueOrderForm: FormGroup;
   approveForm: FormGroup;
 
+  // --- Signaux pour la modale BL ---
+  showBlFormStep = signal<boolean>(true); // true = formulaire, false = aperçu
+  blDriverName = signal<string>('');
+  blDriverPhone = signal<string>('');
+  blVehicleRegistration = signal<string>('');
+  blDeliveryDate = signal<string>(new Date().toISOString().substring(0, 10));
+  isSavingBl = signal<boolean>(false);
+
   constructor(
     private purchaseOrderService: PurchaseOrderService,
     private boutiqueOrderService: BoutiqueOrderService,
@@ -57,6 +66,7 @@ export class PurchaseOrdersComponent implements OnInit {
     private tiersService: TiersService,
     private boutiqueService: BoutiqueService,
     public authService: AuthService,
+    private invoiceService: InvoiceService,
     private route: ActivatedRoute,
     private fb: FormBuilder
   ) {
@@ -78,10 +88,10 @@ export class PurchaseOrdersComponent implements OnInit {
 
     // Formulaire d'approbation et données de livraison (Admin)
     this.approveForm = this.fb.group({
-      deliveryDate: [new Date().toISOString().substring(0, 10), Validators.required],
-      vehicleRegistration: ['', Validators.required],
-      driverName: ['', Validators.required],
-      driverPhone: ['', Validators.required],
+      deliveryDate: [new Date().toISOString().substring(0, 10)],
+      vehicleRegistration: [''],
+      driverName: [''],
+      driverPhone: [''],
       attachmentUrl: [''],
       isModifyMode: [false],
       modifiedItems: this.fb.array([])
@@ -205,7 +215,24 @@ export class PurchaseOrdersComponent implements OnInit {
 
   isBoutiqueUser(): boolean {
     const user = this.authService.currentUser();
-    return !!(user?.boutiqueId);
+    if (user?.boutiqueId) return true;
+    const role = (user?.roleName || '').toUpperCase();
+    return role.includes('EMPLOYEE') || role.includes('EMPLOYE') || role.includes('CAISSIER') || role.includes('GERANT') || role.includes('BOUTIQUE');
+  }
+
+  getAssignedBoutiqueName(): string {
+    const currentUser = this.authService.currentUser();
+    if (currentUser?.boutiqueName) return currentUser.boutiqueName;
+    if (currentUser?.boutiqueId) {
+      const b = this.boutiques().find(x => x.id === currentUser.boutiqueId);
+      if (b) return b.name;
+    }
+    const formBoutiqueId = this.boutiqueOrderForm.get('boutiqueId')?.value;
+    if (formBoutiqueId) {
+      const b = this.boutiques().find(x => x.id == formBoutiqueId);
+      if (b) return b.name;
+    }
+    return 'Votre Boutique';
   }
 
   isGlobalAdmin(): boolean {
@@ -215,8 +242,13 @@ export class PurchaseOrdersComponent implements OnInit {
 
   openBoutiqueCreateModal(): void {
     const currentUser = this.authService.currentUser();
+    let targetBoutiqueId = currentUser?.boutiqueId || null;
+    if (!targetBoutiqueId && this.boutiques().length > 0) {
+      targetBoutiqueId = this.boutiques()[0].id;
+    }
+
     this.boutiqueOrderForm.reset({
-      boutiqueId: currentUser?.boutiqueId || null,
+      boutiqueId: targetBoutiqueId,
       note: ''
     });
     this.boutiqueItemsArray.clear();
@@ -234,9 +266,13 @@ export class PurchaseOrdersComponent implements OnInit {
 
     const currentUser = this.authService.currentUser();
     const formVal = this.boutiqueOrderForm.value;
-    const boutiqueId = formVal.boutiqueId 
+    let boutiqueId = formVal.boutiqueId 
       ? Number(formVal.boutiqueId) 
       : (currentUser?.boutiqueId ? Number(currentUser.boutiqueId) : null);
+
+    if (!boutiqueId && this.boutiques().length > 0) {
+      boutiqueId = this.boutiques()[0].id;
+    }
 
     if (!boutiqueId) {
       this.errorMessage.set("Veuillez sélectionner une boutique valide.");
@@ -371,14 +407,25 @@ export class PurchaseOrdersComponent implements OnInit {
 
     this.boutiqueOrderService.approveOrder(order.id, req).subscribe({
       next: () => {
-        this.isSaving.set(false);
-        this.closeApproveModal();
-        this.loadBoutiqueOrders();
-        alert(`La commande ${order.orderNumber} a été approuvée avec succès et les informations de livraison enregistrées !`);
+        this.boutiqueOrderService.createInvoiceForOrder(order.id).subscribe({
+          next: () => {
+            this.isSaving.set(false);
+            this.closeApproveModal();
+            this.loadBoutiqueOrders();
+            alert(`La commande N° ${order.orderNumber} a été approuvée et sa facture de cession a été créée avec succès !`);
+          },
+          error: () => {
+            this.isSaving.set(false);
+            this.closeApproveModal();
+            this.loadBoutiqueOrders();
+            alert(`La commande N° ${order.orderNumber} a été approuvée avec succès !`);
+          }
+        });
       },
       error: (err) => {
         this.isSaving.set(false);
-        alert(err.error?.message || 'Erreur lors de l\'approbation de la commande.');
+        const msg = typeof err.error === 'string' ? err.error : (err.error?.message || err.message || 'Erreur lors de l\'approbation de la commande.');
+        alert(msg);
       }
     });
   }
@@ -404,6 +451,19 @@ export class PurchaseOrdersComponent implements OnInit {
     }
   }
 
+  confirmDeliveryBoutiqueOrder(order: BoutiqueOrder, event?: Event): void {
+    if (event) event.stopPropagation();
+    if (!confirm(`Confirmer la réception de la livraison pour la commande N° ${order.orderNumber} ?`)) return;
+
+    this.boutiqueOrderService.confirmDelivery(order.id).subscribe({
+      next: (updated) => {
+        alert(`Livraison confirmée pour la commande ${updated.orderNumber}.`);
+        this.loadBoutiqueOrders();
+      },
+      error: (err) => alert(err.error?.message || 'Erreur lors de la confirmation de livraison.')
+    });
+  }
+
   deleteBoutiqueOrder(order: BoutiqueOrder, event?: Event): void {
     if (event) event.stopPropagation();
     if (confirm(`Voulez-vous supprimer définitivement la commande ${order.orderNumber} ?`)) {
@@ -425,31 +485,102 @@ export class PurchaseOrdersComponent implements OnInit {
 
   createdInvoiceSuccess = signal<{ invoiceNumber: string; orderNumber: string; totalAmount?: number } | null>(null);
 
-  // --- Création de Facture Directe depuis une Commande ---
+  // --- Création de Facture / Ouverture modale BL ---
   createInvoiceForOrder(order: BoutiqueOrder, event?: Event): void {
     if (event) {
       event.preventDefault();
       event.stopPropagation();
     }
-    this.isSaving.set(true);
-    this.errorMessage.set(null);
 
+    // Si la facture est déjà créée, ouvrir directement la modale
+    if (order.invoiceCreated) {
+      this.selectedBoutiqueOrder.set(order);
+      // Pré-remplir les champs BL avec les valeurs existantes
+      this.blDriverName.set(order.driverName || '');
+      this.blDriverPhone.set(order.driverPhone || '');
+      this.blVehicleRegistration.set(order.vehicleRegistration || '');
+      this.blDeliveryDate.set(order.deliveryDate ? new Date(order.deliveryDate).toISOString().substring(0, 10) : new Date().toISOString().substring(0, 10));
+      // Si les détails BL ont déjà été renseignés → aperçu direct
+      const blDetailsSaved = !!(order.driverName || order.vehicleRegistration);
+      this.showBlFormStep.set(!blDetailsSaved);
+      this.showInvoiceBlPrintModal.set(true);
+      return;
+    }
+
+    // Sinon créer la facture puis ouvrir le formulaire BL
     this.boutiqueOrderService.createInvoiceForOrder(order.id).subscribe({
       next: (inv) => {
-        this.isSaving.set(false);
         order.invoiceCreated = true;
+        order.invoiceId = inv.id;
         order.invoiceNumber = inv.invoiceNumber;
-        this.createdInvoiceSuccess.set({
-          invoiceNumber: inv.invoiceNumber || `FAC-${order.orderNumber}`,
-          orderNumber: order.orderNumber,
-          totalAmount: order.totalAmount
-        });
+        this.selectedBoutiqueOrder.set(order);
+        // Réinitialiser le formulaire BL
+        this.blDriverName.set('');
+        this.blDriverPhone.set('');
+        this.blVehicleRegistration.set('');
+        this.blDeliveryDate.set(new Date().toISOString().substring(0, 10));
+        this.showBlFormStep.set(true); // Afficher le formulaire en 1ère fois
+        this.showInvoiceBlPrintModal.set(true);
+      },
+      error: () => {
+        this.selectedBoutiqueOrder.set(order);
+        this.showBlFormStep.set(true);
+        this.showInvoiceBlPrintModal.set(true);
+      }
+    });
+  }
+
+  // --- Enregistrement des détails BL et basculement vers l'aperçu ---
+  saveBLDetails(): void {
+    const order = this.selectedBoutiqueOrder();
+    if (!order) return;
+
+    this.isSavingBl.set(true);
+    const driverName = this.blDriverName();
+    const driverPhone = this.blDriverPhone();
+    const vehicleRegistration = this.blVehicleRegistration();
+    const deliveryDate = this.blDeliveryDate();
+
+    // Mettre à jour les infos de livraison sur la commande boutique dans la base de données
+    this.boutiqueOrderService.updateDeliveryInfo(order.id, {
+      driverName,
+      driverPhone,
+      vehicleRegistration,
+      deliveryDate
+    }).subscribe({
+      next: (updatedOrder) => {
+        // Également mettre à jour la facture si invoiceId existe
+        if (order.invoiceId) {
+          this.invoiceService.updateInvoice(order.invoiceId, {
+            driverName,
+            driverPhone,
+            vehicleRegistration,
+            deliveryDate: deliveryDate ? new Date(deliveryDate).toISOString() : undefined
+          } as any).subscribe({ error: () => {} });
+        }
+
+        // Mettre à jour l'objet order localement pour débloquer l'affichage immédiatement
+        order.driverName = driverName;
+        order.driverPhone = driverPhone;
+        order.vehicleRegistration = vehicleRegistration;
+        order.deliveryDate = deliveryDate;
+        this.selectedBoutiqueOrder.set({ ...order });
+
+        // Mettre à jour la liste dans le signal
+        this.boutiqueOrders.update(orders =>
+          orders.map(o => o.id === order.id ? { ...o, driverName, driverPhone, vehicleRegistration, deliveryDate } : o)
+        );
+
+        this.isSavingBl.set(false);
+        // Basculer vers l'aperçu du BL
+        this.showBlFormStep.set(false);
+
+        // Recharger la liste depuis le backend
         this.loadBoutiqueOrders();
       },
       error: (err) => {
-        this.isSaving.set(false);
-        const msg = typeof err.error === 'string' ? err.error : (err.error?.message || err.message || 'Erreur lors de la création de la facture.');
-        this.errorMessage.set(msg);
+        this.isSavingBl.set(false);
+        alert(err.error?.message || 'Erreur lors de la sauvegarde des détails du BL. Veuillez réessayer.');
       }
     });
   }

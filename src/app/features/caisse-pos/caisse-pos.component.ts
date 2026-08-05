@@ -13,7 +13,7 @@ import { PosSale, PaymentMethod, CreatePosSaleRequest } from '../../core/models/
 import { Boutique } from '../../core/models/boutique.model';
 import { Product } from '../../core/models/product.model';
 import { Category } from '../../core/models/category.model';
-import { Tiers } from '../../core/models/tiers.model';
+import { Tiers, CreateTiersRequest } from '../../core/models/tiers.model';
 
 export interface CartItem {
   product: Product;
@@ -51,6 +51,12 @@ export class CaissePosComponent implements OnInit {
   selectedClientId: number | null = null;
   isCustomClient: boolean = false;
   customClientName: string = '';
+  customClientPhone: string = '';
+  customClientEmail: string = '';
+  customClientAddress: string = '';
+  customClientCity: string = '';
+  saveClient: boolean = false;
+  showClientModal: boolean = false;
 
   // Cart
   cart: CartItem[] = [];
@@ -233,6 +239,11 @@ export class CaissePosComponent implements OnInit {
     this.amountPaid = 0;
     this.notes = '';
     this.customClientName = '';
+    this.customClientPhone = '';
+    this.customClientEmail = '';
+    this.customClientAddress = '';
+    this.customClientCity = '';
+    this.saveClient = false;
     this.selectedClientId = null;
   }
 
@@ -275,6 +286,11 @@ export class CaissePosComponent implements OnInit {
       cashSessionId: this.currentSession.id,
       clientId: (!this.isCustomClient && this.selectedClientId) ? this.selectedClientId : undefined,
       customClientName: (this.isCustomClient && this.customClientName) ? this.customClientName : undefined,
+      customClientPhone: (this.isCustomClient && this.customClientPhone) ? this.customClientPhone : undefined,
+      customClientEmail: (this.isCustomClient && this.customClientEmail) ? this.customClientEmail : undefined,
+      customClientAddress: (this.isCustomClient && this.customClientAddress) ? this.customClientAddress : undefined,
+      customClientCity: (this.isCustomClient && this.customClientCity) ? this.customClientCity : undefined,
+      saveClient: this.isCustomClient ? this.saveClient : false,
       discountAmount: this.discountAmount || 0,
       taxAmount: 0,
       amountPaid: this.paymentMethod === 'ESPECES' ? (this.amountPaid || this.netTotal) : this.netTotal,
@@ -298,10 +314,55 @@ export class CaissePosComponent implements OnInit {
         this.clearCart();
         this.loadCurrentSession();
         this.loadProducts();
+        this.loadClients();
       },
       error: (err) => {
         this.loading = false;
         const msg = typeof err.error === 'string' ? err.error : (err.error?.message || err.message || 'Erreur lors de la validation de la vente');
+        alert('⚠️ ' + msg);
+        this.showError(msg);
+      }
+    });
+  }
+
+  // Direct Client Registration from POS Modal
+  confirmSaveClientModal(): void {
+    if (!this.customClientName) {
+      this.showError('Le nom du client est obligatoire.');
+      return;
+    }
+
+    const req: CreateTiersRequest = {
+      name: this.customClientName.trim(),
+      type: 'CLIENT',
+      status: 'ACTIF',
+      phone: this.customClientPhone ? this.customClientPhone.trim() : undefined,
+      email: this.customClientEmail ? this.customClientEmail.trim() : undefined,
+      address: this.customClientAddress ? this.customClientAddress.trim() : undefined,
+      city: this.customClientCity ? this.customClientCity.trim() : undefined,
+      note: 'Client créé depuis la caisse POS'
+    };
+
+    this.loading = true;
+    this.tiersService.createTiers(req).subscribe({
+      next: (newClient) => {
+        this.loading = false;
+        this.showClientModal = false;
+        this.saveClient = false;
+        this.showSuccess(`Client "${newClient.name}" enregistré avec succès dans la base Tiers !`);
+        // Refresh clients list and select newly created client
+        this.loadClients();
+        this.selectedClientId = newClient.id;
+        this.isCustomClient = false;
+        this.customClientName = '';
+        this.customClientPhone = '';
+        this.customClientEmail = '';
+        this.customClientAddress = '';
+        this.customClientCity = '';
+      },
+      error: (err) => {
+        this.loading = false;
+        const msg = typeof err.error === 'string' ? err.error : (err.error?.message || err.message || 'Erreur lors de la création du client');
         alert('⚠️ ' + msg);
         this.showError(msg);
       }

@@ -132,13 +132,32 @@
           </button>
         </div>
 
+        <!-- Mode liste existante -->
         <select *ngIf="!isCustomClient" [(ngModel)]="selectedClientId">
           <option [value]="null">👥 Client Passager / Anonyme</option>
           <option *ngFor="let c of clients" [value]="c.id">{{ c.name }} ({{ c.phone || 'Pas de tel' }})</option>
         </select>
 
-        <input *ngIf="isCustomClient" type="text" class="custom-client-input" [(ngModel)]="customClientName" placeholder="Taper le nom du client (ex: M. Diallo)..." />
+        <!-- Mode saisie libre -->
+        <ng-container *ngIf="isCustomClient">
+          <input type="text" class="custom-client-input" [(ngModel)]="customClientName" placeholder="Nom du client (ex: M. Diallo)..." />
+
+          <!-- Badge résumé si infos renseignées -->
+          <div class="client-info-summary" *ngIf="customClientName">
+            <span *ngIf="customClientPhone">📞 {{ customClientPhone }}</span>
+            <span *ngIf="customClientEmail">✉️ {{ customClientEmail }}</span>
+            <span *ngIf="customClientCity">📍 {{ customClientCity }}</span>
+          </div>
+
+          <!-- Bouton pour ouvrir la modale d'enregistrement complet -->
+          <button type="button" class="save-client-btn" (click)="showClientModal = true">
+            💾 Enregistrer ce client dans la base (Tiers)
+            <span class="save-badge" *ngIf="saveClient">✓ Activé</span>
+          </button>
+        </ng-container>
+
       </div>
+
 
       <!-- Cart Item List -->
       <div class="cart-items">
@@ -424,4 +443,54 @@
       </div>
     </div>
   </div>
+
+  <!-- MODAL: Enregistrement Client dans la Base -->
+  <div class="modal-backdrop" *ngIf="showClientModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>👤 Enregistrer ce client dans la base</h3>
+        <button class="close-btn" (click)="showClientModal = false">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Renseignez les informations du client. Seul le <strong>nom</strong> est obligatoire. Le client sera créé en tant que <span class="badge-type">CLIENT</span> dans la liste des Tiers.</p>
+
+        <div class="form-group">
+          <label>Nom complet <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="customClientName" placeholder="Ex: M. Ibrahima Diallo" />
+        </div>
+
+        <div class="form-group">
+          <label>Téléphone</label>
+          <input type="tel" [(ngModel)]="customClientPhone" placeholder="Ex: 77 123 45 67" />
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" [(ngModel)]="customClientEmail" placeholder="Ex: client@email.com" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Adresse</label>
+            <input type="text" [(ngModel)]="customClientAddress" placeholder="Ex: Rue 10 Médina" />
+          </div>
+          <div class="form-group">
+            <label>Ville</label>
+            <input type="text" [(ngModel)]="customClientCity" placeholder="Ex: Dakar" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="showClientModal = false; saveClient = false">
+          Annuler (ne pas enregistrer)
+        </button>
+        <button class="btn btn-primary" (click)="confirmSaveClientModal()" [disabled]="loading || !customClientName">
+          ✅ Confirmer & Enregistrer le client
+        </button>
+      </div>
+    </div>
+  </div>
+
+
 </div>
+

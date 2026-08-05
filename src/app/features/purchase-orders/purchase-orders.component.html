@@ -8,7 +8,7 @@
       <h1 class="page-title">Module Commandes & Facturation de Cession</h1>
     </div>
     <div class="page-actions">
-      <button *ngIf="activeTab() === 'boutique' && isBoutiqueUser()" class="btn btn-primary" (click)="openBoutiqueCreateModal()">
+      <button *ngIf="activeTab() === 'boutique'" class="btn btn-primary" (click)="openBoutiqueCreateModal()">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
         <span>Passer Commande au Dépôt</span>
       </button>
@@ -102,12 +102,12 @@
               {{ order.orderDate | date:'dd/MM/yyyy HH:mm' }}
             </td>
             <td style="padding: 12px 16px; font-size: 12px; color: #1f1f1f;">
-              <div *ngIf="order.driverName">
-                <strong>🚛 Immat:</strong> {{ order.vehicleRegistration || 'Non renseigné' }}<br/>
-                <strong>👤 Chauffeur:</strong> {{ order.driverName }} ({{ order.driverPhone || 'N/A' }})<br/>
+              <div *ngIf="order.driverName || order.vehicleRegistration || order.deliveryDate">
+                <strong *ngIf="order.vehicleRegistration">🚛 Immat:</strong> {{ order.vehicleRegistration }}<br *ngIf="order.vehicleRegistration"/>
+                <strong *ngIf="order.driverName">👤 Chauffeur:</strong> {{ order.driverName }} <span *ngIf="order.driverPhone">({{ order.driverPhone }})</span><br *ngIf="order.driverName"/>
                 <span *ngIf="order.deliveryDate" style="color: #52c41a; font-weight: 600;">📅 Livr. prévue : {{ order.deliveryDate | date:'dd/MM/yyyy' }}</span>
               </div>
-              <span *ngIf="!order.driverName" style="color: #8c8c8c; font-style: italic;">En attente de validation livraison</span>
+              <span *ngIf="!order.driverName && !order.vehicleRegistration && !order.deliveryDate" style="color: #8c8c8c; font-style: italic;">En attente de validation livraison</span>
             </td>
             <td style="padding: 12px 16px; font-weight: 700; color: #fa8c16; font-size: 13.5px;">
               {{ order.totalAmount | fcfa }}
@@ -121,64 +121,83 @@
                 {{ order.status === 'PENDING' ? 'EN ATTENTE' : (order.status === 'APPROVED' ? 'APPROUVÉE' : (order.status === 'MODIFIED_AND_APPROVED' ? 'MODIFIÉE & APPROUVÉE' : (order.status === 'REJECTED' ? 'REFUSÉE' : order.status))) }}
               </span>
             </td>
-            <td style="padding: 12px 16px; text-align: center;">
-              <div style="display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap;" (click)="$event.stopPropagation()">
+            <td style="padding: 12px 16px; text-align: right;">
+              <div class="action-buttons" (click)="$event.stopPropagation()">
                 <!-- Bouton Approuver -->
                 <button 
                   *ngIf="order.status === 'PENDING' && !authService.currentUser()?.boutiqueId"
                   type="button" 
-                  class="btn btn-sm btn-success" 
+                  class="btn-action-icon btn-validate" 
                   (click)="openApproveModal(order, false, $event)"
-                  title="Approuver la commande et fixer la livraison"
-                  style="background: #52c41a; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11.5px; font-weight: 600;"
+                  title="Approuver la commande et programmer la livraison"
                 >
-                  Approuver
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </button>
 
                 <!-- Bouton Modifier & Approuver -->
                 <button 
                   *ngIf="order.status === 'PENDING' && !authService.currentUser()?.boutiqueId"
                   type="button" 
-                  class="btn btn-sm btn-warning" 
+                  class="btn-action-icon btn-edit" 
                   (click)="openApproveModal(order, true, $event)"
-                  title="Modifier les articles et approuver directement"
-                  style="background: #fa8c16; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11.5px; font-weight: 600;"
+                  title="Modifier les quantités et approuver la commande"
                 >
-                  Modifier & Approuver
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                 </button>
 
-                <!-- Bouton Créer Facture (Uniquement sur commande approuvée) -->
+                <!-- Bouton 1: Créer le Bon de Livraison (BL) - Reservé Admin / Dépôt Central -->
                 <button 
-                  *ngIf="order.status === 'APPROVED' || order.status === 'MODIFIED_AND_APPROVED' || order.invoiceCreated"
+                  *ngIf="(order.status === 'APPROVED' || order.status === 'MODIFIED_AND_APPROVED') && !order.invoiceCreated && !isBoutiqueUser()"
                   type="button" 
-                  class="btn btn-sm btn-primary" 
+                  class="btn-action-icon btn-validate" 
                   (click)="createInvoiceForOrder(order, $event)"
-                  title="Générer directement la facture de cette commande"
-                  style="background: #1890ff; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11.5px; font-weight: 600;"
+                  title="➕ Créer le Bon de Livraison (BL) & Facture de Cession"
                 >
-                  📄 {{ order.invoiceCreated ? 'Facture Créée' : 'Créer Facture' }}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                </button>
+
+                <!-- Bouton 2: Bon de Livraison Créé - Consulter / Imprimer (Tous les utilisateurs) -->
+                <button 
+                  *ngIf="order.invoiceCreated"
+                  type="button" 
+                  class="btn-action-icon btn-view" 
+                  (click)="createInvoiceForOrder(order, $event)"
+                  title="📄 Consulter et imprimer le Bon de Livraison (BL)"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </button>
+
+                <!-- Bouton 3: Confirmer Livraison (Uniquement après création du Bon de Livraison / Facture) -->
+                <button 
+                  *ngIf="(order.status === 'APPROVED' || order.status === 'MODIFIED_AND_APPROVED') && order.invoiceCreated"
+                  type="button" 
+                  class="btn-action-icon btn-deliver" 
+                  (click)="confirmDeliveryBoutiqueOrder(order, $event)"
+                  title="Confirmer la livraison effectuée"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="13" x="1" y="3" rx="2"/><polygon points="17 8 23 8 23 16 17 16 17 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
                 </button>
 
                 <!-- Bouton Annuler -->
                 <button 
                   *ngIf="order.status === 'PENDING'"
                   type="button" 
+                  class="btn-action-icon btn-cancel"
                   (click)="cancelBoutiqueOrder(order, $event)"
                   title="Annuler la commande"
-                  style="background: rgba(140, 140, 140, 0.1); color: #595959; border: 1px solid rgba(140, 140, 140, 0.2); padding: 4px 8px; border-radius: 4px; font-size: 11.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"
                 >
-                  🚫 Annuler
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 14.14 14.14"/></svg>
                 </button>
 
                 <!-- Bouton Supprimer (Admin) -->
                 <button 
                   *ngIf="!authService.currentUser()?.boutiqueId"
                   type="button" 
+                  class="btn-action-icon btn-cancel"
                   (click)="deleteBoutiqueOrder(order, $event)"
                   title="Supprimer la commande"
-                  style="background: rgba(255, 77, 79, 0.1); color: #ff4d4f; border: 1px solid rgba(255, 77, 79, 0.2); padding: 4px 8px; border-radius: 4px; font-size: 11.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"
                 >
-                  🗑️ Supprimer
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                 </button>
               </div>
             </td>
@@ -252,7 +271,7 @@
           <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Boutique Demandeuse *</label>
           <div *ngIf="isBoutiqueUser()" style="padding: 10px 14px; background: rgba(24, 144, 255, 0.08); color: #1890ff; border-radius: 6px; font-weight: 700; font-size: 13.5px; border: 1px solid rgba(24, 144, 255, 0.2); display: flex; align-items: center; gap: 8px;">
             <span>🏪</span>
-            <span>{{ authService.currentUser()?.boutiqueName || 'Votre Boutique' }}</span>
+            <span>{{ getAssignedBoutiqueName() }}</span>
           </div>
           <select *ngIf="!isBoutiqueUser()" formControlName="boutiqueId" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;">
             <option [value]="null">-- Sélectionner la boutique --</option>
@@ -297,20 +316,27 @@
     </div>
   </div>
 
-  <!-- MODALE : APPROBATION ADMIN & INFORMATIONS DE LIVRAISON -->
+  <!-- MODALE : APPROBATION ET CRÉATION DE FACTURE -->
   <div *ngIf="showApproveModal()" class="modal-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;">
-    <div class="modal-card" style="background: white; border-radius: 12px; width: 100%; max-width: 620px; padding: 24px;">
+    <div class="modal-card" style="background: white; border-radius: 12px; width: 100%; max-width: 550px; padding: 24px;">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 12px;">
         <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #0b1a30;">
-          {{ approveForm.get('isModifyMode')?.value ? 'Modifier & Approuver la Commande' : 'Approuver & Organiser la Livraison' }}
+          {{ approveForm.get('isModifyMode')?.value ? 'Modifier & Approuver la Commande' : 'Approuver la Commande & Générer la Facture' }}
         </h3>
         <button type="button" (click)="closeApproveModal()" style="border: none; background: transparent; font-size: 18px;">✕</button>
       </div>
 
       <form [formGroup]="approveForm" (ngSubmit)="submitApproval()" style="display: flex; flex-direction: column; gap: 14px;">
-        <div style="background: #e6f7ff; color: #1890ff; padding: 10px; border-radius: 6px; font-size: 12.5px; font-weight: 600;">
+        <div style="background: #e6f7ff; color: #1890ff; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1px solid #91d5ff;">
           📌 Commande N° : <strong>{{ selectedBoutiqueOrder()?.orderNumber }}</strong> ({{ selectedBoutiqueOrder()?.boutiqueName }})
+          <div style="margin-top: 4px; font-size: 12px; color: #595959; font-weight: normal;">
+            Montant total : <strong>{{ selectedBoutiqueOrder()?.totalAmount | fcfa }}</strong>
+          </div>
         </div>
+
+        <p style="margin: 0; font-size: 13px; color: #595959; line-height: 1.5;">
+          En approuvant cette commande, la <strong>Facture de Cession</strong> sera immédiatement créée. La gestion du Bon de Livraison (BL) et la confirmation de livraison se feront ultérieurement au niveau des factures.
+        </p>
 
         <!-- Section de modification des articles (si Modifier & Approuver est cliqué) -->
         <div *ngIf="approveForm.get('isModifyMode')?.value" style="background: #fffbe6; border: 1px solid #ffe58f; padding: 12px; border-radius: 6px;">
@@ -330,143 +356,162 @@
           </div>
         </div>
 
-        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-          <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Date de Livraison Prévue *</label>
-          <input type="date" formControlName="deliveryDate" style="padding: 9px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
-        </div>
-
-        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-          <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">N° d'Immatriculation du Véhicule *</label>
-          <input type="text" formControlName="vehicleRegistration" placeholder="ex: DK-4589-AB" style="padding: 9px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
-        </div>
-
-        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Nom du Chauffeur *</label>
-            <input type="text" formControlName="driverName" placeholder="Moussa Ndiaye" style="padding: 9px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
-          </div>
-          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Tél du Chauffeur *</label>
-            <input type="text" formControlName="driverPhone" placeholder="77 123 45 67" style="padding: 9px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;" />
-          </div>
-        </div>
-
-        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-          <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Pièce Jointe / Document de Livraison (Optionnel)</label>
-          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <!-- Bouton pour charger un fichier local -->
-            <label style="cursor: pointer; background: rgba(24, 144, 255, 0.08); border: 1px dashed #1890ff; color: #1890ff; padding: 8px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
-              <span>📁 Charger un fichier local (PDF, Image...)</span>
-              <input type="file" (change)="onAttachmentFileSelected($event)" accept="image/*,.pdf,.doc,.docx" style="display: none;" />
-            </label>
-
-            <span style="font-size: 12px; color: #8c8c8c;">ou lien URL :</span>
-
-            <!-- Saisie URL directe -->
-            <input type="text" formControlName="attachmentUrl" placeholder="https://..." style="flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 12.5px;" />
-          </div>
-
-          <!-- Badge du fichier importé -->
-          <div *ngIf="selectedAttachmentFileName()" style="display: inline-flex; align-items: center; gap: 8px; background: #e6f7ff; border: 1px solid #91d5ff; color: #1890ff; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; margin-top: 6px; width: fit-content;">
-            <span>📄 {{ selectedAttachmentFileName() }}</span>
-            <button type="button" (click)="removeAttachmentFile()" style="border: none; background: transparent; color: #ff4d4f; cursor: pointer; font-weight: bold; padding: 0 2px;">✕</button>
-          </div>
-        </div>
-
-        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px;">
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px;">
           <button type="button" class="btn btn-secondary" (click)="closeApproveModal()">Annuler</button>
-          <button type="submit" class="btn btn-success" [disabled]="approveForm.invalid || isSaving()" style="background: #52c41a; border: none;">
-            {{ isSaving() ? 'Validation...' : 'Valider & Transférer le Stock' }}
+          <button type="submit" class="btn btn-success" [disabled]="approveForm.invalid || isSaving()" style="background: #52c41a; border: none; font-weight: 700; padding: 9px 18px;">
+            {{ isSaving() ? 'Validation...' : 'Approuver & Créer la Facture' }}
           </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- MODALE : IMPRESSION FACTURE & BON DE LIVRAISON (BL) PDF -->
+  <!-- MODALE : FORMULAIRE & IMPRESSION FACTURE & BON DE LIVRAISON (BL) PDF -->
   <div *ngIf="showInvoiceBlPrintModal()" class="modal-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px;">
     <div class="modal-card print-modal" style="background: white; border-radius: 12px; width: 100%; max-width: 800px; max-height: 95vh; overflow-y: auto; padding: 32px;">
-      <div class="no-print" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 12px;">
-        <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #0b1a30;">Facture & Bon de Livraison (BL)</h3>
-        <div style="display: flex; gap: 12px;">
-          <button type="button" class="btn btn-primary" (click)="printDocument()">🖨️ Imprimer / Sauvegarder PDF</button>
-          <button type="button" class="btn btn-secondary" (click)="closeInvoiceBlPrintModal()">Fermer</button>
+
+      <!-- ======== ÉTAPE 1 : FORMULAIRE DE SAISIE BL (1ère fois) ======== -->
+      <div *ngIf="showBlFormStep()" class="no-print">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 12px;">
+          <div>
+            <h3 style="margin: 0; font-size: 17px; font-weight: 700; color: #0b1a30;">📋 Informations du Bon de Livraison</h3>
+            <p style="margin: 4px 0 0 0; font-size: 13px; color: #595959;">Commande N° : <strong>{{ selectedBoutiqueOrder()?.orderNumber }}</strong> — {{ selectedBoutiqueOrder()?.boutiqueName }}</p>
+          </div>
+          <button type="button" (click)="closeInvoiceBlPrintModal()" style="border: none; background: transparent; font-size: 20px; cursor: pointer; color: #595959;">✕</button>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">👤 Nom du Chauffeur</label>
+              <input type="text" [value]="blDriverName()" (input)="blDriverName.set($any($event.target).value)" placeholder="Prénom et Nom du chauffeur" style="padding: 10px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 7px; font-size: 13.5px;" />
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">📞 Téléphone Chauffeur</label>
+              <input type="text" [value]="blDriverPhone()" (input)="blDriverPhone.set($any($event.target).value)" placeholder="+221 77 000 00 00" style="padding: 10px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 7px; font-size: 13.5px;" />
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">🚛 Immatriculation Véhicule</label>
+              <input type="text" [value]="blVehicleRegistration()" (input)="blVehicleRegistration.set($any($event.target).value)" placeholder="Ex: DK-1234-AA" style="padding: 10px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 7px; font-size: 13.5px;" />
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">📅 Date de Livraison Prévue</label>
+              <input type="date" [value]="blDeliveryDate()" (input)="blDeliveryDate.set($any($event.target).value)" style="padding: 10px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 7px; font-size: 13.5px;" />
+            </div>
+          </div>
+
+          <!-- Récapitulatif des articles -->
+          <div style="background: #fafafa; border: 1px solid rgba(0,0,0,0.06); border-radius: 8px; padding: 14px; margin-top: 4px;">
+            <p style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; color: #0b1a30;">📦 Articles à livrer :</p>
+            <div *ngFor="let item of selectedBoutiqueOrder()?.items" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed rgba(0,0,0,0.06); font-size: 12.5px;">
+              <span>{{ item.productName }} <code style="background: rgba(24,144,255,0.1); color: #1890ff; padding: 1px 5px; border-radius: 3px; font-size: 11px;">{{ item.productReference }}</code></span>
+              <span style="font-weight: 700;">x{{ item.quantity }} — {{ item.totalPrice | fcfa }}</span>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 8px; font-weight: 700; font-size: 14px; color: #1890ff;">
+              TOTAL : {{ selectedBoutiqueOrder()?.totalAmount | fcfa }}
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 16px;">
+          <button type="button" (click)="closeInvoiceBlPrintModal()" style="padding: 10px 20px; border: 1px solid rgba(0,0,0,0.15); border-radius: 7px; background: white; font-size: 13.5px; cursor: pointer;">Annuler</button>
+          <button type="button" (click)="saveBLDetails()" [disabled]="isSavingBl()" style="padding: 10px 24px; background: #52c41a; color: white; border: none; border-radius: 7px; font-size: 13.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            <span *ngIf="isSavingBl()">⏳ Enregistrement...</span>
+            <span *ngIf="!isSavingBl()">💾 Enregistrer & Générer le BL</span>
+          </button>
         </div>
       </div>
 
-      <!-- Content Printable Area -->
-      <div id="printable-area" style="font-family: Arial, sans-serif; color: #1f1f1f;">
-        <!-- Header -->
-        <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #0b1a30; padding-bottom: 16px; margin-bottom: 24px;">
-          <div>
-            <h2 style="margin: 0; color: #0b1a30; font-size: 22px;">TAWFEKH VAISSELLE</h2>
-            <p style="margin: 4px 0; font-size: 12px; color: #595959;">Dépôt Principal & Gestion de Stock Central<br/>Dakar, Sénégal | Tél : +221 33 000 00 00</p>
-          </div>
-          <div style="text-align: right;">
-            <h3 style="margin: 0; color: #1890ff; font-size: 18px;">BON DE LIVRAISON & FACTURE</h3>
-            <p style="margin: 4px 0; font-size: 13px; font-weight: 700;">N° : {{ selectedBoutiqueOrder()?.invoiceNumber || selectedBoutiqueOrder()?.orderNumber }}</p>
-            <p style="margin: 0; font-size: 12px; color: #595959;">Date : {{ selectedBoutiqueOrder()?.orderDate | date:'dd/MM/yyyy' }}</p>
+      <!-- ======== ÉTAPE 2 : APERÇU DU DOCUMENT BL (après sauvegarde) ======== -->
+      <div *ngIf="!showBlFormStep()">
+        <div class="no-print" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 12px;">
+          <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #0b1a30;">Facture & Bon de Livraison (BL)</h3>
+          <div style="display: flex; gap: 12px;">
+            <button *ngIf="!isBoutiqueUser()" type="button" class="btn btn-warning" (click)="showBlFormStep.set(true)" style="font-weight: 700;">✏️ Modifier les détails</button>
+            <button type="button" class="btn btn-primary" (click)="printDocument()" style="font-weight: 700;">🖨️ Imprimer / PDF</button>
+            <button type="button" class="btn btn-secondary" (click)="closeInvoiceBlPrintModal()">Fermer</button>
           </div>
         </div>
 
-        <!-- Info Grid -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; background: #fafafa; padding: 16px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.06);">
-          <div>
-            <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #0b1a30; text-transform: uppercase;">Destinataire (Boutique)</h4>
-            <p style="margin: 2px 0; font-weight: 700;">{{ selectedBoutiqueOrder()?.boutiqueName }}</p>
-            <p style="margin: 2px 0; font-size: 12px; color: #595959;">Commandé par : {{ selectedBoutiqueOrder()?.createdByUser }}</p>
+        <!-- Content Printable Area -->
+        <div id="printable-area" style="font-family: Arial, sans-serif; color: #1f1f1f;">
+          <!-- Header -->
+          <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #0b1a30; padding-bottom: 16px; margin-bottom: 24px;">
+            <div>
+              <h2 style="margin: 0; color: #0b1a30; font-size: 22px;">TAWFEKH VAISSELLE</h2>
+              <p style="margin: 4px 0; font-size: 12px; color: #595959;">Dépôt Principal & Gestion de Stock Central<br/>Dakar, Sénégal | Tél : +221 33 000 00 00</p>
+            </div>
+            <div style="text-align: right;">
+              <h3 style="margin: 0; color: #1890ff; font-size: 18px;">BON DE LIVRAISON & FACTURE</h3>
+              <p style="margin: 4px 0; font-size: 13px; font-weight: 700;">N° : {{ selectedBoutiqueOrder()?.invoiceNumber || selectedBoutiqueOrder()?.orderNumber }}</p>
+              <p style="margin: 0; font-size: 12px; color: #595959;">Date : {{ selectedBoutiqueOrder()?.orderDate | date:'dd/MM/yyyy' }}</p>
+            </div>
           </div>
-          <div>
-            <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #0b1a30; text-transform: uppercase;">Informations Transport & Chauffeur</h4>
-            <p style="margin: 2px 0; font-size: 12.5px;"><strong>Chauffeur :</strong> {{ selectedBoutiqueOrder()?.driverName || 'Non renseigné' }}</p>
-            <p style="margin: 2px 0; font-size: 12.5px;"><strong>Téléphone :</strong> {{ selectedBoutiqueOrder()?.driverPhone || 'N/A' }}</p>
-            <p style="margin: 2px 0; font-size: 12.5px;"><strong>Immatriculation Véhicule :</strong> {{ selectedBoutiqueOrder()?.vehicleRegistration || 'N/A' }}</p>
-            <p style="margin: 2px 0; font-size: 12.5px;"><strong>Date Livraison :</strong> {{ selectedBoutiqueOrder()?.deliveryDate | date:'dd/MM/yyyy' }}</p>
-          </div>
-        </div>
 
-        <!-- Items Table -->
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
-          <thead>
-            <tr style="background: #0b1a30; color: white; font-size: 12px; text-transform: uppercase;">
-              <th style="padding: 10px; text-align: left;">Réf.</th>
-              <th style="padding: 10px; text-align: left;">Désignation Produit</th>
-              <th style="padding: 10px; text-align: center;">Quantité</th>
-              <th style="padding: 10px; text-align: right;">Prix Cession Unitaire</th>
-              <th style="padding: 10px; text-align: right;">Total FCFA</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of selectedBoutiqueOrder()?.items" style="border-bottom: 1px solid rgba(0,0,0,0.1); font-size: 13px;">
-              <td style="padding: 10px; font-weight: 600;">{{ item.productReference }}</td>
-              <td style="padding: 10px;">{{ item.productName }}</td>
-              <td style="padding: 10px; text-align: center; font-weight: 700;">{{ item.quantity }}</td>
-              <td style="padding: 10px; text-align: right;">{{ item.unitPrice | fcfa }}</td>
-              <td style="padding: 10px; text-align: right; font-weight: 700;">{{ item.totalPrice | fcfa }}</td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr style="background: #fafafa; font-weight: 700; font-size: 14px;">
-              <td colspan="4" style="padding: 12px; text-align: right;">TOTAL CESSION (A DÉDUIRE EN COMPTE) :</td>
-              <td style="padding: 12px; text-align: right; color: #1890ff;">{{ selectedBoutiqueOrder()?.totalAmount | fcfa }}</td>
-            </tr>
-          </tfoot>
-        </table>
-
-        <!-- Signatures Section -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 40px; padding-top: 20px; border-top: 1px dashed rgba(0,0,0,0.2);">
-          <div style="text-align: center; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; padding: 20px; min-height: 120px;">
-            <p style="margin: 0 0 40px 0; font-weight: 700; font-size: 12px; text-transform: uppercase;">Signature & Cachet Dépôt Principal</p>
-            <p style="margin: 0; font-size: 11px; color: #8c8c8c;">(Nom & Validation Responsable Dépôt)</p>
+          <!-- Info Grid -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; background: #fafafa; padding: 16px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.06);">
+            <div>
+              <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #0b1a30; text-transform: uppercase;">Destinataire (Boutique)</h4>
+              <p style="margin: 2px 0; font-weight: 700;">{{ selectedBoutiqueOrder()?.boutiqueName }}</p>
+              <p style="margin: 2px 0; font-size: 12px; color: #595959;">Commandé par : {{ selectedBoutiqueOrder()?.createdByUser }}</p>
+            </div>
+            <div>
+              <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #0b1a30; text-transform: uppercase;">Informations Transport & Chauffeur</h4>
+              <p style="margin: 2px 0; font-size: 12.5px;"><strong>Chauffeur :</strong> {{ selectedBoutiqueOrder()?.driverName || blDriverName() || 'Non renseigné' }}</p>
+              <p style="margin: 2px 0; font-size: 12.5px;"><strong>Téléphone :</strong> {{ selectedBoutiqueOrder()?.driverPhone || blDriverPhone() || 'N/A' }}</p>
+              <p style="margin: 2px 0; font-size: 12.5px;"><strong>Immatriculation :</strong> {{ selectedBoutiqueOrder()?.vehicleRegistration || blVehicleRegistration() || 'N/A' }}</p>
+              <p style="margin: 2px 0; font-size: 12.5px;"><strong>Date Livraison :</strong> {{ selectedBoutiqueOrder()?.deliveryDate | date:'dd/MM/yyyy' }}</p>
+            </div>
           </div>
-          <div style="text-align: center; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; padding: 20px; min-height: 120px;">
-            <p style="margin: 0 0 40px 0; font-weight: 700; font-size: 12px; text-transform: uppercase;">Signature & Réception Boutique</p>
-            <p style="margin: 0; font-size: 11px; color: #8c8c8c;">(Nom & Validation Gérant Boutique)</p>
+
+          <!-- Items Table -->
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+            <thead>
+              <tr style="background: #0b1a30; color: white; font-size: 12px; text-transform: uppercase;">
+                <th style="padding: 10px; text-align: left;">Réf.</th>
+                <th style="padding: 10px; text-align: left;">Désignation Produit</th>
+                <th style="padding: 10px; text-align: center;">Quantité</th>
+                <th style="padding: 10px; text-align: right;">Prix Cession Unitaire</th>
+                <th style="padding: 10px; text-align: right;">Total FCFA</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of selectedBoutiqueOrder()?.items" style="border-bottom: 1px solid rgba(0,0,0,0.1); font-size: 13px;">
+                <td style="padding: 10px; font-weight: 600;">{{ item.productReference }}</td>
+                <td style="padding: 10px;">{{ item.productName }}</td>
+                <td style="padding: 10px; text-align: center; font-weight: 700;">{{ item.quantity }}</td>
+                <td style="padding: 10px; text-align: right;">{{ item.unitPrice | fcfa }}</td>
+                <td style="padding: 10px; text-align: right; font-weight: 700;">{{ item.totalPrice | fcfa }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr style="background: #fafafa; font-weight: 700; font-size: 14px;">
+                <td colspan="4" style="padding: 12px; text-align: right;">TOTAL CESSION (A DÉDUIRE EN COMPTE) :</td>
+                <td style="padding: 12px; text-align: right; color: #1890ff;">{{ selectedBoutiqueOrder()?.totalAmount | fcfa }}</td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <!-- Signatures Section -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 40px; padding-top: 20px; border-top: 1px dashed rgba(0,0,0,0.2);">
+            <div style="text-align: center; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; padding: 20px; min-height: 120px;">
+              <p style="margin: 0 0 40px 0; font-weight: 700; font-size: 12px; text-transform: uppercase;">Signature & Cachet Dépôt Principal</p>
+              <p style="margin: 0; font-size: 11px; color: #8c8c8c;">(Nom & Validation Responsable Dépôt)</p>
+            </div>
+            <div style="text-align: center; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; padding: 20px; min-height: 120px;">
+              <p style="margin: 0 0 40px 0; font-weight: 700; font-size: 12px; text-transform: uppercase;">Signature & Réception Boutique</p>
+              <p style="margin: 0; font-size: 11px; color: #8c8c8c;">(Nom & Validation Gérant Boutique)</p>
+            </div>
           </div>
         </div>
       </div>
+
     </div>
   </div>
+
 </div>
 
 <!-- MODALE POP-UP DE CONFIRMATION CRÉATION FACTURE -->

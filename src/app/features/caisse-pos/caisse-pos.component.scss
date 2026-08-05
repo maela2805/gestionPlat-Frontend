@@ -1051,3 +1051,73 @@
     width: 80mm;
   }
 }
+
+/* Save client button & info summary */
+.client-info-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+  margin-bottom: 4px;
+
+  span {
+    font-size: 12px;
+    color: #595959;
+    background: #f0f0f0;
+    border-radius: 4px;
+    padding: 2px 8px;
+  }
+}
+
+.save-client-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 9px 12px;
+  background: rgba(24, 144, 255, 0.06);
+  border: 1px dashed rgba(24, 144, 255, 0.5);
+  border-radius: 8px;
+  color: #1890ff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(24, 144, 255, 0.12);
+  }
+
+  .save-badge {
+    background: #52c41a;
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+}
+
+/* Badge type CLIENT dans la modale */
+.badge-type {
+  background: #e6f7ff;
+  color: #1890ff;
+  border: 1px solid #91d5ff;
+  border-radius: 4px;
+  padding: 1px 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.required {
+  color: #ff4d4f;
+}
+
+/* Form row (2 colonnes) */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+

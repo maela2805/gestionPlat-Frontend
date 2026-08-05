@@ -1,6 +1,7 @@
 export enum InvoiceType {
   VENTE = 'VENTE',
-  ACHAT = 'ACHAT'
+  ACHAT = 'ACHAT',
+  CESSION_BOUTIQUE = 'CESSION_BOUTIQUE'
 }
 
 export enum InvoiceStatus {
@@ -66,10 +67,31 @@ export interface Invoice {
   paidAmount: number;
   remainingAmount: number;
   note?: string;
+  deliveryConfirmed?: boolean;
+  deliveryDate?: string;
+  driverName?: string;
+  driverPhone?: string;
+  vehicleRegistration?: string;
+  attachmentUrl?: string;
   items: InvoiceItem[];
   payments?: Payment[];
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface UpdateInvoiceRequest {
+  invoiceDate?: string;
+  dueDate?: string;
+  tiersId?: number;
+  boutiqueId?: number;
+  taxRate?: number;
+  note?: string;
+  items?: {
+    description: string;
+    quantity: number;
+    unitPriceHt: number;
+    taxRate?: number;
+  }[];
 }
 
 export interface CreateInvoiceRequest {

@@ -44,6 +44,14 @@ export class InvoiceService {
     return this.http.put<Invoice>(`${this.baseUrl}/${id}/cancel`, {});
   }
 
+  updateInvoice(id: number, request: any): Observable<Invoice> {
+    return this.http.put<Invoice>(`${this.baseUrl}/${id}`, request);
+  }
+
+  confirmDelivery(id: number): Observable<Invoice> {
+    return this.http.put<Invoice>(`${this.baseUrl}/${id}/confirm-delivery`, {});
+  }
+
   addPayment(request: CreatePaymentRequest): Observable<Payment> {
     return this.http.post<Payment>(`${this.baseUrl}/payments`, request);
   }
