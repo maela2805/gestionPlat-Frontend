@@ -1,0 +1,413 @@
+<div class="stock-returns-page" style="width: 100%; padding: 24px;">
+  <!-- Alerts -->
+  <div class="alert alert-danger" *ngIf="errorMessage()" style="background: #fff2f0; border: 1px solid #ffccc7; color: #ff4d4f; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; font-weight: 500;">
+    <span>⚠️ {{ errorMessage() }}</span>
+  </div>
+  <div class="alert alert-success" *ngIf="successMessage()" style="background: #f6ffed; border: 1px solid #b7eb8f; color: #52c41a; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; font-weight: 500;">
+    <span>✅ {{ successMessage() }}</span>
+  </div>
+
+  <!-- Header -->
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <div style="font-size: 13px; color: #8c8c8c; margin-bottom: 6px;">
+        <span>Tawfekh Vaisselle</span> <span style="margin: 0 6px;">></span> <span>Gestion des Stocks</span> <span style="margin: 0 6px;">></span> <span style="color: #1890ff; font-weight: 600;">Retours & Casses</span>
+      </div>
+      <h1 style="margin: 0; font-size: 22px; font-weight: 700; color: #0b1a30;">Déclarations de Retours, Pertes & Casses</h1>
+    </div>
+
+    <div>
+      <button (click)="openCreateModal()" style="display: flex; align-items: center; gap: 8px; padding: 10px 18px; background: #1890ff; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(24,144,255,0.25);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        <span>Déclarer une Casse / Retour</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stat Cards Grid -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+    <div style="background: white; border-radius: 12px; padding: 18px 20px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 16px;">
+      <div style="width: 46px; height: 46px; border-radius: 10px; background: rgba(24,144,255,0.1); color: #1890ff; display: flex; align-items: center; justify-content: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 600; color: #8c8c8c; text-transform: uppercase;">Total Déclarations</div>
+        <div style="font-size: 24px; font-weight: 800; color: #0b1a30;">{{ totalCount() }}</div>
+      </div>
+    </div>
+
+    <div style="background: white; border-radius: 12px; padding: 18px 20px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 16px;">
+      <div style="width: 46px; height: 46px; border-radius: 10px; background: rgba(250,140,22,0.1); color: #fa8c16; display: flex; align-items: center; justify-content: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 600; color: #8c8c8c; text-transform: uppercase;">En Attente (Admin)</div>
+        <div style="font-size: 24px; font-weight: 800; color: #fa8c16;">{{ pendingCount() }}</div>
+      </div>
+    </div>
+
+    <div style="background: white; border-radius: 12px; padding: 18px 20px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 16px;">
+      <div style="width: 46px; height: 46px; border-radius: 10px; background: rgba(82,196,26,0.1); color: #52c41a; display: flex; align-items: center; justify-content: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 600; color: #8c8c8c; text-transform: uppercase;">Approuvées</div>
+        <div style="font-size: 24px; font-weight: 800; color: #52c41a;">{{ approvedCount() }}</div>
+      </div>
+    </div>
+
+    <div style="background: white; border-radius: 12px; padding: 18px 20px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 16px;">
+      <div style="width: 46px; height: 46px; border-radius: 10px; background: rgba(255,77,79,0.1); color: #ff4d4f; display: flex; align-items: center; justify-content: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 600; color: #8c8c8c; text-transform: uppercase;">Rejetées</div>
+        <div style="font-size: 24px; font-weight: 800; color: #ff4d4f;">{{ rejectedCount() }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Row -->
+  <div style="background: white; border-radius: 12px; padding: 16px 20px; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 20px; display: flex; align-items: center; justify-content: flex-start; flex-wrap: wrap; gap: 16px;">
+    <!-- Search Bar -->
+    <div style="position: relative; width: 300px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #8c8c8c;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" placeholder="Rechercher (réf, boutique, agent)..." [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" style="width: 100%; padding: 8.5px 14px 8.5px 38px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; outline: none;" />
+    </div>
+
+    <!-- Boutique Filter -->
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <label style="font-size: 12px; font-weight: 700; color: #0b1a30; text-transform: uppercase;">BOUTIQUE :</label>
+      <select [value]="selectedBoutiqueId() || ''" (change)="onBoutiqueFilterChange($event)" style="padding: 8.5px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; font-weight: 600; color: #0b1a30; outline: none; background: white;">
+        <option value="">Toutes les boutiques</option>
+        <option *ngFor="let b of boutiques()" [value]="b.id">{{ b.name }} ({{ b.code }})</option>
+      </select>
+    </div>
+
+    <!-- Status Filter -->
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <label style="font-size: 12px; font-weight: 700; color: #0b1a30; text-transform: uppercase;">STATUT :</label>
+      <select [value]="selectedStatusFilter()" (change)="selectedStatusFilter.set($any($event.target).value); loadReturns()" style="padding: 8.5px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; font-weight: 600; color: #0b1a30; outline: none; background: white;">
+        <option value="">Tous les statuts</option>
+        <option value="PENDING">⏳ En Attente</option>
+        <option value="APPROVED">✅ Approuvées</option>
+        <option value="REJECTED">❌ Rejetées</option>
+        <option value="CANCELLED">🚫 Annulées</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div style="background: white; border-radius: 12px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 16px rgba(0,0,0,0.04); overflow: hidden;">
+    <div style="width: 100%; overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+          <tr style="background: rgba(0,0,0,0.02); border-bottom: 1px solid rgba(0,0,0,0.06);">
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">RÉFÉRENCE</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">BOUTIQUE</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">MOTIF / TYPE</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">ARTICLES CASSEs</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">MÉDIAS</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">DATE & AGENT</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">STATUT</th>
+            <th style="padding: 14px 16px; font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase; text-align: right;">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="isLoading()">
+            <td colspan="8" style="text-align: center; padding: 32px; color: #8c8c8c;">Chargement des déclarations...</td>
+          </tr>
+
+          <tr *ngIf="!isLoading() && paginatedReturns().length === 0">
+            <td colspan="8" style="text-align: center; padding: 32px; color: #8c8c8c;">Aucune déclaration trouvée.</td>
+          </tr>
+
+          <tr *ngFor="let ret of paginatedReturns()" (click)="openDetailModal(ret)" style="border-bottom: 1px solid rgba(0,0,0,0.04); cursor: pointer; transition: background 0.2s;">
+            <td style="padding: 12px 16px; font-size: 13px; font-weight: 700; color: #1890ff;">{{ ret.reference }}</td>
+            <td style="padding: 12px 16px; font-size: 13px; font-weight: 600; color: #0b1a30;">{{ ret.boutiqueName }}</td>
+            <td style="padding: 12px 16px; font-size: 12px;">
+              <span style="padding: 3px 8px; border-radius: 4px; background: #e6f7ff; color: #1890ff; font-weight: 600;">
+                {{ ret.type }}
+              </span>
+            </td>
+            <td style="padding: 12px 16px; font-size: 13px; font-weight: 600; color: #262626;">
+              {{ ret.items.length }} article(s)
+            </td>
+            <td style="padding: 12px 16px; font-size: 12px;">
+              <span *ngIf="ret.mediaUrls && ret.mediaUrls.length > 0" style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 12px; background: #f6ffed; color: #52c41a; font-weight: 600;">
+                📷 {{ ret.mediaUrls.length }} pièce(s)
+              </span>
+              <span *ngIf="!ret.mediaUrls || ret.mediaUrls.length === 0" style="color: #bfbfbf;">Aucune</span>
+            </td>
+            <td style="padding: 12px 16px; font-size: 12px; color: #595959;">
+              <div>{{ ret.createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+              <small style="color: #8c8c8c;">{{ ret.userEmail }}</small>
+            </td>
+            <td style="padding: 12px 16px; font-size: 12px;">
+              <span *ngIf="ret.status === 'PENDING'" style="padding: 4px 10px; border-radius: 20px; background: rgba(250,140,22,0.1); color: #fa8c16; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #fa8c16;"></span>En Attente
+              </span>
+              <span *ngIf="ret.status === 'APPROVED'" style="padding: 4px 10px; border-radius: 20px; background: rgba(82,196,26,0.1); color: #52c41a; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #52c41a;"></span>Approuvée
+              </span>
+              <span *ngIf="ret.status === 'REJECTED'" style="padding: 4px 10px; border-radius: 20px; background: rgba(255,77,79,0.1); color: #ff4d4f; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #ff4d4f;"></span>Rejetée
+              </span>
+              <span *ngIf="ret.status === 'CANCELLED'" style="padding: 4px 10px; border-radius: 20px; background: #f0f2f5; color: #8c8c8c; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #8c8c8c;"></span>Annulée
+              </span>
+            </td>
+            <td style="padding: 12px 16px; text-align: right;" (click)="$event.stopPropagation()">
+              <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                <button type="button" (click)="openDetailModal(ret)" title="Voir le détail" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid rgba(24,144,255,0.2); background: rgba(24,144,255,0.06); color: #1890ff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+                  👁️
+                </button>
+                <button *ngIf="isAdmin && ret.status === 'PENDING'" type="button" (click)="approveReturn(ret)" title="Approuver & Ajuster le Stock" style="width: 32px; height: 32px; border-radius: 6px; border: none; background: #52c41a; color: white; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 6px rgba(82,196,26,0.3);">
+                  ✓
+                </button>
+                <button *ngIf="isAdmin && ret.status === 'PENDING'" type="button" (click)="openRejectModal(ret)" title="Rejeter" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid rgba(255,77,79,0.2); background: rgba(255,77,79,0.06); color: #ff4d4f; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+                  ✕
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MODAL: Création Déclaration -->
+  <div class="modal-backdrop" *ngIf="showCreateModal()">
+    <div class="modal-card wide">
+      <div class="modal-header">
+        <h3>📋 Déclarer une Casse ou Retour d'Article</h3>
+        <button class="close-btn" (click)="showCreateModal.set(false)">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group" *ngIf="isAdmin">
+            <label style="font-size: 13px; font-weight: 600; color: #262626; margin-bottom: 6px; display: block;">Boutique Concernée :</label>
+            <select [(ngModel)]="formBoutiqueId" (change)="onFormBoutiqueChange()" style="width: 100%; padding: 9px; border: 1px solid #d9d9d9; border-radius: 6px;">
+              <option *ngFor="let b of boutiques()" [value]="b.id">{{ b.name }} ({{ b.code }})</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label style="font-size: 13px; font-weight: 600; color: #262626; margin-bottom: 6px; display: block;">Type de Déclaration :</label>
+            <select [(ngModel)]="formType" style="width: 100%; padding: 9px; border: 1px solid #d9d9d9; border-radius: 6px;">
+              <option value="CASSE">💥 Vaisselle Cassée / Brisée</option>
+              <option value="DEFAUT_FABRICATION">⚠️ Défaut d'Usine / Fabrication</option>
+              <option value="INVENDU_PERIME">📦 Article Endommagé / Inutilisable</option>
+              <option value="RETOUR_CLIENT">↩️ Retour par Client</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 14px;">
+          <label style="font-size: 13px; font-weight: 600; color: #262626; margin-bottom: 6px; display: block;">Description / Explication des faits :</label>
+          <textarea [(ngModel)]="formDescription" rows="2" placeholder="Précisez les circonstances de la casse..." style="width: 100%; padding: 9px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px;"></textarea>
+        </div>
+
+        <!-- Section Ajout d'Articles -->
+        <div style="margin-top: 20px; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 8px; padding: 16px;">
+          <h4 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 700; color: #0b1a30;">Sélection des Articles Endommagés</h4>
+          
+          <div style="display: grid; grid-template-columns: 2fr 1fr 2fr auto; gap: 10px; align-items: end;">
+            <div>
+              <label style="font-size: 12px; color: #595959;">Produit en Stock Boutique :</label>
+              <select [(ngModel)]="selectedProductIdToAdd" style="width: 100%; padding: 8px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px;">
+                <option [value]="null">Choisir un produit...</option>
+                <option *ngFor="let s of boutiqueStocks()" [value]="s.productId">{{ s.productName }} (Réf: {{ s.productReference }}, Stock actuel: {{ s.quantity }})</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="font-size: 12px; color: #595959;">Qté Cassée :</label>
+              <input type="number" [(ngModel)]="addQuantityInput" min="1" style="width: 100%; padding: 8px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px;" />
+            </div>
+
+            <div>
+              <label style="font-size: 12px; color: #595959;">Remarque / Note :</label>
+              <input type="text" [(ngModel)]="addNoteInput" placeholder="Ex: Fêlé sur le bord..." style="width: 100%; padding: 8px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px;" />
+            </div>
+
+            <button type="button" (click)="addItemToDraft()" style="padding: 8px 14px; background: #52c41a; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
+              + Ajouter
+            </button>
+          </div>
+
+          <!-- Draft Items Table -->
+          <table style="width: 100%; margin-top: 14px; border-collapse: collapse; font-size: 13px;" *ngIf="draftItems.length > 0">
+            <thead>
+              <tr style="border-bottom: 1px solid #e8e8e8; text-align: left; color: #8c8c8c;">
+                <th style="padding: 6px;">Produit</th>
+                <th style="padding: 6px;">Quantité</th>
+                <th style="padding: 6px;">Note</th>
+                <th style="padding: 6px; text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of draftItems" style="border-bottom: 1px solid #f0f0f0;">
+                <td style="padding: 6px; font-weight: 600;">{{ item.product.productName }} ({{ item.product.productReference }})</td>
+                <td style="padding: 6px;"><strong style="color: #ff4d4f;">{{ item.quantity }}</strong> unité(s)</td>
+                <td style="padding: 6px; color: #595959;">{{ item.note || '-' }}</td>
+                <td style="padding: 6px; text-align: right;">
+                  <button type="button" (click)="removeDraftItem(item)" style="border: none; background: transparent; color: #ff4d4f; cursor: pointer; font-weight: bold;">✕</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Section Upload Photos/Vidéos -->
+        <div style="margin-top: 20px;">
+          <h4 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 700; color: #0b1a30;">📷 Pièces Jointes Multimédia (Photos / Vidéos)</h4>
+          
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <label style="display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; background: rgba(24,144,255,0.08); color: #1890ff; border: 1px dashed #1890ff; border-radius: 6px; font-weight: 600; cursor: pointer;">
+              <span>📁 Sélectionner une Photo / Vidéo</span>
+              <input type="file" (change)="onFileSelected($event)" accept="image/*,video/*" style="display: none;" />
+            </label>
+
+            <span *ngIf="isUploading()" style="font-size: 13px; color: #fa8c16; font-weight: 600;">
+              Téléversement en cours...
+            </span>
+          </div>
+
+          <!-- Thumbnails Preview -->
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px;" *ngIf="formMediaUrls.length > 0">
+            <div *ngFor="let url of formMediaUrls" style="position: relative; width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 1px solid #d9d9d9;">
+              <img *ngIf="!isVideoUrl(url)" [src]="url" style="width: 100%; height: 100%; object-fit: cover;" />
+              <video *ngIf="isVideoUrl(url)" [src]="url" style="width: 100%; height: 100%; object-fit: cover;"></video>
+              <button type="button" (click)="removeMediaUrl(url)" style="position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="padding: 16px 24px; border-top: 1px solid #e8e8e8; display: flex; justify-content: flex-end; gap: 12px;">
+        <button class="btn btn-secondary" (click)="showCreateModal.set(false)" style="padding: 9px 18px; border: 1px solid #d9d9d9; border-radius: 6px; background: white; cursor: pointer;">Annuler</button>
+        <button class="btn btn-primary" (click)="submitCreate()" [disabled]="isSaving() || draftItems.length === 0" style="padding: 9px 18px; border: none; border-radius: 6px; background: #1890ff; color: white; font-weight: 600; cursor: pointer;">
+          ✅ Soumettre la Déclaration
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Détails & Validation Admin -->
+  <div class="modal-backdrop" *ngIf="showDetailModal() && selectedReturnDetail()">
+    <div class="modal-card wide">
+      <div class="modal-header">
+        <h3>📄 Détails de la Déclaration : {{ selectedReturnDetail()?.reference }}</h3>
+        <button class="close-btn" (click)="showDetailModal.set(false)">✕</button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedReturnDetail() as ret">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; background: #fafafa; padding: 14px; border-radius: 8px;">
+          <div>
+            <div><strong>Boutique :</strong> {{ ret.boutiqueName }} ({{ ret.boutiqueCode }})</div>
+            <div><strong>Type :</strong> {{ ret.type }}</div>
+            <div><strong>Créée par :</strong> {{ ret.userEmail }} le {{ ret.createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+          </div>
+          <div>
+            <div>
+              <strong>Statut :</strong> 
+              <span style="font-weight: 700; margin-left: 6px;">{{ ret.status }}</span>
+            </div>
+            <div *ngIf="ret.approvedByEmail"><strong>Validée/Rejetée par :</strong> {{ ret.approvedByEmail }}</div>
+            <div *ngIf="ret.rejectionReason" style="color: #ff4d4f;"><strong>Motif Rejet :</strong> {{ ret.rejectionReason }}</div>
+          </div>
+        </div>
+
+        <div *ngIf="ret.description" style="margin-bottom: 16px;">
+          <h4 style="margin: 0 0 4px 0; font-size: 13px; color: #595959;">Explication :</h4>
+          <p style="margin: 0; background: #fff; padding: 10px; border: 1px solid #eee; border-radius: 6px; font-size: 13px;">{{ ret.description }}</p>
+        </div>
+
+        <!-- Articles Table -->
+        <h4 style="margin: 16px 0 8px 0; font-size: 14px; font-weight: 700; color: #0b1a30;">Liste des Articles déclarés cassés / endommagés :</h4>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px;">
+          <thead>
+            <tr style="background: #f0f2f5; text-align: left;">
+              <th style="padding: 8px 12px;">Produit</th>
+              <th style="padding: 8px 12px;">Quantité Cassée</th>
+              <th style="padding: 8px 12px;">Remarque</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of ret.items" style="border-bottom: 1px solid #f0f0f0;">
+              <td style="padding: 8px 12px; font-weight: 600;">{{ item.productName }} ({{ item.productReference }})</td>
+              <td style="padding: 8px 12px;"><strong style="color: #ff4d4f;">{{ item.quantity }}</strong> unité(s)</td>
+              <td style="padding: 8px 12px; color: #595959;">{{ item.note || '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Media Gallery -->
+        <div *ngIf="ret.mediaUrls && ret.mediaUrls.length > 0">
+          <h4 style="margin: 16px 0 8px 0; font-size: 14px; font-weight: 700; color: #0b1a30;">📷 Photos & Vidéos de Justificatif :</h4>
+          <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+            <div *ngFor="let url of ret.mediaUrls" (click)="openMediaViewer(url)" style="width: 110px; height: 110px; border-radius: 8px; overflow: hidden; border: 1px solid #d9d9d9; cursor: pointer; position: relative;">
+              <img *ngIf="!isVideoUrl(url)" [src]="url" style="width: 100%; height: 100%; object-fit: cover;" />
+              <div *ngIf="isVideoUrl(url)" style="width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; color: white;">
+                ▶️ Vidéo
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="padding: 16px 24px; border-top: 1px solid #e8e8e8; display: flex; justify-content: flex-end; gap: 12px;">
+        <button class="btn btn-secondary" (click)="showDetailModal.set(false)" style="padding: 9px 18px; border: 1px solid #d9d9d9; border-radius: 6px; background: white; cursor: pointer;">Fermer</button>
+        
+        <ng-container *ngIf="selectedReturnDetail() as ret">
+          <button *ngIf="ret.status === 'PENDING'" (click)="cancelReturn(ret)" style="padding: 9px 18px; border: 1px solid #d9d9d9; border-radius: 6px; background: #fff2f0; color: #ff4d4f; font-weight: 600; cursor: pointer;">
+            Annuler la Déclaration
+          </button>
+          
+          <button *ngIf="isAdmin && ret.status === 'PENDING'" (click)="openRejectModal(ret)" style="padding: 9px 18px; border: 1px solid #ff4d4f; border-radius: 6px; background: white; color: #ff4d4f; font-weight: 600; cursor: pointer;">
+            ✕ Rejeter
+          </button>
+
+          <button *ngIf="isAdmin && ret.status === 'PENDING'" (click)="approveReturn(ret)" style="padding: 9px 18px; border: none; border-radius: 6px; background: #52c41a; color: white; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(82,196,26,0.3);">
+            ✅ Approuver & Ajuster le Stock Boutique
+          </button>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Motif de Rejet -->
+  <div class="modal-backdrop" *ngIf="showRejectModal()">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>❌ Motif du Rejet</h3>
+        <button class="close-btn" (click)="showRejectModal.set(false)">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 13px; color: #595959;">Indiquez à la boutique le motif du rejet de cette déclaration :</p>
+        <textarea [(ngModel)]="rejectionReasonInput" rows="3" placeholder="Ex: Photos illisibles, motif non justifiable..." style="width: 100%; padding: 9px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px;"></textarea>
+      </div>
+      <div class="modal-footer" style="padding: 16px 24px; border-top: 1px solid #e8e8e8; display: flex; justify-content: flex-end; gap: 12px;">
+        <button class="btn btn-secondary" (click)="showRejectModal.set(false)">Annuler</button>
+        <button class="btn btn-danger" (click)="confirmReject()" [disabled]="isSaving()" style="padding: 9px 18px; border: none; border-radius: 6px; background: #ff4d4f; color: white; font-weight: 600; cursor: pointer;">
+          Confirmer le Rejet
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Viewer Photo/Vidéo -->
+  <div class="modal-backdrop" *ngIf="showMediaViewerModal() && selectedMediaUrl()">
+    <div class="modal-card" style="max-width: 800px; padding: 12px; background: #000; color: white;">
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
+        <button (click)="showMediaViewerModal.set(false)" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer;">✕</button>
+      </div>
+      <div style="text-align: center;">
+        <img *ngIf="!isVideoUrl(selectedMediaUrl()!)" [src]="selectedMediaUrl()" style="max-width: 100%; max-height: 70vh; border-radius: 8px;" />
+        <video *ngIf="isVideoUrl(selectedMediaUrl()!)" [src]="selectedMediaUrl()" controls autoplay style="max-width: 100%; max-height: 70vh; border-radius: 8px;"></video>
+      </div>
+    </div>
+  </div>
+</div>

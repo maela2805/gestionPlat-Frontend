@@ -29,6 +29,11 @@ const routes: Routes = [
     loadChildren: () => import('./features/stock/stock.module').then(m => m.StockModule) 
   },
   { 
+    path: 'stock-returns', 
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/stock-returns/stock-returns.module').then(m => m.StockReturnsModule) 
+  },
+  { 
     path: 'inventories', 
     canActivate: [authGuard],
     loadChildren: () => import('./features/inventory/inventory.module').then(m => m.InventoryModule) 
