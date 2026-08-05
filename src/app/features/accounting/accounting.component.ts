@@ -165,13 +165,14 @@ export class AccountingComponent implements OnInit, AfterViewInit {
 
   loadWalletAndTransfers(): void {
     if (this.selectedBoutiqueId) {
-      this.fundTransferService.getBoutiqueWallet(this.selectedBoutiqueId).subscribe({
+      const bId = Number(this.selectedBoutiqueId);
+      this.fundTransferService.getBoutiqueWallet(bId).subscribe({
         next: (wallet) => this.walletSummary = wallet,
         error: (err) => console.error(err)
       });
     }
 
-    const bId = this.selectedBoutiqueId || undefined;
+    const bId = this.selectedBoutiqueId ? Number(this.selectedBoutiqueId) : undefined;
     this.fundTransferService.getAllTransfers(bId).subscribe({
       next: (transfers) => {
         this.transfersList = transfers;
