@@ -184,22 +184,37 @@ export class CaissePosComponent implements OnInit {
     this.loading = true;
     this.warehouseService.getStocksByBoutique(this.selectedBoutiqueId).subscribe({
       next: (boutiqueStocks) => {
-        this.loading = false;
-        this.products = boutiqueStocks.map(bs => ({
-          id: bs.productId,
-          reference: bs.productReference,
-          name: bs.productName,
-          buyPrice: bs.buyPrice,
-          sellPrice: bs.sellPrice || 0,
-          stock: bs.quantity,
-          alertThreshold: bs.alertThreshold || 0,
-          imageUrl: bs.imageUrl,
-          category: bs.categoryId ? { id: bs.categoryId, name: bs.categoryName || '' } : undefined
-        }));
+        if (boutiqueStocks && boutiqueStocks.length > 0) {
+          this.loading = false;
+          this.products = boutiqueStocks.map(bs => ({
+            id: bs.productId,
+            reference: bs.productReference,
+            name: bs.productName,
+            buyPrice: bs.buyPrice,
+            sellPrice: bs.sellPrice || 0,
+            stock: bs.quantity,
+            alertThreshold: bs.alertThreshold || 0,
+            imageUrl: bs.imageUrl,
+            category: bs.categoryId ? { id: bs.categoryId, name: bs.categoryName || '' } : undefined
+          }));
+        } else {
+          this.productService.getAllProducts().subscribe({
+            next: (allProds) => {
+              this.loading = false;
+              this.products = allProds;
+            },
+            error: () => this.loading = false
+          });
+        }
       },
-      error: (err) => {
-        this.loading = false;
-        this.showError('Erreur lors du chargement des produits en stock dans la boutique');
+      error: () => {
+        this.productService.getAllProducts().subscribe({
+          next: (allProds) => {
+            this.loading = false;
+            this.products = allProds;
+          },
+          error: () => this.loading = false
+        });
       }
     });
   }
