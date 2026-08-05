@@ -288,7 +288,7 @@
 
       <div class="modal-footer" style="padding: 16px 24px; border-top: 1px solid #e8e8e8; display: flex; justify-content: flex-end; gap: 12px;">
         <button class="btn btn-secondary" (click)="showCreateModal.set(false)" style="padding: 9px 18px; border: 1px solid #d9d9d9; border-radius: 6px; background: white; cursor: pointer;">Annuler</button>
-        <button class="btn btn-primary" (click)="submitCreate()" [disabled]="isSaving() || draftItems.length === 0" style="padding: 9px 18px; border: none; border-radius: 6px; background: #1890ff; color: white; font-weight: 600; cursor: pointer;">
+        <button class="btn btn-primary" (click)="submitCreate()" [disabled]="isSaving() || (draftItems.length === 0 && !selectedProductIdToAdd)" style="padding: 9px 18px; border: none; border-radius: 6px; background: #1890ff; color: white; font-weight: 600; cursor: pointer;">
           ✅ Soumettre la Déclaration
         </button>
       </div>

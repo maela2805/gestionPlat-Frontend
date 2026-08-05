@@ -244,8 +244,13 @@ export class StockReturnsComponent implements OnInit {
       return;
     }
 
+    // Auto-ajouter le produit si l'utilisateur a sélectionné un produit mais a oublié de cliquer sur "+ Ajouter"
+    if (this.selectedProductIdToAdd) {
+      this.addItemToDraft();
+    }
+
     if (this.draftItems.length === 0) {
-      this.showError('Veuillez ajouter au moins un produit endommagé ou cassé.');
+      this.showError('Veuillez choisir au moins un produit cassé ou endommagé.');
       return;
     }
 
@@ -272,7 +277,9 @@ export class StockReturnsComponent implements OnInit {
       },
       error: (err) => {
         this.isSaving.set(false);
-        this.showError(err.error?.message || 'Erreur lors de la création de la déclaration.');
+        const msg = typeof err.error === 'string' ? err.error : (err.error?.message || err.message || 'Erreur lors de la création de la déclaration.');
+        alert('⚠️ ' + msg);
+        this.showError(msg);
       }
     });
   }
