@@ -128,9 +128,13 @@ export class AccountingComponent implements OnInit, AfterViewInit {
       next: (boutiques) => {
         this.boutiquesList = boutiques;
         if (this.isBoutiqueRestricted && this.userBoutiqueId) {
-          this.selectedBoutiqueId = this.userBoutiqueId;
-        } else if (boutiques.length > 0 && !this.selectedBoutiqueId) {
-          this.selectedBoutiqueId = boutiques[0].id;
+          this.selectedBoutiqueId = Number(this.userBoutiqueId);
+        } else if (boutiques.length > 0) {
+          if (!this.selectedBoutiqueId) {
+            this.selectedBoutiqueId = Number(boutiques[0].id);
+          } else {
+            this.selectedBoutiqueId = Number(this.selectedBoutiqueId);
+          }
         }
         this.loadWalletAndTransfers();
       },

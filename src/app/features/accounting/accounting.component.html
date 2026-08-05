@@ -36,7 +36,7 @@
         [style.background]="isBoutiqueRestricted ? '#f5f5f5' : 'white'"
         [style.cursor]="isBoutiqueRestricted ? 'not-allowed' : 'pointer'"
         style="padding: 8px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; font-weight: 600; color: #0b1a30; outline: none;">
-        <option *ngFor="let b of boutiquesList" [value]="b.id">{{ b.name }} ({{ b.code }})</option>
+        <option *ngFor="let b of boutiquesList" [ngValue]="b.id">{{ b.name }} ({{ b.code }})</option>
       </select>
     </div>
   </div>
