@@ -77,6 +77,10 @@ export class StockReturnsComponent implements OnInit {
   rejectionReasonInput: string = '';
 
   ngOnInit(): void {
+    if (this.isBoutiqueRestricted && this.userBoutiqueId) {
+      this.selectedBoutiqueId.set(this.userBoutiqueId);
+      this.formBoutiqueId = this.userBoutiqueId;
+    }
     this.loadBoutiques();
     this.loadReturns();
   }
@@ -85,13 +89,22 @@ export class StockReturnsComponent implements OnInit {
     return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN', 'MANAGER']);
   }
 
+  get userBoutiqueId(): number | null {
+    const user = this.authService.currentUser();
+    return user && user.boutiqueId ? user.boutiqueId : null;
+  }
+
+  get isBoutiqueRestricted(): boolean {
+    return !this.isAdmin && this.userBoutiqueId !== null;
+  }
+
   loadBoutiques(): void {
     this.boutiqueService.getAllBoutiques().subscribe({
       next: (data) => {
         this.boutiques.set(data);
-        const user = this.authService.currentUser();
-        if (!this.isAdmin && user && user.boutiqueId) {
-          this.formBoutiqueId = user.boutiqueId;
+        if (this.isBoutiqueRestricted && this.userBoutiqueId) {
+          this.selectedBoutiqueId.set(this.userBoutiqueId);
+          this.formBoutiqueId = this.userBoutiqueId;
         } else if (data.length > 0 && !this.formBoutiqueId) {
           this.formBoutiqueId = data[0].id;
         }
@@ -162,9 +175,8 @@ export class StockReturnsComponent implements OnInit {
     this.formMediaUrls = [];
     this.formType = 'CASSE';
 
-    const user = this.authService.currentUser();
-    if (!this.isAdmin && user && user.boutiqueId) {
-      this.formBoutiqueId = user.boutiqueId;
+    if (this.isBoutiqueRestricted && this.userBoutiqueId) {
+      this.formBoutiqueId = this.userBoutiqueId;
     } else if (this.boutiques().length > 0 && !this.formBoutiqueId) {
       this.formBoutiqueId = this.boutiques()[0].id;
     }

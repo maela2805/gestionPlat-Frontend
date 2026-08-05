@@ -78,8 +78,14 @@
     <!-- Boutique Filter -->
     <div style="display: flex; align-items: center; gap: 8px;">
       <label style="font-size: 12px; font-weight: 700; color: #0b1a30; text-transform: uppercase;">BOUTIQUE :</label>
-      <select [value]="selectedBoutiqueId() || ''" (change)="onBoutiqueFilterChange($event)" style="padding: 8.5px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; font-weight: 600; color: #0b1a30; outline: none; background: white;">
-        <option value="">Toutes les boutiques</option>
+      <select 
+        [value]="selectedBoutiqueId() || ''" 
+        [disabled]="isBoutiqueRestricted"
+        (change)="onBoutiqueFilterChange($event)" 
+        [style.background]="isBoutiqueRestricted ? '#f5f5f5' : 'white'"
+        [style.cursor]="isBoutiqueRestricted ? 'not-allowed' : 'pointer'"
+        style="padding: 8.5px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; font-weight: 600; color: #0b1a30; outline: none;">
+        <option value="" *ngIf="!isBoutiqueRestricted">Toutes les boutiques</option>
         <option *ngFor="let b of boutiques()" [value]="b.id">{{ b.name }} ({{ b.code }})</option>
       </select>
     </div>
