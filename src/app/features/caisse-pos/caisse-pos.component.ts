@@ -8,6 +8,8 @@ import { TiersService } from '../../core/services/tiers.service';
 import { WarehouseService } from '../../core/services/warehouse.service';
 import { AuthService } from '../../core/services/auth.service';
 
+import { FundTransferService } from '../../core/services/fund-transfer.service';
+
 import { CashSession, CashMovementType } from '../../core/models/cash-session.model';
 import { PosSale, PaymentMethod, CreatePosSaleRequest } from '../../core/models/pos-sale.model';
 import { Boutique } from '../../core/models/boutique.model';
@@ -36,6 +38,7 @@ export class CaissePosComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private tiersService = inject(TiersService);
   private warehouseService = inject(WarehouseService);
+  private fundTransferService = inject(FundTransferService);
   public authService = inject(AuthService);
 
   boutiques: Boutique[] = [];
@@ -79,12 +82,57 @@ export class CaissePosComponent implements OnInit {
   movementAmount: number = 0;
   movementReason: string = '';
 
+  showTransferModal = false;
+  transferAmount: number | null = null;
+  transferPaymentMethod: string = 'ESPECES';
+  transferProofUrl: string = '';
+  transferNotes: string = '';
+  transferLoading = false;
+
   showReceiptModal = false;
   lastSale: PosSale | null = null;
 
   loading = false;
   errorMsg: string | null = null;
   successMsg: string | null = null;
+
+  openTransferModal(): void {
+    this.transferAmount = null;
+    this.transferProofUrl = '';
+    this.transferNotes = '';
+    this.showTransferModal = true;
+  }
+
+  submitTransfer(): void {
+    if (!this.transferAmount || this.transferAmount <= 0) {
+      this.errorMsg = 'Veuillez saisir un montant valide à verser.';
+      return;
+    }
+    if (!this.selectedBoutiqueId) {
+      this.errorMsg = 'Veuillez sélectionner la boutique concernée.';
+      return;
+    }
+
+    this.transferLoading = true;
+    this.fundTransferService.createTransfer({
+      boutiqueId: Number(this.selectedBoutiqueId),
+      amount: this.transferAmount,
+      paymentMethod: this.transferPaymentMethod,
+      proofUrl: this.transferProofUrl || undefined,
+      notes: this.transferNotes || undefined
+    }).subscribe({
+      next: (t) => {
+        this.transferLoading = false;
+        this.showTransferModal = false;
+        this.successMsg = `Versement de ${this.transferAmount} FCFA vers l'entrepôt soumis avec succès (Réf: ${t.reference}). En attente de validation.`;
+        setTimeout(() => this.successMsg = null, 6000);
+      },
+      error: (err) => {
+        this.transferLoading = false;
+        this.errorMsg = err.error?.message || 'Erreur lors de la création du versement.';
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.loadBoutiques();

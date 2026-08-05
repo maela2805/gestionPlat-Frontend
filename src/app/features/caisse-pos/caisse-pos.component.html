@@ -65,6 +65,9 @@
           <button class="btn btn-danger" (click)="closeBalanceRealInput = currentSession.closingBalanceExpected; showCloseModal = true">
             🔒 Fermer la Caisse
           </button>
+        <button class="btn btn-secondary" style="background: #52c41a; border-color: #52c41a; color: white;" (click)="openTransferModal()">
+          🏦 Verser les Fonds (Entrepôt)
+        </button>
         </ng-container>
       </div>
     </div>
@@ -488,9 +491,52 @@
           ✅ Confirmer & Enregistrer le client
         </button>
       </div>
+  <!-- Modal Versement de Fonds (Entrepôt) -->
+  <div class="modal-overlay" *ngIf="showTransferModal" (click)="showTransferModal = false">
+    <div class="modal-content" (click)="$event.stopPropagation()" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3>🏦 Verser les Fonds à l'Entrepôt (Compte Principal)</h3>
+        <button class="btn-close" (click)="showTransferModal = false">×</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <p style="font-size: 13px; color: #595959; margin-bottom: 16px;">
+          Déclarez le transfert des recettes de caisse vers l'entrepôt principal. Le montant sera déduit du reste à payer de vos factures de cession après validation.
+        </p>
+        
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #595959; margin-bottom: 6px;">Montant à Verser (FCFA) *</label>
+          <input type="number" [(ngModel)]="transferAmount" placeholder="Ex: 50000" style="width: 100%; padding: 10px 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 14px; font-weight: 600;" />
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #595959; margin-bottom: 6px;">Mode de Règlement *</label>
+          <select [(ngModel)]="transferPaymentMethod" style="width: 100%; padding: 10px 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; background: white;">
+            <option value="ESPECES">💵 Espèces (Dépôt direct)</option>
+            <option value="WAVE">📲 Wave</option>
+            <option value="ORANGE_MONEY">📱 Orange Money</option>
+            <option value="VIREMENT">🏦 Virement BDF / Bancaire</option>
+            <option value="CHEQUE">📝 Chèque</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #595959; margin-bottom: 6px;">Lien Justificatif / Bordereau (Optionnel)</label>
+          <input type="text" [(ngModel)]="transferProofUrl" placeholder="https://..." style="width: 100%; padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px;" />
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #595959; margin-bottom: 6px;">Notes / Référence (Optionnel)</label>
+          <textarea [(ngModel)]="transferNotes" rows="2" placeholder="Ex: Versement recettes de caisse..." style="width: 100%; padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px;"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="showTransferModal = false">Annuler</button>
+        <button class="btn btn-primary" (click)="submitTransfer()" [disabled]="transferLoading || !transferAmount">
+          {{ transferLoading ? 'Envoi...' : '✅ Confirmer le Versement' }}
+        </button>
+      </div>
     </div>
   </div>
-
 
 </div>
 

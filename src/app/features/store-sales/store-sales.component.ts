@@ -9,6 +9,8 @@ import { Boutique, BoutiquePrice } from '../../core/models/boutique.model';
 
 import { AuthService } from '../../core/services/auth.service';
 
+import { FundTransferService } from '../../core/services/fund-transfer.service';
+
 @Component({
   selector: 'app-store-sales',
   templateUrl: './store-sales.component.html',
@@ -23,12 +25,20 @@ export class StoreSalesComponent implements OnInit {
   isLoading = signal<boolean>(false);
   isSaving = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
+  transferSuccessMessage = signal<string | null>(null);
 
   searchTerm = signal<string>('');
   statusFilter = signal<string>('');
   showCreateModal = signal<boolean>(false);
   showDetailModal = signal<boolean>(false);
   selectedSaleDetail = signal<StoreSale | null>(null);
+
+  showTransferModal = signal<boolean>(false);
+  transferBoutiqueId = signal<number | null>(null);
+  transferAmount = signal<number | null>(null);
+  transferPaymentMethod = signal<string>('ESPECES');
+  transferProofUrl = signal<string>('');
+  transferNotes = signal<string>('');
 
   saleForm: FormGroup;
 
@@ -66,6 +76,7 @@ export class StoreSalesComponent implements OnInit {
     private storeSaleService: StoreSaleService,
     private productService: ProductService,
     private boutiqueService: BoutiqueService,
+    private fundTransferService: FundTransferService,
     public authService: AuthService,
     private fb: FormBuilder
   ) {
@@ -226,5 +237,52 @@ export class StoreSalesComponent implements OnInit {
         error: (err) => alert(err.error?.message || 'Erreur lors de l\'annulation.')
       });
     }
+  }
+
+  openTransferModal(): void {
+    const user = this.authService.currentUser();
+    if (user && user.boutiqueId) {
+      this.transferBoutiqueId.set(user.boutiqueId);
+    } else if (this.boutiques().length > 0) {
+      this.transferBoutiqueId.set(this.boutiques()[0].id);
+    }
+    this.transferAmount.set(null);
+    this.transferProofUrl.set('');
+    this.transferNotes.set('');
+    this.transferSuccessMessage.set(null);
+    this.showTransferModal.set(true);
+  }
+
+  submitTransfer(): void {
+    const amount = this.transferAmount();
+    const btqId = this.transferBoutiqueId();
+    if (!amount || amount <= 0) {
+      this.errorMessage.set('Veuillez saisir un montant valide à verser.');
+      return;
+    }
+    if (!btqId) {
+      this.errorMessage.set('Veuillez sélectionner la boutique concernée.');
+      return;
+    }
+
+    this.isSaving.set(true);
+    this.fundTransferService.createTransfer({
+      boutiqueId: btqId,
+      amount: amount,
+      paymentMethod: this.transferPaymentMethod(),
+      proofUrl: this.transferProofUrl() || undefined,
+      notes: this.transferNotes() || undefined
+    }).subscribe({
+      next: (t) => {
+        this.isSaving.set(false);
+        this.showTransferModal.set(false);
+        this.transferSuccessMessage.set(`Versement de ${amount} FCFA vers l'entrepôt soumis avec succès (Réf: ${t.reference}). En attente de validation comptable.`);
+        setTimeout(() => this.transferSuccessMessage.set(null), 6000);
+      },
+      error: (err) => {
+        this.isSaving.set(false);
+        this.errorMessage.set(err.error?.message || 'Erreur lors de la création du versement.');
+      }
+    });
   }
 }
