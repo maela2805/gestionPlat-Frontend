@@ -64,10 +64,10 @@ export class LoginComponent implements OnInit {
         this.isLoading.set(false);
         this.isSlowLoading.set(false);
 
-        // Vérification du rôle connecté : Les comptes CLIENT ne peuvent pas accéder au Back-Office
-        if (!this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'EMPLOYEE'])) {
+        // Seuls les comptes CLIENT sont redirigés/bloqués du tableau de bord de gestion
+        if (this.authService.isClient()) {
           this.authService.logout();
-          this.errorMessage.set('Accès refusé : Ce compte est un compte Client. Le tableau de bord de gestion est réservé au personnel de l\'entreprise (Admin, Manager, Employé).');
+          this.errorMessage.set('Accès refusé : Ce compte est un compte Client. Le tableau de bord de gestion est réservé au personnel de l\'entreprise.');
           return;
         }
 

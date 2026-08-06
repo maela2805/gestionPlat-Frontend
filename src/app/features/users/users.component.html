@@ -33,9 +33,11 @@
       <label style="font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">RÔLE ATTRIBUÉ :</label>
       <select [value]="selectedRoleFilter()" (change)="updateRoleFilter($event)" class="filter-select" style="padding: 8px 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; font-size: 13px; background: white; outline: none;">
         <option value="">Tous les rôles</option>
-        <option value="ROLE_SUPER_ADMIN">ROLE_SUPER_ADMIN (Super Admin)</option>
-        <option value="ROLE_ADMIN">ROLE_ADMIN (Administrateur)</option>
-        <option value="ROLE_MANAGER">ROLE_MANAGER (Manager)</option>
+        <option value="ROLE_SUPER_ADMIN" *ngIf="isAdmin">ROLE_SUPER_ADMIN (Super Admin)</option>
+        <option value="ROLE_ADMIN" *ngIf="isAdmin">ROLE_ADMIN (Administrateur)</option>
+        <option value="ROLE_MANAGER" *ngIf="isAdmin">ROLE_MANAGER (Responsable Boutique)</option>
+        <option value="ROLE_CAISSIER">ROLE_CAISSIER (Caissier)</option>
+        <option value="ROLE_VENDEUR">ROLE_VENDEUR (Vendeur)</option>
         <option value="ROLE_EMPLOYEE">ROLE_EMPLOYEE (Employé)</option>
       </select>
     </div>
@@ -183,21 +185,26 @@
         <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
           <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Attribution du Rôle Système *</label>
           <select class="form-control" formControlName="roleName" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; font-weight: 600; color: #1890ff;">
-            <option value="ROLE_SUPER_ADMIN">👑 ROLE_SUPER_ADMIN (Accès Total & Administration)</option>
-            <option value="ROLE_ADMIN">⚡ ROLE_ADMIN (Administration & Paramétrage)</option>
-            <option value="ROLE_MANAGER">💼 ROLE_MANAGER (Gestion Opérationnelle Stock/Commandes)</option>
-            <option value="ROLE_EMPLOYEE">👤 ROLE_EMPLOYEE (Opérations de base & Caisse)</option>
+            <option value="ROLE_SUPER_ADMIN" *ngIf="isAdmin">👑 ROLE_SUPER_ADMIN (Super Admin Global Réseau)</option>
+            <option value="ROLE_ADMIN" *ngIf="isAdmin">⚡ ROLE_ADMIN (Administrateur Central)</option>
+            <option value="ROLE_MANAGER" *ngIf="isAdmin">💼 ROLE_MANAGER (Responsable Boutique)</option>
+            <option value="ROLE_CAISSIER">💰 ROLE_CAISSIER (Caissier - Gestion Ventes, Caisses & Comptabilité)</option>
+            <option value="ROLE_VENDEUR">🛒 ROLE_VENDEUR (Vendeur - Saisie Ventes POS uniquement)</option>
           </select>
         </div>
 
         <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-          <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Boutique Affectée (Rôle Employé / Manager)</label>
-          <select class="form-control" formControlName="boutiqueId" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;">
+          <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Boutique Affectée</label>
+          <select *ngIf="isAdmin" class="form-control" formControlName="boutiqueId" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px;">
             <option [ngValue]="null">Aucune boutique (Entrepôt Central / Global)</option>
             <option *ngFor="let b of boutiques()" [ngValue]="b.id">
               🏪 {{ b.name }} ({{ b.code }})
             </option>
           </select>
+          <div *ngIf="!isAdmin" style="padding: 9px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 6px;">
+            <span>🏪 {{ authService.currentUser()?.boutiqueName || 'Votre Boutique' }}</span>
+            <span style="font-size: 11px; color: #64748b; font-weight: 400;">(Rattachement automatique à votre boutique)</span>
+          </div>
         </div>
 
         <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">

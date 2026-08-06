@@ -80,6 +80,13 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
+  isClient(): boolean {
+    const user = this.currentUser();
+    if (!user) return false;
+    const roleName = user.roleName || (user.role && user.role.name) || (typeof user.role === 'string' ? user.role : '') || '';
+    return roleName === 'CLIENT' || roleName === 'ROLE_CLIENT';
+  }
+
   hasRole(requiredRole: string): boolean {
     const user = this.currentUser();
     if (!user) return false;
@@ -92,7 +99,6 @@ export class AuthService {
     const user = this.currentUser();
     if (!user) return false;
     const roleName = user.roleName || (user.role && user.role.name) || (typeof user.role === 'string' ? user.role : '') || '';
-    if (roleName === 'ROLE_SUPER_ADMIN' || roleName === 'SUPER_ADMIN') return true;
     return allowedRoles.some(r => roleName === r || roleName === `ROLE_${r}` || `ROLE_${roleName}` === r);
   }
 

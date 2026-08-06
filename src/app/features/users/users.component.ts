@@ -4,6 +4,7 @@ import { UserService } from '../../core/services/user.service';
 import { BoutiqueService } from '../../core/services/boutique.service';
 import { UserSystem, SystemRole, UserCreateRequest, UserUpdateRequest } from '../../core/models/user.model';
 import { Boutique } from '../../core/models/boutique.model';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-users',
@@ -30,6 +31,15 @@ export class UsersComponent implements OnInit {
 
   filteredUsers = computed(() => {
     let list = this.users();
+
+    const currentUser = this.authService.currentUser();
+    const isAdmin = this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN']);
+
+    // Si ce n'est pas un admin global, on filtre les utilisateurs pour ne montrer QUE ceux de la boutique de l'employé
+    if (!isAdmin && currentUser?.boutiqueId) {
+      list = list.filter(u => u.boutiqueId === currentUser.boutiqueId);
+    }
+
     const search = this.searchTerm().toLowerCase().trim();
     if (search) {
       list = list.filter(u => 
@@ -55,18 +65,25 @@ export class UsersComponent implements OnInit {
     return this.filteredUsers().slice(start, start + perPage);
   });
 
+  get isAdmin(): boolean {
+    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN']);
+  }
+
   constructor(
     private userService: UserService,
     private boutiqueService: BoutiqueService,
+    public authService: AuthService,
     private fb: FormBuilder
   ) {
+    const userBoutiqueId = this.authService.currentUser()?.boutiqueId || null;
+    const defaultRole = this.isAdmin ? 'ROLE_MANAGER' : 'ROLE_CAISSIER';
     this.userForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: [''],
       firstName: [''],
       lastName: [''],
-      roleName: ['ROLE_EMPLOYEE', Validators.required],
-      boutiqueId: [null]
+      roleName: [defaultRole, Validators.required],
+      boutiqueId: [userBoutiqueId]
     });
   }
 
@@ -125,13 +142,15 @@ export class UsersComponent implements OnInit {
 
   openCreateModal(): void {
     this.editingUser.set(null);
+    const userBoutiqueId = this.authService.currentUser()?.boutiqueId || null;
+    const defaultRole = this.isAdmin ? 'ROLE_MANAGER' : 'ROLE_CAISSIER';
     this.userForm.reset({
       email: '',
       password: '',
       firstName: '',
       lastName: '',
-      roleName: 'ROLE_EMPLOYEE',
-      boutiqueId: null
+      roleName: defaultRole,
+      boutiqueId: userBoutiqueId
     });
     this.userForm.get('email')?.enable();
     this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);

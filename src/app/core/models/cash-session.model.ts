@@ -45,6 +45,8 @@ export interface CashSession {
   totalSalesMobileMoney: number;
   totalSalesCard: number;
   totalSalesOther: number;
+  totalTransferredAmount?: number;
+  remainingToTransfer?: number;
   totalCashIn?: number;
   totalCashOut?: number;
   status: CashSessionStatus;

@@ -93,6 +93,11 @@ const routes: Routes = [
     canActivate: [authGuard],
     loadChildren: () => import('./features/accounting/accounting.module').then(m => m.AccountingModule) 
   },
+  { 
+    path: 'promotions', 
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/promotions/promotions.module').then(m => m.PromotionsModule) 
+  },
   { path: '**', redirectTo: 'dashboard' }
 ];
 

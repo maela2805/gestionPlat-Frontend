@@ -8,7 +8,7 @@ import { BoutiqueWallet, CreateFundTransferRequest, FundTransfer, FundTransferSt
   providedIn: 'root'
 })
 export class FundTransferService {
-  private apiUrl = `${environment.apiUrl}/accounting`;
+  private apiUrl = `${environment.apiUrl}/api/accounting`;
 
   constructor(private http: HttpClient) {}
 
@@ -39,7 +39,10 @@ export class FundTransferService {
     return this.http.post<FundTransfer>(`${this.apiUrl}/transfers/${id}/cancel`, {});
   }
 
-  getBoutiqueWallet(boutiqueId: number): Observable<BoutiqueWallet> {
-    return this.http.get<BoutiqueWallet>(`${this.apiUrl}/wallet/${boutiqueId}`);
+  getBoutiqueWallet(boutiqueId?: number | null): Observable<BoutiqueWallet> {
+    if (boutiqueId) {
+      return this.http.get<BoutiqueWallet>(`${this.apiUrl}/wallet/${boutiqueId}`);
+    }
+    return this.http.get<BoutiqueWallet>(`${this.apiUrl}/wallet`);
   }
 }

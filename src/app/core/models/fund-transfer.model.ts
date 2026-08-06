@@ -1,10 +1,17 @@
 export type FundTransferStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+export type VersementType = 'VERSEMENT_RECETTE' | 'VERSEMENT_FACTURE' | 'AUTRE';
 
 export interface FundTransfer {
   id: number;
   reference: string;
   boutiqueId: number;
   boutiqueName: string;
+  cashSessionId?: number;
+  versemenType?: VersementType;
+  invoiceId?: number;
+  invoiceNumber?: string;
+  invoiceTotalAmount?: number;
+  invoiceRemainingAmount?: number;
   amount: number;
   paymentMethod: string;
   proofUrl?: string;
@@ -19,6 +26,9 @@ export interface FundTransfer {
 
 export interface CreateFundTransferRequest {
   boutiqueId?: number;
+  cashSessionId?: number;
+  versemenType?: VersementType;
+  invoiceId?: number;
   amount: number;
   paymentMethod: string;
   proofUrl?: string;
@@ -32,4 +42,5 @@ export interface BoutiqueWallet {
   totalPaidAmount: number;
   balanceDue: number;
   pendingTransfersAmount: number;
+  availableCashBalance?: number;
 }

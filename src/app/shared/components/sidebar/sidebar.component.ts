@@ -47,23 +47,23 @@ export class SidebarComponent {
   }
 
   canAccessUsers(): boolean {
-    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN']);
+    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'ADMIN_BOUTIQUE', 'EMPLOYEE', 'ROLE_EMPLOYEE']);
   }
 
   canAccessTiers(): boolean {
-    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN', 'MANAGER']);
+    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'ADMIN_BOUTIQUE', 'CAISSIER', 'EMPLOYEE', 'ROLE_EMPLOYEE']);
   }
 
   canAccessPurchases(): boolean {
-    return true;
+    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'ADMIN_BOUTIQUE', 'EMPLOYEE', 'ROLE_EMPLOYEE']);
   }
 
   canAccessBoutiques(): boolean {
-    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN', 'MANAGER']);
+    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'ADMIN_BOUTIQUE']);
   }
 
   canAccessSales(): boolean {
-    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN', 'MANAGER']);
+    return true; // Accessible à tous les employés connectés
   }
 
   logout(): void {

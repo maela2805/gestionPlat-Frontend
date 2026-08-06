@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TiersService } from '../../core/services/tiers.service';
 import { Tiers, TiersType, TiersStatus, CreateTiersRequest, UpdateTiersRequest } from '../../core/models/tiers.model';
 
+import { AuthService } from '../../core/services/auth.service';
+
 @Component({
   selector: 'app-tiers',
   templateUrl: './tiers.component.html',
@@ -14,6 +16,10 @@ export class TiersComponent implements OnInit {
   isSaving = signal<boolean>(false);
   successMessage = signal<string | null>(null);
   errorMessage = signal<string | null>(null);
+
+  get isAdmin(): boolean {
+    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN']);
+  }
 
   // Filters
   searchTerm = signal<string>('');
@@ -42,6 +48,11 @@ export class TiersComponent implements OnInit {
   // Filtered List
   filteredTiers = computed(() => {
     let list = this.tiersList();
+
+    // Masquer les Fournisseurs pour les employés et utilisateurs non-administrateurs
+    if (!this.isAdmin) {
+      list = list.filter(t => t.type !== 'FOURNISSEUR');
+    }
 
     const search = this.searchTerm().toLowerCase().trim();
     if (search) {
@@ -78,12 +89,14 @@ export class TiersComponent implements OnInit {
 
   constructor(
     private tiersService: TiersService,
+    public authService: AuthService,
     private fb: FormBuilder
   ) {
+    const defaultType = this.isAdmin ? 'FOURNISSEUR' : 'CLIENT';
     this.tiersForm = this.fb.group({
       code: [''],
       name: ['', Validators.required],
-      type: ['FOURNISSEUR', Validators.required],
+      type: [defaultType, Validators.required],
       email: ['', [Validators.email]],
       phone: [''],
       address: [''],

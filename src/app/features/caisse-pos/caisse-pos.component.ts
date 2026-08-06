@@ -17,6 +17,8 @@ import { Product } from '../../core/models/product.model';
 import { Category } from '../../core/models/category.model';
 import { Tiers, CreateTiersRequest } from '../../core/models/tiers.model';
 
+import { BoutiquePromotionService } from '../../core/services/boutique-promotion.service';
+
 export interface CartItem {
   product: Product;
   quantity: number;
@@ -97,9 +99,12 @@ export class CaissePosComponent implements OnInit {
   successMsg: string | null = null;
 
   openTransferModal(): void {
-    this.transferAmount = null;
+    const suggestedAmount = (this.currentSession?.remainingToTransfer !== undefined) 
+      ? this.currentSession.remainingToTransfer 
+      : (this.currentSession?.totalSalesCash || null);
+    this.transferAmount = suggestedAmount && suggestedAmount > 0 ? suggestedAmount : null;
     this.transferProofUrl = '';
-    this.transferNotes = '';
+    this.transferNotes = this.currentSession ? `Versement recette caisse Réf: ${this.currentSession.sessionReference}` : '';
     this.showTransferModal = true;
   }
 
@@ -108,28 +113,33 @@ export class CaissePosComponent implements OnInit {
       this.errorMsg = 'Veuillez saisir un montant valide à verser.';
       return;
     }
-    if (!this.selectedBoutiqueId) {
-      this.errorMsg = 'Veuillez sélectionner la boutique concernée.';
+
+    const bId = this.selectedBoutiqueId ? Number(this.selectedBoutiqueId) : (this.currentSession?.boutiqueId ? Number(this.currentSession.boutiqueId) : null);
+    if (!bId) {
+      this.errorMsg = 'Veuillez sélectionner la boutique concernée par le versement.';
       return;
     }
 
     this.transferLoading = true;
     this.fundTransferService.createTransfer({
-      boutiqueId: Number(this.selectedBoutiqueId),
+      boutiqueId: bId,
+      cashSessionId: this.currentSession?.id,
       amount: this.transferAmount,
-      paymentMethod: this.transferPaymentMethod,
+      paymentMethod: this.transferPaymentMethod || 'ESPECES',
       proofUrl: this.transferProofUrl || undefined,
       notes: this.transferNotes || undefined
     }).subscribe({
       next: (t) => {
         this.transferLoading = false;
         this.showTransferModal = false;
-        this.successMsg = `Versement de ${this.transferAmount} FCFA vers l'entrepôt soumis avec succès (Réf: ${t.reference}). En attente de validation.`;
+        this.successMsg = `Versement de ${(this.transferAmount || 0).toLocaleString()} FCFA vers la Caisse Principale enregistré avec succès (Réf: ${t.reference}).`;
+        this.loadCurrentSession();
         setTimeout(() => this.successMsg = null, 6000);
       },
       error: (err) => {
         this.transferLoading = false;
-        this.errorMsg = err.error?.message || 'Erreur lors de la création du versement.';
+        const serverMsg = typeof err.error === 'string' ? err.error : (err.error?.message || err.message);
+        this.errorMsg = serverMsg ? `Erreur versement: ${serverMsg}` : 'Erreur lors de la création du versement.';
       }
     });
   }
@@ -179,43 +189,56 @@ export class CaissePosComponent implements OnInit {
     });
   }
 
+  private promotionService = inject(BoutiquePromotionService);
+
   loadProducts(): void {
     if (!this.selectedBoutiqueId) return;
     this.loading = true;
-    this.warehouseService.getStocksByBoutique(this.selectedBoutiqueId).subscribe({
-      next: (boutiqueStocks) => {
-        if (boutiqueStocks && boutiqueStocks.length > 0) {
-          this.loading = false;
-          this.products = boutiqueStocks.map(bs => ({
-            id: bs.productId,
-            reference: bs.productReference,
-            name: bs.productName,
-            buyPrice: bs.buyPrice,
-            sellPrice: bs.sellPrice || 0,
-            stock: bs.quantity,
-            alertThreshold: bs.alertThreshold || 0,
-            imageUrl: bs.imageUrl,
-            category: bs.categoryId ? { id: bs.categoryId, name: bs.categoryName || '' } : undefined
-          }));
-        } else {
-          this.productService.getAllProducts().subscribe({
-            next: (allProds) => {
-              this.loading = false;
-              this.products = allProds;
-            },
-            error: () => this.loading = false
-          });
+
+    this.promotionService.getActivePromotions(this.selectedBoutiqueId).subscribe({
+      next: (promos) => {
+        const promoMap = new Map<number, any>();
+        if (promos) {
+          promos.forEach(p => promoMap.set(p.productId, p));
         }
-      },
-      error: () => {
-        this.productService.getAllProducts().subscribe({
-          next: (allProds) => {
+
+        this.warehouseService.getStocksByBoutique(this.selectedBoutiqueId!).subscribe({
+          next: (boutiqueStocks) => {
             this.loading = false;
-            this.products = allProds;
+            if (boutiqueStocks && boutiqueStocks.length > 0) {
+              this.products = boutiqueStocks.map(bs => {
+                const promo = promoMap.get(bs.productId);
+                const normalPrice = bs.sellPrice || 0;
+                return {
+                  id: bs.productId,
+                  reference: bs.productReference,
+                  name: bs.productName + (promo ? ' 🔥 [PROMO]' : ''),
+                  buyPrice: bs.buyPrice,
+                  sellPrice: promo ? promo.promoPrice : normalPrice,
+                  stock: bs.quantity,
+                  alertThreshold: bs.alertThreshold || 0,
+                  imageUrl: bs.imageUrl,
+                  category: bs.categoryId ? { id: bs.categoryId, name: bs.categoryName || '' } : undefined
+                };
+              });
+            } else {
+              this.productService.getAllProducts().subscribe({
+                next: (allProds) => {
+                  this.products = allProds.map(p => {
+                    const promo = promoMap.get(p.id);
+                    return {
+                      ...p,
+                      name: p.name + (promo ? ' 🔥 [PROMO]' : ''),
+                      sellPrice: promo ? promo.promoPrice : (p.sellPrice || 0)
+                    };
+                  });
+                }
+              });
+            }
           },
           error: () => this.loading = false
         });
-      }
+      },
     });
   }
 

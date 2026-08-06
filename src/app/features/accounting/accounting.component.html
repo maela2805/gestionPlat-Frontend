@@ -4,10 +4,10 @@
     <p class="subtitle" style="font-size: 13px; color: #707e94; margin: 4px 0 0 0;">Tableau de bord financier, suivi des engagements envers le dépôt central, journal des recettes et versements.</p>
   </div>
   <div class="header-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
-    <button class="btn btn-outline-danger" (click)="openEntryModal(EntryTypeEnum.DEPENSE)" style="padding: 9px 16px; border-radius: 6px; font-size: 13px; font-weight: 600;">
+    <button *ngIf="isAdmin" class="btn btn-outline-danger" (click)="openEntryModal(EntryTypeEnum.DEPENSE)" style="padding: 9px 16px; border-radius: 6px; font-size: 13px; font-weight: 600;">
       - Saisir une Dépense
     </button>
-    <button class="btn btn-outline-success" (click)="openEntryModal(EntryTypeEnum.RECETTE)" style="padding: 9px 16px; border-radius: 6px; font-size: 13px; font-weight: 600;">
+    <button *ngIf="isAdmin" class="btn btn-outline-success" (click)="openEntryModal(EntryTypeEnum.RECETTE)" style="padding: 9px 16px; border-radius: 6px; font-size: 13px; font-weight: 600;">
       + Saisir une Recette
     </button>
     <button class="btn btn-primary" (click)="openTransferModal()" style="padding: 9px 18px; border-radius: 6px; font-size: 13px; font-weight: 700; background: linear-gradient(135deg, #1890ff, #096dd9); border: none; box-shadow: 0 4px 12px rgba(24,144,255,0.3);">
@@ -18,6 +18,69 @@
 
 <div *ngIf="successMsg" class="alert alert-success" style="padding: 12px 16px; background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 6px; color: #52c41a; font-weight: 600; margin-bottom: 20px;">
   ✅ {{ successMsg }}
+</div>
+
+<!-- BANNIÈRE BILAN FINANCIER GLOBAL & TRÉSORERIE ENTREPÔT (CENTRALE) - EXCLUSIF ADMIN -->
+<div *ngIf="isAdmin" style="background: linear-gradient(135deg, #0b1a30 0%, #1e3a8a 100%); border-radius: 12px; padding: 20px; color: white; margin-bottom: 24px; box-shadow: 0 10px 25px rgba(11,26,48,0.15);">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 22px;">🏛️</span>
+      <div>
+        <h2 style="font-size: 17px; font-weight: 800; margin: 0; color: white;">Bilan Financier Global & Trésorerie Centrale (Entrepôt)</h2>
+        <p style="font-size: 12px; color: rgba(255,255,255,0.7); margin: 2px 0 0 0;">Vue consolidée de la trésorerie nette, des créances boutiques, des dettes fournisseurs et de la rentabilité.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+    <!-- CARD 1: TRESORERIE CENTRALE DISPONIBLE -->
+    <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size: 11.5px; font-weight: 700; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.5px;">💵 Trésorerie Centrale</span>
+        <span style="font-size: 18px;">🏛️</span>
+      </div>
+      <div style="font-size: 22px; font-weight: 800; color: #ffffff;">
+        {{ (summary?.centralCashBalance || summary?.cashBalance || 0) | number:'1.0-0' }} FCFA
+      </div>
+      <div style="font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 4px;">Versements validés reçus – Dépenses centrales</div>
+    </div>
+
+    <!-- CARD 2: CREANCES & DETTES DES BOUTIQUES -->
+    <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size: 11.5px; font-weight: 700; color: #c084fc; text-transform: uppercase; letter-spacing: 0.5px;">🏷️ Créances Boutiques</span>
+        <span style="font-size: 18px;">🏪</span>
+      </div>
+      <div style="font-size: 22px; font-weight: 800; color: #f3e8ff;">
+        {{ (summary?.boutiqueReceivables || summary?.clientReceivables || 0) | number:'1.0-0' }} FCFA
+      </div>
+      <div style="font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 4px;">Cumul factures cessions impayées des boutiques</div>
+    </div>
+
+    <!-- CARD 3: DETTES FOURNISSEURS -->
+    <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size: 11.5px; font-weight: 700; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.5px;">📦 Dettes Fournisseurs</span>
+        <span style="font-size: 18px;">🛍️</span>
+      </div>
+      <div style="font-size: 22px; font-weight: 800; color: #fef2f2;">
+        {{ (summary?.supplierPayables || 0) | number:'1.0-0' }} FCFA
+      </div>
+      <div style="font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 4px;">Achats de stock arrivés non encore réglés</div>
+    </div>
+
+    <!-- CARD 4: BENEFICE NET GLOBAL -->
+    <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size: 11.5px; font-weight: 700; color: #4ade80; text-transform: uppercase; letter-spacing: 0.5px;">📈 Bénéfice Net Global</span>
+        <span style="font-size: 18px;">💎</span>
+      </div>
+      <div style="font-size: 22px; font-weight: 800;" [style.color]="(summary?.netProfit || 0) >= 0 ? '#4ade80' : '#f87171'">
+        {{ (summary?.netProfit || 0) | number:'1.0-0' }} FCFA
+      </div>
+      <div style="font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 4px;">Résultat net après coût d'achat & charges</div>
+    </div>
+  </div>
 </div>
 
 <!-- BOUTIQUE SELECTION & WALLET METRICS -->
@@ -53,7 +116,7 @@
         <div style="font-size: 22px; font-weight: 800; color: #c41d7f;">
           {{ (walletSummary?.balanceDue || 0) | number:'1.0-0' }} FCFA
         </div>
-        <div style="font-size: 11px; color: #8c8c8c; margin-top: 4px;">Somme des restes à payer des factures non payées</div>
+        <div style="font-size: 11px; color: #8c8c8c; margin-top: 4px;">Cumul approvisionnements - Total déjà versé</div>
       </div>
     </div>
 
@@ -85,17 +148,17 @@
       </div>
     </div>
 
-    <!-- CARD 4: SOLDE TRESORERIE COMPTABLE -->
+    <!-- CARD 4: SOLDE CAISSE GLOBALE BOUTIQUE -->
     <div style="flex: 1; min-width: 220px; padding: 8px;">
       <div style="background: #e6f7ff; border: 1px solid #91caff; border-radius: 8px; padding: 16px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <span style="font-size: 12px; font-weight: 700; color: #0958d9; text-transform: uppercase;">Trésorerie Global Bilan</span>
+          <span style="font-size: 12px; font-weight: 700; color: #0958d9; text-transform: uppercase;">Caisse Globale Boutique</span>
           <span style="font-size: 20px;">💰</span>
         </div>
         <div style="font-size: 22px; font-weight: 800; color: #0958d9;">
-          {{ (summary?.cashBalance || 0) | number:'1.0-0' }} FCFA
+          {{ (walletSummary?.availableCashBalance || 0) | number:'1.0-0' }} FCFA
         </div>
-        <div style="font-size: 11px; color: #8c8c8c; margin-top: 4px;">Recettes caisses - Dépenses comptables</div>
+        <div style="font-size: 11px; color: #8c8c8c; margin-top: 4px;">Recettes espèces caisse - Versements au dépôt</div>
       </div>
     </div>
   </div>
@@ -211,6 +274,7 @@
       <thead>
         <tr style="background: #fafafa; border-bottom: 1px solid #f0f0f0;">
           <th style="padding: 12px; text-align: left;">Référence</th>
+          <th style="padding: 12px; text-align: left;">Type / Objet</th>
           <th style="padding: 12px; text-align: left;">Boutique</th>
           <th style="padding: 12px; text-align: left;">Date</th>
           <th style="padding: 12px; text-align: right;">Montant Versé</th>
@@ -223,6 +287,14 @@
       <tbody>
         <tr *ngFor="let t of filteredTransfers" style="border-bottom: 1px solid #f0f0f0;">
           <td style="padding: 12px; font-weight: 700; color: #1890ff;">{{ t.reference }}</td>
+          <td style="padding: 12px;">
+            <span *ngIf="t.versemenType === 'VERSEMENT_FACTURE'" style="background: rgba(114,46,209,0.12); color: #722ed1; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 11px;">
+              📌 FACTURE {{ t.invoiceNumber ? '#' + t.invoiceNumber : '' }}
+            </span>
+            <span *ngIf="t.versemenType !== 'VERSEMENT_FACTURE'" style="background: rgba(24,144,255,0.12); color: #1890ff; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 11px;">
+              💵 RECETTE CAISSE
+            </span>
+          </td>
           <td style="padding: 12px; font-weight: 600;">{{ t.boutiqueName }}</td>
           <td style="padding: 12px; color: #8c8c8c;">{{ t.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
           <td style="padding: 12px; text-align: right; font-weight: 800; color: #52c41a; font-size: 14px;">
@@ -260,27 +332,66 @@
           </td>
         </tr>
         <tr *ngIf="filteredTransfers.length === 0">
-          <td colspan="8" style="padding: 24px; text-align: center; color: #8c8c8c;">Aucun versement de fonds enregistré.</td>
+          <td colspan="9" style="padding: 24px; text-align: center; color: #8c8c8c;">Aucun versement de fonds enregistré.</td>
         </tr>
       </tbody>
     </table>
   </div>
 </div>
 
-<!-- MODALE NOUTEAU VERSEMENT DE FONDS -->
+<!-- MODALE NOUVEAU VERSEMENT DE FONDS -->
 <div *ngIf="showTransferModal" class="modal-backdrop" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1050; display: flex; align-items: center; justify-content: center;">
-  <div style="background: white; border-radius: 12px; width: 100%; max-width: 500px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+  <div style="background: white; border-radius: 12px; width: 100%; max-width: 540px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h3 style="font-size: 18px; font-weight: 700; color: #0b1a30; margin: 0;">💸 Effectuer un Versement au Dépôt</h3>
-      <button (click)="closeTransferModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #8c8c8c;">&times;</button>
+      <h3 style="font-size: 17px; font-weight: 700; margin: 0; color: #0b1a30;">💸 Effectuer un Versement de Fonds / Dépôt</h3>
+      <button (click)="closeTransferModal()" style="background: none; border: none; font-size: 20px; cursor: pointer;">&times;</button>
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 16px;">
       <div>
-        <label style="font-size: 13px; font-weight: 600; color: #262626; margin-bottom: 6px; display: block;">Boutique Emettrice :</label>
-        <select [(ngModel)]="transferBoutiqueId" [disabled]="isBoutiqueRestricted" style="width: 100%; padding: 10px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px;">
+        <label style="font-size: 13px; font-weight: 600; color: #262626; margin-bottom: 6px; display: block;">Boutique Émettrice :</label>
+        <select [(ngModel)]="transferBoutiqueId" (change)="loadUnpaidInvoices()" [disabled]="isBoutiqueRestricted" style="width: 100%; padding: 10px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-weight: 600;">
           <option *ngFor="let b of boutiquesList" [value]="b.id">{{ b.name }} ({{ b.code }})</option>
         </select>
+      </div>
+
+      <!-- TYPE DE VERSEMENT -->
+      <div>
+        <label style="font-size: 13px; font-weight: 700; color: #0b1a30; margin-bottom: 8px; display: block;">Type / Objet du Versement * :</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <button type="button" (click)="onTransferTypeChange('VERSEMENT_RECETTE')" 
+                  [style.border]="transferVersemenType === 'VERSEMENT_RECETTE' ? '2px solid #1890ff' : '1px solid #d9d9d9'"
+                  [style.background]="transferVersemenType === 'VERSEMENT_RECETTE' ? 'rgba(24,144,255,0.08)' : 'white'"
+                  style="padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 700; text-align: left; cursor: pointer;">
+            💵 Recette de Caisse
+            <div style="font-size: 10.5px; font-weight: 400; color: #595959; margin-top: 2px;">Dépôt global de caisse</div>
+          </button>
+
+          <button type="button" (click)="onTransferTypeChange('VERSEMENT_FACTURE')" 
+                  [style.border]="transferVersemenType === 'VERSEMENT_FACTURE' ? '2px solid #722ed1' : '1px solid #d9d9d9'"
+                  [style.background]="transferVersemenType === 'VERSEMENT_FACTURE' ? 'rgba(114,46,209,0.08)' : 'white'"
+                  style="padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 700; text-align: left; cursor: pointer;">
+            📌 Règlement de Facture
+            <div style="font-size: 10.5px; font-weight: 400; color: #595959; margin-top: 2px;">Payer une dette inter-boutique</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- CHOIX FACTURE (si VERSEMENT_FACTURE) -->
+      <div *ngIf="transferVersemenType === 'VERSEMENT_FACTURE'" style="background: rgba(114,46,209,0.04); border: 1px solid rgba(114,46,209,0.2); border-radius: 8px; padding: 12px;">
+        <label style="font-size: 12.5px; font-weight: 700; color: #722ed1; margin-bottom: 6px; display: block;">Sélectionner la Facture à Régler * :</label>
+        <select (change)="onInvoiceSelect($event)" style="width: 100%; padding: 9px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 12.5px; font-weight: 600; background: white;">
+          <option value="">-- Choisir une facture impayée ({{ unpaidInvoices.length }}) --</option>
+          <option *ngFor="let inv of unpaidInvoices" [value]="inv.id">
+            📄 {{ inv.invoiceNumber }} du {{ inv.invoiceDate | date:'dd/MM/yyyy' }} - Reste: {{ (inv.remainingAmount || inv.totalTtc || 0) | number:'1.0-0' }} FCFA (Total: {{ inv.totalTtc | number:'1.0-0' }} FCFA)
+          </option>
+        </select>
+
+        <div *ngIf="selectedInvoice" style="margin-top: 10px; font-size: 12px; color: #595959; background: white; padding: 8px 12px; border-radius: 6px; border: 1px dashed rgba(114,46,209,0.3);">
+          <div>N° Facture : <strong>{{ selectedInvoice.invoiceNumber }}</strong></div>
+          <div>Total TTC : <strong>{{ selectedInvoice.totalTtc | number:'1.0-0' }} FCFA</strong></div>
+          <div>Reste à Payer : <strong style="color: #ff4d4f;">{{ (selectedInvoice.remainingAmount || selectedInvoice.totalTtc || 0) | number:'1.0-0' }} FCFA</strong></div>
+        </div>
       </div>
 
       <div>

@@ -1,15 +1,74 @@
 <div class="dashboard-page">
-  <div class="page-header-block">
+  <div class="page-header-block" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
     <div>
       <div class="breadcrumb">
         <span>GE</span> <span class="breadcrumb-separator">></span> <span class="breadcrumb-item active">Tableau de bord</span>
       </div>
       <h1 class="page-title">Tableau de Bord Principal</h1>
     </div>
+
+    <!-- Boutique Filter for Admin / Global View -->
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <label style="font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">BOUTIQUE / ENTREPÔT :</label>
+      <select 
+        (change)="onSelectChange($event)"
+        [disabled]="!isAdmin"
+        [style.background]="!isAdmin ? '#f5f5f5' : 'white'"
+        [style.cursor]="!isAdmin ? 'not-allowed' : 'pointer'"
+        style="padding: 8px 14px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-weight: 600; color: #0b1a30; outline: none;">
+        <option value="ALL" [selected]="selectedBoutiqueId() === null">🌐 Toutes les Boutiques (Vue Globale Admin)</option>
+        <option *ngFor="let b of boutiquesList()" [value]="b.id" [selected]="selectedBoutiqueId() === b.id">{{ b.name }} ({{ b.code }})</option>
+      </select>
+    </div>
   </div>
 
   <!-- Quick Stat Cards -->
   <div class="card-grid">
+    <!-- Financial & Caisse Cards -->
+    <div class="stat-card">
+      <div class="stat-info">
+        <h3>Total Dû à l'Entrepôt</h3>
+        <div class="stat-value" style="color: #c41d7f;">{{ (walletSummary()?.balanceDue || 0) | number:'1.0-0' }} FCFA</div>
+        <div class="stat-trend down">Approvisionnements - Versements</div>
+      </div>
+      <div class="stat-icon-wrapper danger">
+        <span style="font-size: 20px;">📦</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-info">
+        <h3>Total Déjà Versé / Validé</h3>
+        <div class="stat-value" style="color: #389e0d;">{{ (walletSummary()?.totalPaidAmount || 0) | number:'1.0-0' }} FCFA</div>
+        <div class="stat-trend up">Versements approuvés par le dépôt</div>
+      </div>
+      <div class="stat-icon-wrapper success">
+        <span style="font-size: 20px;">✅</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-info">
+        <h3>Recette Espèces Caisse</h3>
+        <div class="stat-value" style="color: #1890ff;">{{ (currentSession()?.totalSalesCash || 0) | number:'1.0-0' }} FCFA</div>
+        <div class="stat-trend up">Session {{ currentSession()?.status === 'OPEN' ? 'Ouverte' : 'Fermée' }}</div>
+      </div>
+      <div class="stat-icon-wrapper">
+        <span style="font-size: 20px;">💵</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-info">
+        <h3>Quantité Totale Stock</h3>
+        <div class="stat-value">{{ totalStockQuantity() | number }}</div>
+        <div class="stat-trend">Unités en réserve</div>
+      </div>
+      <div class="stat-icon-wrapper warning">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect width="4" height="7" x="7" y="10" rx="1"/><rect width="4" height="12" x="15" y="5" rx="1"/></svg>
+      </div>
+    </div>
+
     <div class="stat-card">
       <div class="stat-info">
         <h3>Total Produits</h3>
@@ -18,28 +77,6 @@
       </div>
       <div class="stat-icon-wrapper success">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/></svg>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-info">
-        <h3>Mouvements Enregistrés</h3>
-        <div class="stat-value">{{ movements().length }}</div>
-        <div class="stat-trend up">Historique à jour</div>
-      </div>
-      <div class="stat-icon-wrapper">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-info">
-        <h3>Quantité Totale Stock</h3>
-        <div class="stat-value">{{ totalStockQuantity() }}</div>
-        <div class="stat-trend">Unités en réserve</div>
-      </div>
-      <div class="stat-icon-wrapper warning">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect width="4" height="7" x="7" y="10" rx="1"/><rect width="4" height="12" x="15" y="5" rx="1"/></svg>
       </div>
     </div>
 
@@ -103,6 +140,63 @@
           Réapprovisionner
         </a>
       </div>
+    </div>
+  </div>
+
+  <!-- Journal de Traçabilité & Activités Réseau (Phase 6) -->
+  <div class="alerts-section" style="margin-top: 24px;">
+    <div class="section-header">
+      <div class="section-title">
+        <span class="pulse-icon">📋</span>
+        <h3>Journal de Traçabilité & Dernières Opérations Réseau</h3>
+      </div>
+      <span style="font-size: 12px; color: #8c8c8c;">Visibilité globale Admin 360°</span>
+    </div>
+
+    <div style="background: white; border-radius: 8px; border: 1px solid #f0f0f0; overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+        <thead>
+          <tr style="background: #fafafa; border-bottom: 1px solid #f0f0f0;">
+            <th style="padding: 12px 16px; font-weight: 700; color: #595959;">Type d'Opération</th>
+            <th style="padding: 12px 16px; font-weight: 700; color: #595959;">Référence / Libellé</th>
+            <th style="padding: 12px 16px; font-weight: 700; color: #595959;">Boutique / Entrepôt</th>
+            <th style="padding: 12px 16px; font-weight: 700; color: #595959;">Opérateur</th>
+            <th style="padding: 12px 16px; font-weight: 700; color: #595959;">Montant / Qté</th>
+            <th style="padding: 12px 16px; font-weight: 700; color: #595959;">Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Versements de fonds -->
+          <tr *ngFor="let t of transfers()" style="border-bottom: 1px solid #f0f0f0;">
+            <td style="padding: 12px 16px; font-weight: 700; color: #722ed1;">🏦 VERSEMENT DÉPÔT</td>
+            <td style="padding: 12px 16px;">{{ t.reference }}</td>
+            <td style="padding: 12px 16px;">{{ t.boutiqueName }}</td>
+            <td style="padding: 12px 16px;">{{ t.userEmail }}</td>
+            <td style="padding: 12px 16px; font-weight: 700; color: #389e0d;">{{ t.amount | number:'1.0-0' }} FCFA</td>
+            <td style="padding: 12px 16px;">
+              <span [style.background]="t.status === 'APPROVED' ? '#f6ffed' : '#fffbe6'" 
+                    [style.color]="t.status === 'APPROVED' ? '#52c41a' : '#faad14'" 
+                    style="padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;">
+                {{ t.status === 'APPROVED' ? 'VALIDÉ' : 'EN ATTENTE' }}
+              </span>
+            </td>
+          </tr>
+
+          <!-- Mouvements de Stock Récents -->
+          <tr *ngFor="let m of movements().slice(0, 5)" style="border-bottom: 1px solid #f0f0f0;">
+            <td style="padding: 12px 16px; font-weight: 700; color: #1890ff;">📦 MOUVEMENT STOCK</td>
+            <td style="padding: 12px 16px;">{{ m.product?.name || 'Produit' }}</td>
+            <td style="padding: 12px 16px;">{{ m.boutique?.name || 'Dépôt Central' }}</td>
+            <td style="padding: 12px 16px;">{{ m.userEmail || 'ADMIN' }}</td>
+            <td style="padding: 12px 16px; font-weight: 700;">{{ m.quantity }} unité(s)</td>
+            <td style="padding: 12px 16px;">
+              <span style="background: #e6f7ff; color: #0958d9; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;">
+                {{ m.type }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

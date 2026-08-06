@@ -18,6 +18,10 @@ import { PaymentMethod } from '../../core/models/invoice.model';
 import { Tiers } from '../../core/models/tiers.model';
 import Chart from 'chart.js/auto';
 
+import { InvoiceService } from '../../core/services/invoice.service';
+import { Invoice } from '../../core/models/invoice.model';
+import { VersementType } from '../../core/models/fund-transfer.model';
+
 @Component({
   selector: 'app-accounting',
   templateUrl: './accounting.component.html',
@@ -36,6 +40,7 @@ export class AccountingComponent implements OnInit, AfterViewInit {
   walletSummary: BoutiqueWallet | null = null;
   transfersList: FundTransfer[] = [];
   filteredTransfers: FundTransfer[] = [];
+  unpaidInvoices: Invoice[] = [];
 
   loading: boolean = false;
   error: string | null = null;
@@ -61,6 +66,9 @@ export class AccountingComponent implements OnInit, AfterViewInit {
   // Fund Transfer Modal
   showTransferModal: boolean = false;
   transferBoutiqueId: number | null = null;
+  transferVersemenType: VersementType = 'VERSEMENT_RECETTE';
+  transferInvoiceId: number | null = null;
+  selectedInvoice: Invoice | null = null;
   transferAmount: number = 0;
   transferPaymentMethod: string = 'WAVE';
   transferProofUrl: string = '';
@@ -96,6 +104,7 @@ export class AccountingComponent implements OnInit, AfterViewInit {
     private tiersService: TiersService,
     private boutiqueService: BoutiqueService,
     private fundTransferService: FundTransferService,
+    private invoiceService: InvoiceService,
     public authService: AuthService,
     private uploadService: UploadService
   ) {}
@@ -302,15 +311,56 @@ export class AccountingComponent implements OnInit, AfterViewInit {
   // --- FUND TRANSFER MODAL ---
   openTransferModal(): void {
     this.transferBoutiqueId = this.selectedBoutiqueId || (this.boutiquesList.length > 0 ? this.boutiquesList[0].id : null);
+    this.transferVersemenType = 'VERSEMENT_RECETTE';
+    this.transferInvoiceId = null;
+    this.selectedInvoice = null;
     this.transferAmount = 0;
     this.transferPaymentMethod = 'WAVE';
     this.transferProofUrl = '';
     this.transferNotes = '';
     this.showTransferModal = true;
+
+    this.loadUnpaidInvoices();
   }
 
   closeTransferModal(): void {
     this.showTransferModal = false;
+  }
+
+  loadUnpaidInvoices(): void {
+    if (!this.transferBoutiqueId) {
+      this.unpaidInvoices = [];
+      return;
+    }
+    this.invoiceService.getUnpaidCessionInvoices(Number(this.transferBoutiqueId)).subscribe({
+      next: (invoices) => {
+        this.unpaidInvoices = invoices.filter(i => (i.remainingAmount || 0) > 0 || i.status !== 'PAYEE');
+      },
+      error: (err) => console.error(err)
+    });
+  }
+
+  onTransferTypeChange(type: VersementType): void {
+    this.transferVersemenType = type;
+    if (type !== 'VERSEMENT_FACTURE') {
+      this.transferInvoiceId = null;
+      this.selectedInvoice = null;
+    }
+  }
+
+  onInvoiceSelect(event: Event): void {
+    const invId = Number((event.target as HTMLSelectElement).value);
+    if (invId) {
+      const found = this.unpaidInvoices.find(i => i.id === invId);
+      if (found) {
+        this.transferInvoiceId = invId;
+        this.selectedInvoice = found;
+        this.transferAmount = found.remainingAmount || found.totalTtc || 0;
+      }
+    } else {
+      this.transferInvoiceId = null;
+      this.selectedInvoice = null;
+    }
   }
 
   onProofFileSelected(event: any): void {
@@ -337,8 +387,21 @@ export class AccountingComponent implements OnInit, AfterViewInit {
       return;
     }
 
+    if (this.transferVersemenType === 'VERSEMENT_FACTURE' && !this.transferInvoiceId) {
+      alert('Veuillez sélectionner la facture à régler pour ce versement.');
+      return;
+    }
+
+    const available = this.walletSummary?.availableCashBalance ?? 0;
+    if (this.transferVersemenType === 'VERSEMENT_RECETTE' && available > 0 && this.transferAmount > available) {
+      alert(`⚠️ Impossible d'effectuer ce versement : le montant (${this.transferAmount.toLocaleString()} FCFA) dépasse le solde disponible dans la caisse globale de la boutique (${available.toLocaleString()} FCFA).`);
+      return;
+    }
+
     this.fundTransferService.createTransfer({
       boutiqueId: this.transferBoutiqueId || undefined,
+      versemenType: this.transferVersemenType,
+      invoiceId: this.transferInvoiceId || undefined,
       amount: this.transferAmount,
       paymentMethod: this.transferPaymentMethod,
       proofUrl: this.transferProofUrl,
@@ -362,7 +425,11 @@ export class AccountingComponent implements OnInit, AfterViewInit {
           this.loadWalletAndTransfers();
           this.loadData();
         },
-        error: (err) => alert(err?.error?.message || 'Erreur lors de l\'approbation.')
+        error: (err) => {
+          console.error('Approve error:', err);
+          const errorMsg = typeof err?.error === 'string' ? err.error : (err?.error?.message || err?.message || 'Erreur lors de l\'approbation.');
+          alert(`⚠️ Erreur lors de la validation : ${errorMsg}`);
+        }
       });
     }
   }

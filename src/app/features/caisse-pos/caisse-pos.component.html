@@ -68,11 +68,43 @@
         </ng-container>
 
         <button class="btn btn-secondary" style="background: #52c41a; border-color: #52c41a; color: white;" (click)="openTransferModal()">
-          🏦 Verser les Fonds (Entrepôt)
+          🏦 Verser la recette à la caisse principale
         </button>
       </div>
     </div>
   </header>
+
+  <!-- Banner post-fermeture de caisse si la caisse est fermée -->
+  <div class="closed-caisse-banner" *ngIf="currentSession && currentSession.status === 'CLOSED'" 
+       [style.background]="(currentSession.remainingToTransfer ?? 0) <= 0 ? '#f6ffed' : '#fffbe6'"
+       [style.border]="(currentSession.remainingToTransfer ?? 0) <= 0 ? '1px solid #b7eb8f' : '1px solid #ffe58f'"
+       style="border-radius: 10px; padding: 16px 24px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <span style="font-size: 32px;">{{ (currentSession.remainingToTransfer ?? 0) <= 0 ? '✅' : '🔒' }}</span>
+      <div>
+        <h3 style="margin: 0; font-size: 16px; font-weight: 700;" [style.color]="(currentSession.remainingToTransfer ?? 0) <= 0 ? '#389e0d' : '#d46b08'">
+          Session de caisse fermée (Réf: {{ currentSession.sessionReference }})
+        </h3>
+        <p style="margin: 4px 0 0 0; font-size: 13px; color: #595959;">
+          Recette espèces réalisée : <strong>{{ (currentSession.totalSalesCash || 0) | number }} FCFA</strong> | 
+          Versé à la Caisse Principale : <strong>{{ (currentSession.totalTransferredAmount || 0) | number }} FCFA</strong> | 
+          Reste à verser : <strong [style.color]="(currentSession.remainingToTransfer ?? 0) <= 0 ? '#52c41a' : '#ff4d4f'" style="font-size: 14px;">{{ (currentSession.remainingToTransfer ?? 0) | number }} FCFA</strong>
+        </p>
+      </div>
+    </div>
+    <div>
+      <button *ngIf="(currentSession.remainingToTransfer ?? 0) > 0" 
+              class="btn btn-secondary" 
+              style="background: #52c41a; border-color: #52c41a; color: white; padding: 10px 18px; font-weight: 700; border-radius: 8px;" 
+              (click)="openTransferModal()">
+        🏦 Verser les {{ currentSession.remainingToTransfer | number }} FCFA à la caisse principale
+      </button>
+      <span *ngIf="(currentSession.remainingToTransfer ?? 0) <= 0" 
+            style="background: #52c41a; color: white; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+        ✔ Recette entièrement versée à la Caisse Principale (0 FCFA restant)
+      </span>
+    </div>
+  </div>
 
   <!-- Main POS Grid -->
   <div class="pos-layout">
@@ -492,26 +524,29 @@
           ✅ Confirmer & Enregistrer le client
         </button>
       </div>
-  <!-- Modal Versement de Fonds (Entrepôt) -->
-  <div class="modal-overlay" *ngIf="showTransferModal" (click)="showTransferModal = false">
-    <div class="modal-content" (click)="$event.stopPropagation()" style="max-width: 480px;">
+    </div>
+  </div>
+
+  <!-- Modal Versement de la Recette à la Caisse Principale -->
+  <div class="modal-backdrop" *ngIf="showTransferModal">
+    <div class="modal-card" style="max-width: 500px;">
       <div class="modal-header">
-        <h3>🏦 Verser les Fonds à l'Entrepôt (Compte Principal)</h3>
-        <button class="btn-close" (click)="showTransferModal = false">×</button>
+        <h3>🏦 Verser la Recette à la Caisse Principale</h3>
+        <button class="close-btn" (click)="showTransferModal = false">✕</button>
       </div>
-      <div class="modal-body" style="padding: 20px;">
+      <div class="modal-body">
         <p style="font-size: 13px; color: #595959; margin-bottom: 16px;">
-          Déclarez le transfert des recettes de caisse vers l'entrepôt principal. Le montant sera déduit du reste à payer de vos factures de cession après validation.
+          Transférez la recette de caisse vers la <strong>Caisse Principale</strong>. Une fois le versement validé, le montant alimentera la <strong>Trésorerie Global Bilan</strong>.
         </p>
-        
-        <div style="margin-bottom: 16px;">
-          <label style="display: block; font-size: 12px; font-weight: 600; color: #595959; margin-bottom: 6px;">Montant à Verser (FCFA) *</label>
-          <input type="number" [(ngModel)]="transferAmount" placeholder="Ex: 50000" style="width: 100%; padding: 10px 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 14px; font-weight: 600;" />
+
+        <div class="form-group">
+          <label>Montant à Verser (FCFA) <span class="required">*</span></label>
+          <input type="number" [(ngModel)]="transferAmount" placeholder="Ex: 50000" style="font-size: 16px; font-weight: 700; color: #1890ff;" />
         </div>
 
-        <div style="margin-bottom: 16px;">
-          <label style="display: block; font-size: 12px; font-weight: 600; color: #595959; margin-bottom: 6px;">Mode de Règlement *</label>
-          <select [(ngModel)]="transferPaymentMethod" style="width: 100%; padding: 10px 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; background: white;">
+        <div class="form-group">
+          <label>Mode de Règlement <span class="required">*</span></label>
+          <select [(ngModel)]="transferPaymentMethod">
             <option value="ESPECES">💵 Espèces (Dépôt direct)</option>
             <option value="WAVE">📲 Wave</option>
             <option value="ORANGE_MONEY">📱 Orange Money</option>
@@ -520,14 +555,14 @@
           </select>
         </div>
 
-        <div style="margin-bottom: 16px;">
-          <label style="display: block; font-size: 12px; font-weight: 600; color: #595959; margin-bottom: 6px;">Lien Justificatif / Bordereau (Optionnel)</label>
-          <input type="text" [(ngModel)]="transferProofUrl" placeholder="https://..." style="width: 100%; padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px;" />
+        <div class="form-group">
+          <label>Lien Justificatif / Bordereau (Optionnel)</label>
+          <input type="text" [(ngModel)]="transferProofUrl" placeholder="https://..." />
         </div>
 
-        <div style="margin-bottom: 20px;">
-          <label style="display: block; font-size: 12px; font-weight: 600; color: #595959; margin-bottom: 6px;">Notes / Référence (Optionnel)</label>
-          <textarea [(ngModel)]="transferNotes" rows="2" placeholder="Ex: Versement recettes de caisse..." style="width: 100%; padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px;"></textarea>
+        <div class="form-group">
+          <label>Notes / Référence (Optionnel)</label>
+          <textarea [(ngModel)]="transferNotes" rows="2" placeholder="Ex: Versement recettes de caisse..."></textarea>
         </div>
       </div>
       <div class="modal-footer">

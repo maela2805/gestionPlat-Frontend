@@ -27,7 +27,7 @@
       </div>
     </div>
 
-    <div class="stat-card" style="background: white; border-radius: 12px; padding: 18px 20px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 16px;">
+    <div *ngIf="isAdmin" class="stat-card" style="background: white; border-radius: 12px; padding: 18px 20px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 16px;">
       <div style="width: 46px; height: 46px; border-radius: 10px; background: rgba(114,46,209,0.1); color: #722ed1; display: flex; align-items: center; justify-content: center;">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
       </div>
@@ -77,7 +77,7 @@
       <label style="font-size: 12px; font-weight: 700; color: #0b1a30; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">TYPE :</label>
       <select [value]="activeTypeFilter()" (change)="updateTypeFilter($event)" style="padding: 8.5px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; font-weight: 600; color: #0b1a30; background: #ffffff; outline: none; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
         <option value="">Tous les types ({{ totalCount() }})</option>
-        <option value="FOURNISSEUR">Fournisseurs ({{ fournisseursCount() }})</option>
+        <option value="FOURNISSEUR" *ngIf="isAdmin">Fournisseurs ({{ fournisseursCount() }})</option>
         <option value="CLIENT">Clients ({{ clientsCount() }})</option>
         <option value="PARTENAIRE">Partenaires ({{ partenairesCount() }})</option>
       </select>
@@ -228,7 +228,7 @@
           <div style="display: flex; flex-direction: column; gap: 6px;">
             <label style="font-size: 13px; font-weight: 600; color: #0b1a30;">Type de Tiers *</label>
             <select formControlName="type" style="padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; font-weight: 600;">
-              <option value="FOURNISSEUR">🏢 FOURNISSEUR (Matières & Matériel)</option>
+              <option value="FOURNISSEUR" *ngIf="isAdmin">🏢 FOURNISSEUR (Réservé Administration)</option>
               <option value="CLIENT">👤 CLIENT (Particulier / Entreprise)</option>
               <option value="PARTENAIRE">🤝 PARTENAIRE / PRESTATAIRE</option>
             </select>

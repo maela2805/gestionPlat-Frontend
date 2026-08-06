@@ -48,7 +48,9 @@ export interface FinancialSummary {
   totalExpense: number;
   netProfit: number;
   clientReceivables: number;
+  boutiqueReceivables?: number;
   supplierPayables: number;
   cashBalance: number;
+  centralCashBalance?: number;
   expensesByCategory: { [key: string]: number };
 }

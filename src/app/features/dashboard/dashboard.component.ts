@@ -1,8 +1,16 @@
-import { Component, OnInit, signal, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, signal, ViewChild, ElementRef, inject } from '@angular/core';
 import { ProductService } from '../../core/services/product.service';
 import { StockMovementService } from '../../core/services/stock-movement.service';
+import { CashSessionService } from '../../core/services/cash-session.service';
+import { FundTransferService } from '../../core/services/fund-transfer.service';
+import { AuthService } from '../../core/services/auth.service';
+import { BoutiqueService } from '../../core/services/boutique.service';
+
 import { Product } from '../../core/models/product.model';
 import { StockMovement } from '../../core/models/stock-movement.model';
+import { CashSession } from '../../core/models/cash-session.model';
+import { BoutiqueWallet } from '../../core/models/fund-transfer.model';
+import { Boutique } from '../../core/models/boutique.model';
 import Chart from 'chart.js/auto';
 
 @Component({
@@ -17,22 +25,35 @@ export class DashboardComponent implements OnInit {
   products = signal<Product[]>([]);
   criticalProducts = signal<Product[]>([]);
   movements = signal<StockMovement[]>([]);
+  currentSession = signal<CashSession | null>(null);
+  walletSummary = signal<BoutiqueWallet | null>(null);
 
   totalStockQuantity = signal<number>(0);
 
   private barChartInstance?: Chart;
   private donutChartInstance?: Chart;
 
-  constructor(
-    private productService: ProductService,
-    private movementService: StockMovementService
-  ) {}
+  private productService = inject(ProductService);
+  private movementService = inject(StockMovementService);
+  private cashSessionService = inject(CashSessionService);
+  private fundTransferService = inject(FundTransferService);
+  public authService = inject(AuthService);
+  private boutiqueService = inject(BoutiqueService);
+
+  boutiquesList = signal<Boutique[]>([]);
+  selectedBoutiqueId = signal<number | null>(null);
+
+  get isAdmin(): boolean {
+    return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN']);
+  }
+
+  transfers = signal<any[]>([]);
 
   ngOnInit(): void {
     this.loadData();
   }
 
-  loadData(): void {
+  private loadData(): void {
     this.productService.getAllProducts().subscribe(prods => {
       this.products.set(prods);
       const totalQty = prods.reduce((sum, p) => sum + (p.stock || 0), 0);
@@ -48,6 +69,53 @@ export class DashboardComponent implements OnInit {
     this.movementService.getAllStockMovements().subscribe(movs => {
       this.movements.set(movs);
       this.renderDonutChart(movs);
+    });
+
+    this.fundTransferService.getAllTransfers().subscribe(trfs => {
+      this.transfers.set(trfs ? trfs.slice(0, 5) : []);
+    });
+
+    this.boutiqueService.getAllBoutiques().subscribe(boutiques => {
+      this.boutiquesList.set(boutiques);
+      const user = this.authService.currentUser();
+      const userBoutiqueId = user?.boutiqueId;
+
+      if (!this.isAdmin && userBoutiqueId) {
+        this.selectedBoutiqueId.set(userBoutiqueId);
+        this.loadFinancialData(userBoutiqueId);
+      } else {
+        // Admin vue globale (null)
+        this.selectedBoutiqueId.set(null);
+        this.loadFinancialData(null);
+      }
+    });
+  }
+
+  onSelectChange(event: Event): void {
+    const val = (event.target as HTMLSelectElement).value;
+    const bId = (val === 'ALL' || !val) ? null : Number(val);
+    this.selectedBoutiqueId.set(bId);
+    this.loadFinancialData(bId);
+  }
+
+  onBoutiqueChange(bId: number | null): void {
+    this.selectedBoutiqueId.set(bId);
+    this.loadFinancialData(bId);
+  }
+
+  private loadFinancialData(boutiqueId: number | null): void {
+    if (boutiqueId) {
+      this.cashSessionService.getCurrentBoutiqueSession(boutiqueId).subscribe((session: CashSession | null) => {
+        this.currentSession.set(session);
+      });
+    } else {
+      this.cashSessionService.getCurrentUserSession().subscribe((session: CashSession | null) => {
+        this.currentSession.set(session);
+      });
+    }
+
+    this.fundTransferService.getBoutiqueWallet(boutiqueId).subscribe((wallet: BoutiqueWallet) => {
+      this.walletSummary.set(wallet);
     });
   }
 

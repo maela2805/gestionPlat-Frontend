@@ -20,6 +20,12 @@ export class InvoiceService {
     return this.http.get<Invoice[]>(this.baseUrl, { params });
   }
 
+  getUnpaidCessionInvoices(boutiqueId?: number): Observable<Invoice[]> {
+    let params = new HttpParams().set('type', 'CESSION_BOUTIQUE');
+    if (boutiqueId) params = params.set('boutiqueId', boutiqueId.toString());
+    return this.http.get<Invoice[]>(this.baseUrl, { params });
+  }
+
   getInvoiceById(id: number): Observable<Invoice> {
     return this.http.get<Invoice>(`${this.baseUrl}/${id}`);
   }
