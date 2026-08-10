@@ -89,6 +89,26 @@ export class WarehousesComponent implements OnInit {
     }
   });
 
+  // --- Pagination ---
+  currentPage = signal<number>(1);
+  itemsPerPage = signal<number>(5);
+
+  paginatedStocks = computed(() => {
+    const list = this.filteredStocks();
+    const start = (this.currentPage() - 1) * this.itemsPerPage();
+    return list.slice(start, start + this.itemsPerPage());
+  });
+
+  totalPages = computed(() => Math.ceil(this.filteredStocks().length / this.itemsPerPage()) || 1);
+
+  nextPage(): void {
+    if (this.currentPage() < this.totalPages()) this.currentPage.update(p => p + 1);
+  }
+
+  prevPage(): void {
+    if (this.currentPage() > 1) this.currentPage.update(p => p - 1);
+  }
+
   totalItemsInWarehouse = computed(() => {
     return this.filteredStocks().reduce((sum, item) => sum + item.quantity, 0);
   });

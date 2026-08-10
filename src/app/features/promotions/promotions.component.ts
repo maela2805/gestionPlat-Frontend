@@ -37,7 +37,7 @@ export class PromotionsComponent implements OnInit {
 
   // Pagination
   currentPage = signal<number>(1);
-  itemsPerPage = signal<number>(8);
+  itemsPerPage = signal<number>(5);
 
   get isAdmin(): boolean {
     return this.authService.hasAnyRole(['SUPER_ADMIN', 'ADMIN']);

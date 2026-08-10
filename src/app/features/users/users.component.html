@@ -29,9 +29,9 @@
       />
     </div>
 
-    <div class="filter-item" style="display: flex; align-items: center; gap: 8px;">
-      <label style="font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase;">RÔLE ATTRIBUÉ :</label>
-      <select [value]="selectedRoleFilter()" (change)="updateRoleFilter($event)" class="filter-select" style="padding: 8px 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; font-size: 13px; background: white; outline: none;">
+    <div class="filter-item" style="display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; white-space: nowrap;">
+      <label style="font-size: 12px; font-weight: 700; color: #595959; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; margin-bottom: 0;">RÔLE ATTRIBUÉ :</label>
+      <select [value]="selectedRoleFilter()" (change)="updateRoleFilter($event)" class="filter-select" style="padding: 8px 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; font-size: 13px; background: white; outline: none; white-space: nowrap; flex-shrink: 0;">
         <option value="">Tous les rôles</option>
         <option value="ROLE_SUPER_ADMIN" *ngIf="isAdmin">ROLE_SUPER_ADMIN (Super Admin)</option>
         <option value="ROLE_ADMIN" *ngIf="isAdmin">ROLE_ADMIN (Administrateur)</option>
@@ -128,8 +128,7 @@
         <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #595959; white-space: nowrap;">
           <span style="white-space: nowrap;">Lignes par page&nbsp;:</span>
           <select [value]="itemsPerPage()" (change)="updateItemsPerPage($event)" style="padding: 4px 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px; font-size: 12px; outline: none; background: white; cursor: pointer; white-space: nowrap;">
-            <option [value]="4">4</option>
-            <option [value]="8">8</option>
+            <option [value]="5">5</option>
             <option [value]="10">10</option>
             <option [value]="20">20</option>
             <option [value]="50">50</option>

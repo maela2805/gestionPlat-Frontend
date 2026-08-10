@@ -22,7 +22,7 @@ export class ProductsComponent implements OnInit {
 
   // Pagination Signals
   currentPage = signal<number>(1);
-  itemsPerPage = signal<number>(4);
+  itemsPerPage = signal<number>(5);
 
   showModal = signal<boolean>(false);
   editingProduct = signal<Product | null>(null);

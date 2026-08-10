@@ -23,8 +23,10 @@
 <!-- BANNIÈRE BILAN FINANCIER GLOBAL & TRÉSORERIE ENTREPÔT (CENTRALE) - EXCLUSIF ADMIN -->
 <div *ngIf="isAdmin" style="background: linear-gradient(135deg, #0b1a30 0%, #1e3a8a 100%); border-radius: 12px; padding: 20px; color: white; margin-bottom: 24px; box-shadow: 0 10px 25px rgba(11,26,48,0.15);">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <span style="font-size: 22px;">🏛️</span>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.12); color: white;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7H3"/><path d="M5 21V10.85"/><path d="M19 21V10.85"/></svg>
+      </div>
       <div>
         <h2 style="font-size: 17px; font-weight: 800; margin: 0; color: white;">Bilan Financier Global & Trésorerie Centrale (Entrepôt)</h2>
         <p style="font-size: 12px; color: rgba(255,255,255,0.7); margin: 2px 0 0 0;">Vue consolidée de la trésorerie nette, des créances boutiques, des dettes fournisseurs et de la rentabilité.</p>
@@ -36,8 +38,8 @@
     <!-- CARD 1: TRESORERIE CENTRALE DISPONIBLE -->
     <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: 16px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span style="font-size: 11.5px; font-weight: 700; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.5px;">💵 Trésorerie Centrale</span>
-        <span style="font-size: 18px;">🏛️</span>
+        <span style="font-size: 11.5px; font-weight: 700; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.5px;">Trésorerie Centrale</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
       </div>
       <div style="font-size: 22px; font-weight: 800; color: #ffffff;">
         {{ (summary?.centralCashBalance || summary?.cashBalance || 0) | number:'1.0-0' }} FCFA
@@ -48,8 +50,8 @@
     <!-- CARD 2: CREANCES & DETTES DES BOUTIQUES -->
     <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: 16px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span style="font-size: 11.5px; font-weight: 700; color: #c084fc; text-transform: uppercase; letter-spacing: 0.5px;">🏷️ Créances Boutiques</span>
-        <span style="font-size: 18px;">🏪</span>
+        <span style="font-size: 11.5px; font-weight: 700; color: #c084fc; text-transform: uppercase; letter-spacing: 0.5px;">Créances Boutiques</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7z"/></svg>
       </div>
       <div style="font-size: 22px; font-weight: 800; color: #f3e8ff;">
         {{ (summary?.boutiqueReceivables || summary?.clientReceivables || 0) | number:'1.0-0' }} FCFA
@@ -60,8 +62,8 @@
     <!-- CARD 3: DETTES FOURNISSEURS -->
     <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: 16px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span style="font-size: 11.5px; font-weight: 700; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.5px;">📦 Dettes Fournisseurs</span>
-        <span style="font-size: 18px;">🛍️</span>
+        <span style="font-size: 11.5px; font-weight: 700; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.5px;">Dettes Fournisseurs</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
       </div>
       <div style="font-size: 22px; font-weight: 800; color: #fef2f2;">
         {{ (summary?.supplierPayables || 0) | number:'1.0-0' }} FCFA
@@ -72,8 +74,8 @@
     <!-- CARD 4: BENEFICE NET GLOBAL -->
     <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: 16px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span style="font-size: 11.5px; font-weight: 700; color: #4ade80; text-transform: uppercase; letter-spacing: 0.5px;">📈 Bénéfice Net Global</span>
-        <span style="font-size: 18px;">💎</span>
+        <span style="font-size: 11.5px; font-weight: 700; color: #4ade80; text-transform: uppercase; letter-spacing: 0.5px;">Bénéfice Net Global</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
       </div>
       <div style="font-size: 22px; font-weight: 800;" [style.color]="(summary?.netProfit || 0) >= 0 ? '#4ade80' : '#f87171'">
         {{ (summary?.netProfit || 0) | number:'1.0-0' }} FCFA
@@ -83,109 +85,229 @@
   </div>
 </div>
 
-<!-- BOUTIQUE SELECTION & WALLET METRICS -->
-<div style="background: white; border-radius: 10px; border: 1px solid rgba(0,0,0,0.06); padding: 18px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <span style="font-size: 18px;">🏬</span>
-      <h3 style="font-size: 16px; font-weight: 700; color: #0b1a30; margin: 0;">Sélection Boutique & Engagements Dépôt</h3>
+<!-- TAB 1: DETTES BOUTIQUES & ENGAGEMENTS -->
+<div *ngIf="activeTab === 'debts'">
+  <!-- BOUTIQUE SELECTION & WALLET METRICS -->
+  <div style="background: white; border-radius: 10px; border: 1px solid rgba(0,0,0,0.06); padding: 18px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow: hidden; box-sizing: border-box; width: 100%;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; width: 100%; box-sizing: border-box;">
+      <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 240px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1890ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7H3"/><path d="M5 21V10.85"/><path d="M19 21V10.85"/></svg>
+        <h3 style="font-size: 15px; font-weight: 700; color: #0b1a30; margin: 0;">Fiche Détaillée & Engagements Dépôt (Boutique Sélectionnée)</h3>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; white-space: nowrap; flex-shrink: 0; max-width: 100%; box-sizing: border-box;">
+        <label style="font-size: 12px; font-weight: 700; color: #0b1a30; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; margin: 0;">BOUTIQUE :</label>
+        <!-- Sélecteur visible uniquement pour les admins ou si l'employé a plusieurs boutiques -->
+        <select *ngIf="isAdmin || !isBoutiqueRestricted || boutiquesList.length > 1"
+          [(ngModel)]="selectedBoutiqueId" 
+          (change)="onBoutiqueChange()" 
+          style="padding: 6px 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 12.5px; font-weight: 600; color: #0b1a30; outline: none; white-space: nowrap; width: 210px; max-width: 100%; box-sizing: border-box; text-overflow: ellipsis; overflow: hidden;">
+          <option *ngFor="let b of boutiquesList" [ngValue]="b.id">{{ b.name }} ({{ b.code }})</option>
+        </select>
+        <!-- Étiquette statique pour un employé à boutique unique -->
+        <span *ngIf="!isAdmin && isBoutiqueRestricted && boutiquesList.length <= 1"
+          style="padding: 6px 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #0b1a30; background: #f0f5ff; white-space: nowrap;">
+          {{ boutiquesList[0]?.name || 'Ma Boutique' }}
+        </span>
+      </div>
     </div>
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <label style="font-size: 12px; font-weight: 700; color: #0b1a30; text-transform: uppercase;">BOUTIQUE :</label>
-      <select 
-        [(ngModel)]="selectedBoutiqueId" 
-        [disabled]="isBoutiqueRestricted"
-        (change)="onBoutiqueChange()" 
-        [style.background]="isBoutiqueRestricted ? '#f5f5f5' : 'white'"
-        [style.cursor]="isBoutiqueRestricted ? 'not-allowed' : 'pointer'"
-        style="padding: 8px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 13px; font-weight: 600; color: #0b1a30; outline: none;">
-        <option *ngFor="let b of boutiquesList" [ngValue]="b.id">{{ b.name }} ({{ b.code }})</option>
-      </select>
+
+    <!-- KPI CARDS WALLET -->
+    <div class="row g-3" style="display: flex; flex-wrap: wrap; margin: -8px;">
+      <!-- CARD 1: TOTAL DU A L'ENTREPOT -->
+      <div style="flex: 1; min-width: 220px; padding: 8px;">
+        <div style="background: #fff0f6; border: 1px solid #ffadd2; border-radius: 8px; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 12px; font-weight: 700; color: #c41d7f; text-transform: uppercase;">Total Dû à l'Entrepôt</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c41d7f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
+          </div>
+          <div style="font-size: 22px; font-weight: 800; color: #c41d7f;">
+            {{ (walletSummary?.balanceDue || 0) | number:'1.0-0' }} FCFA
+          </div>
+          <div style="font-size: 11px; color: #8c8c8c; margin-top: 4px;">Cumul approvisionnements - Total déjà versé</div>
+        </div>
+      </div>
+
+      <!-- CARD 2: TOTAL DEJA PAYE / VERSE -->
+      <div style="flex: 1; min-width: 220px; padding: 8px;">
+        <div style="background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 8px; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 12px; font-weight: 700; color: #389e0d; text-transform: uppercase;">Total Déjà Versé / Validé</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#389e0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style="font-size: 22px; font-weight: 800; color: #389e0d;">
+            {{ (walletSummary?.totalPaidAmount || 0) | number:'1.0-0' }} FCFA
+          </div>
+          <div style="font-size: 11px; color: #8c8c8c; margin-top: 4px;">Versements approuvés par le dépôt</div>
+        </div>
+      </div>
+
+      <!-- CARD 3: TOTAL CUMULE DES APPROVISIONNEMENTS -->
+      <div style="flex: 1; min-width: 220px; padding: 8px;">
+        <div style="background: #fffbe6; border: 1px solid #ffe58f; border-radius: 8px; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 12px; font-weight: 700; color: #d46b08; text-transform: uppercase;">Cumul Approvisionnements</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d46b08" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div style="font-size: 22px; font-weight: 800; color: #d46b08;">
+            {{ (walletSummary?.totalCessionInvoicesAmount || 0) | number:'1.0-0' }} FCFA
+          </div>
+          <div style="font-size: 11px; color: #8c8c8c; margin-top: 4px;">Montant total initial de toutes les factures</div>
+        </div>
+      </div>
+
+      <!-- CARD 4: SOLDE CAISSE GLOBALE BOUTIQUE -->
+      <div style="flex: 1; min-width: 220px; padding: 8px;">
+        <div style="background: #e6f7ff; border: 1px solid #91caff; border-radius: 8px; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 12px; font-weight: 700; color: #0958d9; text-transform: uppercase;">Caisse Globale Boutique</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0958d9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/></svg>
+          </div>
+          <div style="font-size: 22px; font-weight: 800; color: #0958d9;">
+            {{ (walletSummary?.availableCashBalance || 0) | number:'1.0-0' }} FCFA
+          </div>
+          <div style="font-size: 11px; color: #8c8c8c; margin-top: 4px;">Recettes espèces caisse de la boutique</div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- KPI CARDS WALLET -->
-  <div class="row g-3" style="display: flex; flex-wrap: wrap; margin: -8px;">
-    <!-- CARD 1: TOTAL DU A L'ENTREPOT (SOMME DES RESTES A PAYER DES FACTURES NON PAYEES) -->
-    <div style="flex: 1; min-width: 220px; padding: 8px;">
-      <div style="background: #fff0f6; border: 1px solid #ffadd2; border-radius: 8px; padding: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <span style="font-size: 12px; font-weight: 700; color: #c41d7f; text-transform: uppercase;">Total Dû à l'Entrepôt</span>
-          <span style="font-size: 20px;">📦</span>
-        </div>
-        <div style="font-size: 22px; font-weight: 800; color: #c41d7f;">
-          {{ (walletSummary?.balanceDue || 0) | number:'1.0-0' }} FCFA
-        </div>
-        <div style="font-size: 11px; color: #8c8c8c; margin-top: 4px;">Cumul approvisionnements - Total déjà versé</div>
+  <!-- TABLEAU DES DETTES & ENGAGEMENTS PAR BOUTIQUE (EXCLUSIF ADMIN) -->
+  <div *ngIf="isAdmin" class="card" style="background: white; border-radius: 12px; border: 1px solid rgba(0,0,0,0.06); padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.04);">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <h3 style="font-size: 16px; font-weight: 800; color: #0b1a30; margin: 0; display: flex; align-items: center; gap: 8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1890ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Situation Financière & Dettes de Chaque Boutique envers l'Entrepôt
+        </h3>
+        <p style="font-size: 12px; color: #707e94; margin: 4px 0 0 0;">Tableau récapitulatif détaillé des livraisons, des remboursements et du solde de créance pour chaque boutique.</p>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="badge" style="background: rgba(24,144,255,0.1); color: #1890ff; padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 12px;">
+          {{ allBoutiquesWallets.length }} Boutique(s) au total
+        </span>
       </div>
     </div>
 
-    <!-- CARD 2: TOTAL DEJA PAYE / VERSE -->
-    <div style="flex: 1; min-width: 220px; padding: 8px;">
-      <div style="background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 8px; padding: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <span style="font-size: 12px; font-weight: 700; color: #389e0d; text-transform: uppercase;">Total Déjà Versé / Validé</span>
-          <span style="font-size: 20px;">✅</span>
-        </div>
-        <div style="font-size: 22px; font-weight: 800; color: #389e0d;">
-          {{ (walletSummary?.totalPaidAmount || 0) | number:'1.0-0' }} FCFA
-        </div>
-        <div style="font-size: 11px; color: #8c8c8c; margin-top: 4px;">Versements approuvés par le dépôt</div>
-      </div>
-    </div>
+    <div class="table-responsive" style="overflow-x: auto;">
+      <table class="data-table" style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: #fafafa; border-bottom: 2px solid #e8e8e8; font-size: 12px; color: #595959; text-transform: uppercase;">
+            <th style="padding: 12px 16px; text-align: left;">Boutique</th>
+            <th style="padding: 12px 16px; text-align: right;">Cumul Approvisionnements</th>
+            <th style="padding: 12px 16px; text-align: right;">Total Déjà Versé / Validé</th>
+            <th style="padding: 12px 16px; text-align: right; color: #c41d7f;">Dette Due au Dépôt</th>
+            <th style="padding: 12px 16px; text-align: right;">Caisse Globale Boutique</th>
+            <th style="padding: 12px 16px; text-align: center;">Versements en Attente</th>
+            <th style="padding: 12px 16px; text-align: center;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="isLoadingWallets">
+            <td colspan="7" style="text-align: center; padding: 32px; color: #8c8c8c;">Chargement des données financières par boutique...</td>
+          </tr>
 
-    <!-- CARD 3: TOTAL CUMULE DES APPROVISIONNEMENTS -->
-    <div style="flex: 1; min-width: 220px; padding: 8px;">
-      <div style="background: #fffbe6; border: 1px solid #ffe58f; border-radius: 8px; padding: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <span style="font-size: 12px; font-weight: 700; color: #d46b08; text-transform: uppercase;">Cumul Approvisionnements</span>
-          <span style="font-size: 20px;">📜</span>
-        </div>
-        <div style="font-size: 22px; font-weight: 800; color: #d46b08;">
-          {{ (walletSummary?.totalCessionInvoicesAmount || 0) | number:'1.0-0' }} FCFA
-        </div>
-        <div style="font-size: 11px; color: #8c8c8c; margin-top: 4px;">Montant total initial de toutes les factures</div>
-      </div>
-    </div>
+          <tr *ngFor="let w of allBoutiquesWallets" 
+              [style.background]="selectedBoutiqueId === w.boutiqueId ? 'rgba(24,144,255,0.04)' : 'transparent'"
+              (click)="selectBoutique(w.boutiqueId)"
+              style="border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.2s;">
+            
+            <td style="padding: 14px 16px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: rgba(24,144,255,0.1); color: #1890ff; font-weight: 700; font-size: 12px;">
+                  🏪
+                </span>
+                <div>
+                  <div style="font-weight: 700; color: #0b1a30; font-size: 13.5px;">{{ w.boutiqueName }}</div>
+                  <span *ngIf="selectedBoutiqueId === w.boutiqueId" style="font-size: 10px; background: #1890ff; color: white; padding: 1px 6px; border-radius: 4px; font-weight: 700;">
+                    Sélectionnée
+                  </span>
+                </div>
+              </div>
+            </td>
 
-    <!-- CARD 4: SOLDE CAISSE GLOBALE BOUTIQUE -->
-    <div style="flex: 1; min-width: 220px; padding: 8px;">
-      <div style="background: #e6f7ff; border: 1px solid #91caff; border-radius: 8px; padding: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <span style="font-size: 12px; font-weight: 700; color: #0958d9; text-transform: uppercase;">Caisse Globale Boutique</span>
-          <span style="font-size: 20px;">💰</span>
-        </div>
-        <div style="font-size: 22px; font-weight: 800; color: #0958d9;">
-          {{ (walletSummary?.availableCashBalance || 0) | number:'1.0-0' }} FCFA
-        </div>
-        <div style="font-size: 11px; color: #8c8c8c; margin-top: 4px;">Recettes espèces caisse - Versements au dépôt</div>
-      </div>
+            <!-- Cumul Approvisionnements -->
+            <td style="padding: 14px 16px; text-align: right; font-weight: 600; color: #d46b08;">
+              {{ w.totalCessionInvoicesAmount | number:'1.0-0' }} FCFA
+            </td>
+
+            <!-- Total Déjà Versé -->
+            <td style="padding: 14px 16px; text-align: right; font-weight: 600; color: #389e0d;">
+              {{ w.totalPaidAmount | number:'1.0-0' }} FCFA
+            </td>
+
+            <!-- Dette Due à l'Entrepôt -->
+            <td style="padding: 14px 16px; text-align: right; font-weight: 800; font-size: 14px;" [style.color]="w.balanceDue > 0 ? '#c41d7f' : '#52c41a'">
+              <div>{{ w.balanceDue | number:'1.0-0' }} FCFA</div>
+              <span *ngIf="w.balanceDue > 0" style="display: inline-block; padding: 2px 8px; border-radius: 10px; background: #fff0f6; border: 1px solid #ffadd2; color: #c41d7f; font-size: 10.5px; font-weight: 700; margin-top: 2px;">
+                ⚠️ En Dette
+              </span>
+              <span *ngIf="w.balanceDue === 0" style="display: inline-block; padding: 2px 8px; border-radius: 10px; background: #f6ffed; border: 1px solid #b7eb8f; color: #52c41a; font-size: 10.5px; font-weight: 700; margin-top: 2px;">
+                ✓ À Jour
+              </span>
+            </td>
+
+            <!-- Caisse Globale Boutique -->
+            <td style="padding: 14px 16px; text-align: right; font-weight: 700; color: #0958d9;">
+              {{ (w.availableCashBalance || 0) | number:'1.0-0' }} FCFA
+            </td>
+
+            <!-- Versements en Attente -->
+            <td style="padding: 14px 16px; text-align: center;">
+              <span *ngIf="w.pendingTransfersAmount > 0" style="padding: 4px 10px; border-radius: 12px; background: #fffbe6; border: 1px solid #ffe58f; color: #fa8c16; font-weight: 700; font-size: 12px;">
+                ⏳ {{ w.pendingTransfersAmount | number:'1.0-0' }} FCFA
+              </span>
+              <span *ngIf="!w.pendingTransfersAmount || w.pendingTransfersAmount === 0" style="color: #bfbfbf; font-size: 12px;">-</span>
+            </td>
+
+            <!-- Actions -->
+            <td style="padding: 14px 16px; text-align: center;" (click)="$event.stopPropagation()">
+              <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <button type="button" 
+                        (click)="selectBoutique(w.boutiqueId)" 
+                        class="btn btn-sm" 
+                        [style.background]="selectedBoutiqueId === w.boutiqueId ? '#1890ff' : '#f0f5ff'"
+                        [style.color]="selectedBoutiqueId === w.boutiqueId ? 'white' : '#1890ff'"
+                        style="border: 1px solid rgba(24,144,255,0.3); border-radius: 6px; font-size: 11.5px; font-weight: 600; padding: 4px 10px;">
+                  {{ selectedBoutiqueId === w.boutiqueId ? '✓ Filtrée' : 'Voir Fiche' }}
+                </button>
+
+                <button type="button" 
+                        (click)="openTransferModalForBoutique(w.boutiqueId, $event)"
+                        title="Saisir un versement pour cette boutique"
+                        style="padding: 4px 10px; border-radius: 6px; background: #52c41a; color: white; border: none; font-size: 11.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                  💸 Versement
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- LIGNE DE TOTAL GENERAL / CONSOLIDE -->
+          <tr *ngIf="!isLoadingWallets && allBoutiquesWallets.length > 0" style="background: #fafafa; border-top: 2px solid #0b1a30; font-weight: 800; font-size: 13.5px; color: #0b1a30;">
+            <td style="padding: 14px 16px; font-weight: 800; text-transform: uppercase;">
+              TOTAL TOUTES BOUTIQUES
+            </td>
+            <td style="padding: 14px 16px; text-align: right; color: #d46b08;">
+              {{ totalCessionAllBoutiques | number:'1.0-0' }} FCFA
+            </td>
+            <td style="padding: 14px 16px; text-align: right; color: #389e0d;">
+              {{ totalPaidAllBoutiques | number:'1.0-0' }} FCFA
+            </td>
+            <td style="padding: 14px 16px; text-align: right; color: #c41d7f; font-size: 15px;">
+              {{ totalDueAllBoutiques | number:'1.0-0' }} FCFA
+            </td>
+            <td style="padding: 14px 16px; text-align: right; color: #0958d9;">
+              {{ totalCashAllBoutiques | number:'1.0-0' }} FCFA
+            </td>
+            <td style="padding: 14px 16px; text-align: center; color: #fa8c16;">
+              {{ totalPendingTransfersAllBoutiques | number:'1.0-0' }} FCFA
+            </td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
-
-<!-- TABS SWITCHING (JOURNAL vs VERSEMENTS) -->
-<div style="display: flex; border-bottom: 2px solid #e8e8e8; margin-bottom: 20px;">
-  <button 
-    (click)="activeTab = 'journal'" 
-    [style.border-bottom]="activeTab === 'journal' ? '3px solid #1890ff' : 'none'"
-    [style.color]="activeTab === 'journal' ? '#1890ff' : '#595959'"
-    style="padding: 12px 24px; background: none; border: none; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-    📖 Journal des Écritures Comptables
-  </button>
-  <button 
-    (click)="activeTab = 'transfers'" 
-    [style.border-bottom]="activeTab === 'transfers' ? '3px solid #1890ff' : 'none'"
-    [style.color]="activeTab === 'transfers' ? '#1890ff' : '#595959'"
-    style="padding: 12px 24px; background: none; border: none; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-    💸 Historique des Versements au Dépôt
-    <span *ngIf="walletSummary?.pendingTransfersAmount && walletSummary!.pendingTransfersAmount > 0" style="background: #fa8c16; color: white; border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: 800;">
-      En Attente
-    </span>
-  </button>
-</div>
-
-<!-- TAB 1 : JOURNAL DES ECRITURES COMPTABLES -->
 <div *ngIf="activeTab === 'journal'" class="row">
   <!-- Chart Card -->
   <div class="col-4" style="margin-bottom: 20px;">
@@ -225,7 +347,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let entry of filteredEntries" style="border-bottom: 1px solid #f0f0f0;">
+            <tr *ngFor="let entry of paginatedEntries" style="border-bottom: 1px solid #f0f0f0;">
               <td style="padding: 10px; font-weight: 600; color: #595959;">{{ entry.entryCode }}</td>
               <td style="padding: 10px; color: #8c8c8c;">{{ entry.entryDate | date:'dd/MM/yyyy HH:mm' }}</td>
               <td style="padding: 10px;">
@@ -247,6 +369,39 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Pagination Footer Journal -->
+      <div class="pagination-footer" style="padding: 12px 20px; border-top: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: #fafafa;">
+        <div style="font-size: 12.5px; color: #595959; font-weight: 500; white-space: nowrap;">
+          Affichage de <strong>{{ paginatedEntries.length }}</strong> sur <strong>{{ filteredEntries.length }}</strong> écritures
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: nowrap;">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #595959; white-space: nowrap;">
+            <span style="white-space: nowrap;">Lignes par page&nbsp;:</span>
+            <select [(ngModel)]="journalItemsPerPage" (change)="journalCurrentPage = 1" style="padding: 4px 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px; font-size: 12px; outline: none; background: white; cursor: pointer; white-space: nowrap;">
+              <option [ngValue]="5">5</option>
+              <option [ngValue]="10">10</option>
+              <option [ngValue]="20">20</option>
+              <option [ngValue]="50">50</option>
+            </select>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
+            <button type="button" (click)="journalPrevPage()" [disabled]="journalCurrentPage === 1" style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; background: white; color: #0b1a30; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;" [style.opacity]="journalCurrentPage === 1 ? '0.5' : '1'" [style.cursor]="journalCurrentPage === 1 ? 'not-allowed' : 'pointer'">
+              ‹ Précédent
+            </button>
+
+            <span style="font-size: 12.5px; font-weight: 600; color: #0b1a30; padding: 0 8px; white-space: nowrap;">
+              Page {{ journalCurrentPage }} / {{ journalTotalPages }}
+            </span>
+
+            <button type="button" (click)="journalNextPage()" [disabled]="journalCurrentPage >= journalTotalPages" style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; background: white; color: #0b1a30; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;" [style.opacity]="journalCurrentPage >= journalTotalPages ? '0.5' : '1'" [style.cursor]="journalCurrentPage >= journalTotalPages ? 'not-allowed' : 'pointer'">
+              Suivant ›
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -285,7 +440,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let t of filteredTransfers" style="border-bottom: 1px solid #f0f0f0;">
+        <tr *ngFor="let t of paginatedTransfers" style="border-bottom: 1px solid #f0f0f0;">
           <td style="padding: 12px; font-weight: 700; color: #1890ff;">{{ t.reference }}</td>
           <td style="padding: 12px;">
             <span *ngIf="t.versemenType === 'VERSEMENT_FACTURE'" style="background: rgba(114,46,209,0.12); color: #722ed1; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 11px;">
@@ -336,6 +491,39 @@
         </tr>
       </tbody>
     </table>
+
+    <!-- Pagination Footer Versements -->
+    <div class="pagination-footer" style="padding: 12px 20px; border-top: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: #fafafa;">
+      <div style="font-size: 12.5px; color: #595959; font-weight: 500; white-space: nowrap;">
+        Affichage de <strong>{{ paginatedTransfers.length }}</strong> sur <strong>{{ filteredTransfers.length }}</strong> versements
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: nowrap;">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #595959; white-space: nowrap;">
+          <span style="white-space: nowrap;">Lignes par page&nbsp;:</span>
+          <select [(ngModel)]="transfersItemsPerPage" (change)="transfersCurrentPage = 1" style="padding: 4px 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px; font-size: 12px; outline: none; background: white; cursor: pointer; white-space: nowrap;">
+            <option [ngValue]="5">5</option>
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
+            <option [ngValue]="50">50</option>
+          </select>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
+          <button type="button" (click)="transfersPrevPage()" [disabled]="transfersCurrentPage === 1" style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; background: white; color: #0b1a30; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;" [style.opacity]="transfersCurrentPage === 1 ? '0.5' : '1'" [style.cursor]="transfersCurrentPage === 1 ? 'not-allowed' : 'pointer'">
+            ‹ Précédent
+          </button>
+
+          <span style="font-size: 12.5px; font-weight: 600; color: #0b1a30; padding: 0 8px; white-space: nowrap;">
+            Page {{ transfersCurrentPage }} / {{ transfersTotalPages }}
+          </span>
+
+          <button type="button" (click)="transfersNextPage()" [disabled]="transfersCurrentPage >= transfersTotalPages" style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; background: white; color: #0b1a30; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;" [style.opacity]="transfersCurrentPage >= transfersTotalPages ? '0.5' : '1'" [style.cursor]="transfersCurrentPage >= transfersTotalPages ? 'not-allowed' : 'pointer'">
+            Suivant ›
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 

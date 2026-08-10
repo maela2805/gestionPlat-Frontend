@@ -196,6 +196,46 @@ export class PurchaseOrdersComponent implements OnInit {
     return list;
   });
 
+  // --- Pagination Inter-Boutiques ---
+  boutiqueCurrentPage = signal<number>(1);
+  boutiqueItemsPerPage = signal<number>(5);
+
+  paginatedBoutiqueOrders = computed(() => {
+    const list = this.filteredBoutiqueOrders();
+    const start = (this.boutiqueCurrentPage() - 1) * this.boutiqueItemsPerPage();
+    return list.slice(start, start + this.boutiqueItemsPerPage());
+  });
+
+  boutiqueTotalPages = computed(() => Math.ceil(this.filteredBoutiqueOrders().length / this.boutiqueItemsPerPage()) || 1);
+
+  boutiqueNextPage(): void {
+    if (this.boutiqueCurrentPage() < this.boutiqueTotalPages()) this.boutiqueCurrentPage.update(p => p + 1);
+  }
+
+  boutiquePrevPage(): void {
+    if (this.boutiqueCurrentPage() > 1) this.boutiqueCurrentPage.update(p => p - 1);
+  }
+
+  // --- Pagination Fournisseurs ---
+  fournisseurCurrentPage = signal<number>(1);
+  fournisseurItemsPerPage = signal<number>(5);
+
+  paginatedPurchaseOrders = computed(() => {
+    const list = this.filteredPurchaseOrders();
+    const start = (this.fournisseurCurrentPage() - 1) * this.fournisseurItemsPerPage();
+    return list.slice(start, start + this.fournisseurItemsPerPage());
+  });
+
+  fournisseurTotalPages = computed(() => Math.ceil(this.filteredPurchaseOrders().length / this.fournisseurItemsPerPage()) || 1);
+
+  fournisseurNextPage(): void {
+    if (this.fournisseurCurrentPage() < this.fournisseurTotalPages()) this.fournisseurCurrentPage.update(p => p + 1);
+  }
+
+  fournisseurPrevPage(): void {
+    if (this.fournisseurCurrentPage() > 1) this.fournisseurCurrentPage.update(p => p - 1);
+  }
+
   // --- Gestion du FormArray Commande Boutique ---
   get boutiqueItemsArray(): FormArray {
     return this.boutiqueOrderForm.get('items') as FormArray;

@@ -23,7 +23,7 @@ export class UsersComponent implements OnInit {
 
   // Pagination Signals
   currentPage = signal<number>(1);
-  itemsPerPage = signal<number>(4);
+  itemsPerPage = signal<number>(5);
 
   userForm: FormGroup;
   isSaving = signal<boolean>(false);

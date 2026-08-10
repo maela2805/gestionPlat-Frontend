@@ -60,9 +60,9 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #8c8c8c;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <label style="font-size: 12px; font-weight: 700; color: #0b1a30;">STATUT :</label>
-      <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)" style="padding: 8px 12px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; font-size: 13px; background: white;">
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; white-space: nowrap;">
+      <label style="font-size: 12px; font-weight: 700; color: #0b1a30; white-space: nowrap; flex-shrink: 0; margin-bottom: 0;">STATUT :</label>
+      <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)" style="padding: 8px 12px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; font-size: 13px; background: white; white-space: nowrap; flex-shrink: 0;">
         <option value="">Tous les statuts</option>
         <option value="PENDING">En attente d'approbation</option>
         <option value="APPROVED">Approuvée / En livraison</option>
@@ -89,7 +89,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let order of filteredBoutiqueOrders()" style="border-bottom: 1px solid rgba(0,0,0,0.04); cursor: pointer;" (click)="openBoutiqueOrderDetailModal(order)">
+          <tr *ngFor="let order of paginatedBoutiqueOrders()" style="border-bottom: 1px solid rgba(0,0,0,0.04); cursor: pointer;" (click)="openBoutiqueOrderDetailModal(order)">
             <td style="padding: 12px 16px;">
               <code style="background: rgba(24, 144, 255, 0.08); color: #1890ff; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 12px;">
                 {{ order.orderNumber }}
@@ -140,42 +140,31 @@
                   type="button" 
                   class="btn-action-icon btn-edit" 
                   (click)="openApproveModal(order, true, $event)"
-                  title="Modifier les quantités et approuver la commande"
+                  title="Modifier les quantités et approuver"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                 </button>
 
-                <!-- Bouton 1: Créer le Bon de Livraison (BL) - Reservé Admin / Dépôt Central -->
+                <!-- Bouton Refuser -->
                 <button 
-                  *ngIf="(order.status === 'APPROVED' || order.status === 'MODIFIED_AND_APPROVED') && !order.invoiceCreated && !isBoutiqueUser()"
+                  *ngIf="order.status === 'PENDING' && !authService.currentUser()?.boutiqueId"
                   type="button" 
-                  class="btn-action-icon btn-validate" 
-                  (click)="createInvoiceForOrder(order, $event)"
-                  title="➕ Créer le Bon de Livraison (BL) & Facture de Cession"
+                  class="btn-action-icon btn-cancel" 
+                  (click)="rejectBoutiqueOrder(order, $event)"
+                  title="Refuser la commande"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                 </button>
 
-                <!-- Bouton 2: Bon de Livraison Créé - Consulter / Imprimer (Tous les utilisateurs) -->
+                <!-- Bouton Générer BL / Reçu PDF -->
                 <button 
-                  *ngIf="order.invoiceCreated"
+                  *ngIf="order.status === 'APPROVED' || order.status === 'MODIFIED_AND_APPROVED'"
                   type="button" 
-                  class="btn-action-icon btn-view" 
+                  class="btn-action-icon btn-bl" 
                   (click)="createInvoiceForOrder(order, $event)"
-                  title="📄 Consulter et imprimer le Bon de Livraison (BL)"
+                  title="Générer / Télécharger le Bon de Livraison BL"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
-                </button>
-
-                <!-- Bouton 3: Confirmer Livraison (Uniquement après création du Bon de Livraison / Facture) -->
-                <button 
-                  *ngIf="(order.status === 'APPROVED' || order.status === 'MODIFIED_AND_APPROVED') && order.invoiceCreated"
-                  type="button" 
-                  class="btn-action-icon btn-deliver" 
-                  (click)="confirmDeliveryBoutiqueOrder(order, $event)"
-                  title="Confirmer la livraison effectuée"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="13" x="1" y="3" rx="2"/><polygon points="17 8 23 8 23 16 17 16 17 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                 </button>
 
                 <!-- Bouton Annuler -->
@@ -210,6 +199,39 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Pagination Footer Inter-Boutiques -->
+    <div class="pagination-footer" style="padding: 12px 20px; border-top: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: #fafafa;">
+      <div style="font-size: 12.5px; color: #595959; font-weight: 500; white-space: nowrap;">
+        Affichage de <strong>{{ paginatedBoutiqueOrders().length }}</strong> sur <strong>{{ filteredBoutiqueOrders().length }}</strong> commandes
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: nowrap;">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #595959; white-space: nowrap;">
+          <span style="white-space: nowrap;">Lignes par page&nbsp;:</span>
+          <select [value]="boutiqueItemsPerPage()" (change)="boutiqueItemsPerPage.set(+$any($event.target).value); boutiqueCurrentPage.set(1)" style="padding: 4px 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px; font-size: 12px; outline: none; background: white; cursor: pointer; white-space: nowrap;">
+            <option [value]="5">5</option>
+            <option [value]="10">10</option>
+            <option [value]="20">20</option>
+            <option [value]="50">50</option>
+          </select>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
+          <button type="button" (click)="boutiquePrevPage()" [disabled]="boutiqueCurrentPage() === 1" style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; background: white; color: #0b1a30; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;" [style.opacity]="boutiqueCurrentPage() === 1 ? '0.5' : '1'" [style.cursor]="boutiqueCurrentPage() === 1 ? 'not-allowed' : 'pointer'">
+            ‹ Précédent
+          </button>
+
+          <span style="font-size: 12.5px; font-weight: 600; color: #0b1a30; padding: 0 8px; white-space: nowrap;">
+            Page {{ boutiqueCurrentPage() }} / {{ boutiqueTotalPages() }}
+          </span>
+
+          <button type="button" (click)="boutiqueNextPage()" [disabled]="boutiqueCurrentPage() >= boutiqueTotalPages()" style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; background: white; color: #0b1a30; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;" [style.opacity]="boutiqueCurrentPage() >= boutiqueTotalPages() ? '0.5' : '1'" [style.cursor]="boutiqueCurrentPage() >= boutiqueTotalPages() ? 'not-allowed' : 'pointer'">
+            Suivant ›
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- TAB 2 : COMMANDES FOURNISSEURS -->
@@ -228,7 +250,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let order of filteredPurchaseOrders()" style="border-bottom: 1px solid rgba(0,0,0,0.04); cursor: pointer;" (click)="openDetailModal(order)">
+          <tr *ngFor="let order of paginatedPurchaseOrders()" style="border-bottom: 1px solid rgba(0,0,0,0.04); cursor: pointer;" (click)="openDetailModal(order)">
             <td style="padding: 12px 16px;">
               <code style="background: rgba(24, 144, 255, 0.08); color: #1890ff; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 12px;">{{ order.reference }}</code>
             </td>
@@ -254,6 +276,39 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Pagination Footer Fournisseurs -->
+    <div class="pagination-footer" style="padding: 12px 20px; border-top: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: #fafafa;">
+      <div style="font-size: 12.5px; color: #595959; font-weight: 500; white-space: nowrap;">
+        Affichage de <strong>{{ paginatedPurchaseOrders().length }}</strong> sur <strong>{{ filteredPurchaseOrders().length }}</strong> commandes
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: nowrap;">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #595959; white-space: nowrap;">
+          <span style="white-space: nowrap;">Lignes par page&nbsp;:</span>
+          <select [value]="fournisseurItemsPerPage()" (change)="fournisseurItemsPerPage.set(+$any($event.target).value); fournisseurCurrentPage.set(1)" style="padding: 4px 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px; font-size: 12px; outline: none; background: white; cursor: pointer; white-space: nowrap;">
+            <option [value]="5">5</option>
+            <option [value]="10">10</option>
+            <option [value]="20">20</option>
+            <option [value]="50">50</option>
+          </select>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
+          <button type="button" (click)="fournisseurPrevPage()" [disabled]="fournisseurCurrentPage() === 1" style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; background: white; color: #0b1a30; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;" [style.opacity]="fournisseurCurrentPage() === 1 ? '0.5' : '1'" [style.cursor]="fournisseurCurrentPage() === 1 ? 'not-allowed' : 'pointer'">
+            ‹ Précédent
+          </button>
+
+          <span style="font-size: 12.5px; font-weight: 600; color: #0b1a30; padding: 0 8px; white-space: nowrap;">
+            Page {{ fournisseurCurrentPage() }} / {{ fournisseurTotalPages() }}
+          </span>
+
+          <button type="button" (click)="fournisseurNextPage()" [disabled]="fournisseurCurrentPage() >= fournisseurTotalPages()" style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; background: white; color: #0b1a30; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;" [style.opacity]="fournisseurCurrentPage() >= fournisseurTotalPages() ? '0.5' : '1'" [style.cursor]="fournisseurCurrentPage() >= fournisseurTotalPages() ? 'not-allowed' : 'pointer'">
+            Suivant ›
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 

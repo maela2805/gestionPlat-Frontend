@@ -209,23 +209,23 @@ a:hover {
   flex-direction: column;
   min-height: 100vh;
   transition: var(--transition);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* ==================== HEADER ==================== */
 .main-header {
   height: var(--header-height);
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.95);
   padding: 0 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
   position: sticky;
   top: 0;
   z-index: 90;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
 }
 
 .search-input {
@@ -249,7 +249,6 @@ a:hover {
 .page-container {
   padding: 32px;
   flex-grow: 1;
-  overflow-y: auto;
   width: 100%;
 }
 
@@ -476,7 +475,41 @@ a:hover {
 .badge-danger { color: #cf1322; background-color: #fff1f0; border-color: #ffccc7; }
 .badge-info { color: #096dd9; background-color: #e6f7ff; border-color: #91d5ff; }
 
-/* ==================== FORMS ==================== */
+/* ==================== FORMS & INLINE LABELS ==================== */
+label, 
+.form-group label, 
+.filter-item label, 
+.filter-row label, 
+.filter-group label, 
+.filter-container label, 
+.boutique-selector label, 
+.search-filter-box label,
+th label,
+td label {
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+}
+
+/* Ensure label + select containers stay strictly on the same single line without wrapping */
+.filter-item, 
+.filter-group, 
+.filter-bar, 
+.filter-container, 
+.boutique-selector, 
+.form-inline-group,
+div[style*="display: flex"] {
+  label {
+    margin-bottom: 0 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  select {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+}
+
 .form-group {
   margin-bottom: 20px;
 }
@@ -489,6 +522,7 @@ a:hover {
   text-transform: uppercase;
   letter-spacing: 0.3px;
   color: var(--text-secondary);
+  white-space: nowrap !important;
 }
 
 .form-control, input, select, textarea {
@@ -514,4 +548,71 @@ a:hover {
 input::placeholder, textarea::placeholder {
   color: #8c8c8c !important;
   opacity: 1 !important;
+}
+
+/* ==================== GLOBAL PRINT STYLING ==================== */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .app-sidebar,
+  .sidebar,
+  .main-header,
+  .page-header-block,
+  .tabs-card,
+  .page-header,
+  .card,
+  .no-print,
+  .modal-header.no-print {
+    display: none !important;
+  }
+
+  .modal-backdrop {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    z-index: 99999 !important;
+  }
+
+  .modal-dialog {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .modal-content {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .printable-invoice,
+  .printable-invoice *,
+  #bl-printable,
+  #bl-printable * {
+    visibility: visible !important;
+  }
+
+  .printable-invoice,
+  #bl-printable {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    padding: 20px !important;
+    background: white !important;
+    color: black !important;
+  }
 }

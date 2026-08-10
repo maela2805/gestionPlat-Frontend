@@ -69,6 +69,9 @@ export class CaisseSupervisionComponent implements OnInit {
     });
   }
 
+  sessionsCurrentPage: number = 1;
+  sessionsItemsPerPage: number = 5;
+
   get filteredSessions(): CashSession[] {
     return this.sessions.filter(s => {
       const matchesBoutique = !this.selectedBoutiqueId || 
@@ -79,12 +82,49 @@ export class CaisseSupervisionComponent implements OnInit {
     });
   }
 
+  get paginatedSessions(): CashSession[] {
+    const start = (this.sessionsCurrentPage - 1) * this.sessionsItemsPerPage;
+    return this.filteredSessions.slice(start, start + this.sessionsItemsPerPage);
+  }
+
+  get sessionsTotalPages(): number {
+    return Math.ceil(this.filteredSessions.length / this.sessionsItemsPerPage) || 1;
+  }
+
+  sessionsNextPage(): void {
+    if (this.sessionsCurrentPage < this.sessionsTotalPages) this.sessionsCurrentPage++;
+  }
+
+  sessionsPrevPage(): void {
+    if (this.sessionsCurrentPage > 1) this.sessionsCurrentPage--;
+  }
+
+  salesCurrentPage: number = 1;
+  salesItemsPerPage: number = 5;
+
   get filteredSales(): PosSale[] {
     return this.sales.filter(s => {
       return !this.selectedBoutiqueId || 
              String(this.selectedBoutiqueId) === 'null' || 
              Number(s.boutiqueId) === Number(this.selectedBoutiqueId);
     });
+  }
+
+  get paginatedSales(): PosSale[] {
+    const start = (this.salesCurrentPage - 1) * this.salesItemsPerPage;
+    return this.filteredSales.slice(start, start + this.salesItemsPerPage);
+  }
+
+  get salesTotalPages(): number {
+    return Math.ceil(this.filteredSales.length / this.salesItemsPerPage) || 1;
+  }
+
+  salesNextPage(): void {
+    if (this.salesCurrentPage < this.salesTotalPages) this.salesCurrentPage++;
+  }
+
+  salesPrevPage(): void {
+    if (this.salesCurrentPage > 1) this.salesCurrentPage--;
   }
 
   // KPIs (Calculés dynamiquement sur les sessions filtrées)

@@ -9,9 +9,10 @@ import { AuthService } from '../../../core/services/auth.service';
 export class SidebarComponent {
   public authService = inject(AuthService);
   user = this.authService.currentUser;
-  isStockSubmenuOpen = signal<boolean>(true);
-  isWarehouseSubmenuOpen = signal<boolean>(true);
+  isStockSubmenuOpen = signal<boolean>(false);
+  isWarehouseSubmenuOpen = signal<boolean>(false);
   isPurchaseSubmenuOpen = signal<boolean>(false);
+  isAccountingSubmenuOpen = signal<boolean>(false);
 
   toggleStockSubmenu(event?: Event): void {
     if (event) {
@@ -35,6 +36,14 @@ export class SidebarComponent {
       event.stopPropagation();
     }
     this.isPurchaseSubmenuOpen.update(v => !v);
+  }
+
+  toggleAccountingSubmenu(event?: Event): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    this.isAccountingSubmenuOpen.update(v => !v);
   }
 
   getInitials(): string {

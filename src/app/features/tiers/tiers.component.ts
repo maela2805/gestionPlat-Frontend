@@ -37,7 +37,7 @@ export class TiersComponent implements OnInit {
 
   // Pagination Signals
   currentPage = signal<number>(1);
-  itemsPerPage = signal<number>(6);
+  itemsPerPage = signal<number>(5);
 
   // Stats
   totalCount = computed(() => this.tiersList().length);

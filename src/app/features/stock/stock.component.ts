@@ -64,7 +64,7 @@ export class StockComponent implements OnInit {
 
   // Pagination Signals
   currentPage = signal<number>(1);
-  itemsPerPage = signal<number>(4);
+  itemsPerPage = signal<number>(5);
 
   isEmployeeLocked = computed(() => {
     const u = this.authService.currentUser();

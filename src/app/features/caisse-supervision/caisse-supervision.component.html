@@ -101,7 +101,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let s of filteredSessions">
+        <tr *ngFor="let s of paginatedSessions">
           <td><strong class="text-white">{{ s.sessionReference }}</strong></td>
           <td>
             <span class="boutique-badge">{{ s.boutiqueName }}</span>
@@ -141,6 +141,39 @@
         </tr>
       </tbody>
     </table>
+
+    <!-- Pagination Footer Sessions -->
+    <div class="pagination-footer" style="padding: 12px 20px; border-top: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: #fafafa;">
+      <div style="font-size: 12.5px; color: #595959; font-weight: 500; white-space: nowrap;">
+        Affichage de <strong>{{ paginatedSessions.length }}</strong> sur <strong>{{ filteredSessions.length }}</strong> sessions
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: nowrap;">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #595959; white-space: nowrap;">
+          <span style="white-space: nowrap;">Lignes par page&nbsp;:</span>
+          <select [(ngModel)]="sessionsItemsPerPage" (change)="sessionsCurrentPage = 1" style="padding: 4px 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px; font-size: 12px; outline: none; background: white; cursor: pointer; white-space: nowrap;">
+            <option [ngValue]="5">5</option>
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
+            <option [ngValue]="50">50</option>
+          </select>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
+          <button type="button" (click)="sessionsPrevPage()" [disabled]="sessionsCurrentPage === 1" style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; background: white; color: #0b1a30; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;" [style.opacity]="sessionsCurrentPage === 1 ? '0.5' : '1'" [style.cursor]="sessionsCurrentPage === 1 ? 'not-allowed' : 'pointer'">
+            ‹ Précédent
+          </button>
+
+          <span style="font-size: 12.5px; font-weight: 600; color: #0b1a30; padding: 0 8px; white-space: nowrap;">
+            Page {{ sessionsCurrentPage }} / {{ sessionsTotalPages }}
+          </span>
+
+          <button type="button" (click)="sessionsNextPage()" [disabled]="sessionsCurrentPage >= sessionsTotalPages" style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; background: white; color: #0b1a30; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;" [style.opacity]="sessionsCurrentPage >= sessionsTotalPages ? '0.5' : '1'" [style.cursor]="sessionsCurrentPage >= sessionsTotalPages ? 'not-allowed' : 'pointer'">
+            Suivant ›
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Tab 2: Historique des Ventes POS -->
@@ -161,7 +194,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let v of filteredSales">
+        <tr *ngFor="let v of paginatedSales">
           <td><strong class="text-white">{{ v.receiptNumber }}</strong></td>
           <td><span class="boutique-badge">{{ v.boutiqueName }}</span></td>
           <td>{{ v.saleDate | date:'dd/MM/yyyy HH:mm' }}</td>
@@ -193,6 +226,39 @@
         </tr>
       </tbody>
     </table>
+
+    <!-- Pagination Footer Sales -->
+    <div class="pagination-footer" style="padding: 12px 20px; border-top: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: #fafafa;">
+      <div style="font-size: 12.5px; color: #595959; font-weight: 500; white-space: nowrap;">
+        Affichage de <strong>{{ paginatedSales.length }}</strong> sur <strong>{{ filteredSales.length }}</strong> ventes
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: nowrap;">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #595959; white-space: nowrap;">
+          <span style="white-space: nowrap;">Lignes par page&nbsp;:</span>
+          <select [(ngModel)]="salesItemsPerPage" (change)="salesCurrentPage = 1" style="padding: 4px 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px; font-size: 12px; outline: none; background: white; cursor: pointer; white-space: nowrap;">
+            <option [ngValue]="5">5</option>
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
+            <option [ngValue]="50">50</option>
+          </select>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
+          <button type="button" (click)="salesPrevPage()" [disabled]="salesCurrentPage === 1" style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; background: white; color: #0b1a30; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;" [style.opacity]="salesCurrentPage === 1 ? '0.5' : '1'" [style.cursor]="salesCurrentPage === 1 ? 'not-allowed' : 'pointer'">
+            ‹ Précédent
+          </button>
+
+          <span style="font-size: 12.5px; font-weight: 600; color: #0b1a30; padding: 0 8px; white-space: nowrap;">
+            Page {{ salesCurrentPage }} / {{ salesTotalPages }}
+          </span>
+
+          <button type="button" (click)="salesNextPage()" [disabled]="salesCurrentPage >= salesTotalPages" style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; background: white; color: #0b1a30; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;" [style.opacity]="salesCurrentPage >= salesTotalPages ? '0.5' : '1'" [style.cursor]="salesCurrentPage >= salesTotalPages ? 'not-allowed' : 'pointer'">
+            Suivant ›
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL: Details Session -->

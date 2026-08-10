@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
 import { InvoiceService } from '../../core/services/invoice.service';
 import { TiersService } from '../../core/services/tiers.service';
 import { BoutiqueService } from '../../core/services/boutique.service';
@@ -24,7 +24,8 @@ import { AuthService } from '../../core/services/auth.service';
 @Component({
   selector: 'app-invoices',
   templateUrl: './invoices.component.html',
-  styleUrls: ['./invoices.component.scss']
+  styleUrls: ['./invoices.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class InvoicesComponent implements OnInit {
 
@@ -78,6 +79,30 @@ export class InvoicesComponent implements OnInit {
   editItems: { description: string; quantity: number; unitPriceHt: number; taxRate: number }[] = [];
   showEditModal: boolean = false;
 
+  // Custom Confirm Modal
+  showConfirmModal: boolean = false;
+  confirmMessage: string = '';
+  private confirmCallback: (() => void) | null = null;
+
+  openConfirm(message: string, callback: () => void): void {
+    this.confirmMessage = message;
+    this.confirmCallback = callback;
+    this.showConfirmModal = true;
+  }
+
+  doConfirm(): void {
+    this.showConfirmModal = false;
+    if (this.confirmCallback) {
+      this.confirmCallback();
+      this.confirmCallback = null;
+    }
+  }
+
+  cancelConfirm(): void {
+    this.showConfirmModal = false;
+    this.confirmCallback = null;
+  }
+
   // Enums for Template
   InvoiceTypeEnum = InvoiceType;
   InvoiceStatusEnum = InvoiceStatus;
@@ -90,14 +115,18 @@ export class InvoicesComponent implements OnInit {
     private storeSaleService: StoreSaleService,
     private purchaseOrderService: PurchaseOrderService,
     private productService: ProductService,
-    public authService: AuthService
-  ) {}
+    public authService: AuthService,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   isEmployee(): boolean {
     const user = this.authService.currentUser();
     if (!user) return false;
-    const r = user.roleName || (user.role && typeof user.role === 'object' ? user.role.name : user.role) || '';
-    return r === 'ROLE_EMPLOYEE' || r === 'EMPLOYEE' || r === 'ROLE_CAISSIER' || r === 'CAISSIER' || !!user.boutiqueId;
+    const r = (user.roleName || (user.role && typeof user.role === 'object' ? (user.role as any).name : user.role) || '').toString().toUpperCase();
+    if (r.includes('ADMIN') || r.includes('SUPER_ADMIN') || r.includes('MANAGER')) {
+      return false;
+    }
+    return r.includes('EMPLOYEE') || r.includes('CAISSIER') || r.includes('CLIENT') || !!user.boutiqueId;
   }
 
   canCreateInvoice(): boolean {
@@ -190,18 +219,67 @@ export class InvoicesComponent implements OnInit {
 
   activeTab: 'ALL' | 'CESSION' | 'VENTE' | 'ACHAT' | 'PAYMENTS' = 'ALL';
 
+  // Pagination Invoices
+  invoicesCurrentPage: number = 1;
+  invoicesItemsPerPage: number = 5;
+
+  get paginatedInvoices(): Invoice[] {
+    const start = (this.invoicesCurrentPage - 1) * this.invoicesItemsPerPage;
+    return this.filteredInvoices.slice(start, start + this.invoicesItemsPerPage);
+  }
+
+  get invoicesTotalPages(): number {
+    return Math.ceil(this.filteredInvoices.length / this.invoicesItemsPerPage) || 1;
+  }
+
+  invoicesNextPage(): void {
+    if (this.invoicesCurrentPage < this.invoicesTotalPages) this.invoicesCurrentPage++;
+  }
+
+  invoicesPrevPage(): void {
+    if (this.invoicesCurrentPage > 1) this.invoicesCurrentPage--;
+  }
+
+  // Pagination Payments
+  paymentsCurrentPage: number = 1;
+  paymentsItemsPerPage: number = 5;
+
+  get paginatedPayments(): Payment[] {
+    const start = (this.paymentsCurrentPage - 1) * this.paymentsItemsPerPage;
+    return this.allPayments.slice(start, start + this.paymentsItemsPerPage);
+  }
+
+  get paymentsTotalPages(): number {
+    return Math.ceil(this.allPayments.length / this.paymentsItemsPerPage) || 1;
+  }
+
+  paymentsNextPage(): void {
+    if (this.paymentsCurrentPage < this.paymentsTotalPages) this.paymentsCurrentPage++;
+  }
+
+  paymentsPrevPage(): void {
+    if (this.paymentsCurrentPage > 1) this.paymentsCurrentPage--;
+  }
+
   setTab(tab: 'ALL' | 'CESSION' | 'VENTE' | 'ACHAT' | 'PAYMENTS'): void {
     this.activeTab = tab;
+    this.invoicesCurrentPage = 1;
+    this.paymentsCurrentPage = 1;
     this.applyFilter();
   }
 
   filterByStatus(status: string): void {
     this.selectedStatus = status;
+    this.invoicesCurrentPage = 1;
     this.applyFilter();
   }
 
   applyFilter(): void {
     if (this.activeTab === 'PAYMENTS') return;
+
+    // Si l'utilisateur est un employé et a une boutique assignée, filtrer par sa boutique
+    const user = this.authService.currentUser();
+    const employeeBoutiqueId = (this.isEmployee() && user?.boutiqueId) ? user.boutiqueId : null;
 
     this.filteredInvoices = this.invoices.filter(inv => {
       let matchType = false;
@@ -222,7 +300,12 @@ export class InvoicesComponent implements OnInit {
         (inv.tiersName && inv.tiersName.toLowerCase().includes(q)) ||
         (inv.boutiqueName && inv.boutiqueName.toLowerCase().includes(q));
 
-      return matchType && matchStatus && matchQuery;
+      // Filtre boutique pour les employés : ne voir que les factures de sa boutique
+      const matchBoutique = !employeeBoutiqueId ||
+        inv.boutiqueId === employeeBoutiqueId ||
+        String(inv.boutiqueId) === String(employeeBoutiqueId);
+
+      return matchType && matchStatus && matchQuery && matchBoutique;
     });
   }
 
@@ -347,36 +430,44 @@ export class InvoicesComponent implements OnInit {
   }
 
   validateInvoice(invoice: Invoice): void {
-    if (!confirm(`Confirmer la validation de la facture ${invoice.invoiceNumber} ?`)) return;
-
-    this.invoiceService.validateInvoice(invoice.id!).subscribe({
-      next: () => {
-        this.showSuccess('Facture validée.');
-        this.loadInvoices();
-      },
-      error: () => alert('Erreur lors de la validation.')
-    });
+    this.openConfirm(
+      `Confirmer la validation de la facture ${invoice.invoiceNumber} ?`,
+      () => {
+        this.invoiceService.validateInvoice(invoice.id!).subscribe({
+          next: () => {
+            this.showSuccess('Facture validée.');
+            this.loadInvoices();
+          },
+          error: () => alert('Erreur lors de la validation.')
+        });
+      }
+    );
   }
 
   cancelInvoice(invoice: Invoice): void {
-    if (!confirm(`Êtes-vous sûr de vouloir annuler la facture ${invoice.invoiceNumber} ?`)) return;
-
-    this.invoiceService.cancelInvoice(invoice.id!).subscribe({
-      next: () => {
-        this.showSuccess('Facture annulée.');
-        this.loadInvoices();
-      },
-      error: () => alert('Erreur lors de l\'annulation.')
-    });
+    this.openConfirm(
+      `Êtes-vous sûr de vouloir annuler la facture ${invoice.invoiceNumber} ?`,
+      () => {
+        this.invoiceService.cancelInvoice(invoice.id!).subscribe({
+          next: () => {
+            this.showSuccess('Facture annulée.');
+            this.loadInvoices();
+          },
+          error: () => alert('Erreur lors de l\'annulation.')
+        });
+      }
+    );
   }
 
   openPaymentModal(invoice: Invoice): void {
+    console.log('InvoicesComponent: openPaymentModal', invoice?.id, invoice?.invoiceNumber);
     this.selectedInvoice = invoice;
     this.paymentAmount = invoice.remainingAmount || 0;
     this.paymentMethod = PaymentMethod.ESPECES;
     this.paymentReference = '';
     this.paymentNote = '';
     this.showPaymentModal = true;
+    this.cdr.detectChanges();
   }
 
   closePaymentModal(): void {
@@ -420,21 +511,25 @@ export class InvoicesComponent implements OnInit {
 
   confirmDelivery(invoice: Invoice): void {
     if (!invoice.id) return;
-    if (!confirm(`Confirmer que la livraison de la facture N° ${invoice.invoiceNumber} a bien été effectuée ?`)) return;
-
-    this.invoiceService.confirmDelivery(invoice.id).subscribe({
-      next: (updated) => {
-        this.showSuccess(`Livraison confirmée pour la facture N° ${updated.invoiceNumber}.`);
-        if (this.selectedInvoice && this.selectedInvoice.id === updated.id) {
-          this.selectedInvoice = updated;
-        }
-        this.loadInvoices();
-      },
-      error: () => alert('Erreur lors de la confirmation de livraison.')
-    });
+    this.openConfirm(
+      `Confirmer que la livraison de la facture N° ${invoice.invoiceNumber} a bien été effectuée ?`,
+      () => {
+        this.invoiceService.confirmDelivery(invoice.id!).subscribe({
+          next: (updated) => {
+            this.showSuccess(`Livraison confirmée pour la facture N° ${updated.invoiceNumber}.`);
+            if (this.selectedInvoice && this.selectedInvoice.id === updated.id) {
+              this.selectedInvoice = updated;
+            }
+            this.loadInvoices();
+          },
+          error: () => alert('Erreur lors de la confirmation de livraison.')
+        });
+      }
+    );
   }
 
   openEditModal(invoice: Invoice): void {
+    console.log('InvoicesComponent: openEditModal', invoice?.id, invoice?.invoiceNumber);
     this.selectedInvoice = invoice;
     this.editInvoiceId = invoice.id || null;
     this.editInvoiceDate = invoice.invoiceDate ? invoice.invoiceDate.substring(0, 10) : '';
@@ -447,6 +542,7 @@ export class InvoicesComponent implements OnInit {
       ? invoice.items.map(i => ({ description: i.description, quantity: i.quantity, unitPriceHt: i.unitPriceHt, taxRate: i.taxRate || 0 }))
       : [{ description: '', quantity: 1, unitPriceHt: 0, taxRate: 0 }];
     this.showEditModal = true;
+    this.cdr.detectChanges();
   }
 
   closeEditModal(): void {
@@ -505,8 +601,10 @@ export class InvoicesComponent implements OnInit {
   }
 
   openDetailModal(invoice: Invoice): void {
+    console.log('InvoicesComponent: openDetailModal', invoice?.id, invoice?.invoiceNumber);
     this.selectedInvoice = invoice;
     this.showDetailModal = true;
+    this.cdr.detectChanges();
   }
 
   closeDetailModal(): void {
@@ -515,6 +613,7 @@ export class InvoicesComponent implements OnInit {
   }
 
   openBlModal(invoice: Invoice): void {
+    console.log('InvoicesComponent: openBlModal', invoice?.id, invoice?.invoiceNumber);
     this.selectedInvoice = invoice;
     this.blDeliveryDate = invoice.deliveryDate ? new Date(invoice.deliveryDate).toISOString().substring(0, 10) : new Date().toISOString().substring(0, 10);
     this.blVehicleRegistration = invoice.vehicleRegistration || '';
@@ -531,6 +630,7 @@ export class InvoicesComponent implements OnInit {
       this.showBlFormStep = true;  // 1ère fois : Formulaire de saisie
     }
     this.showBlModal = true;
+    this.cdr.detectChanges();
   }
 
   closeBlModal(): void {
@@ -543,7 +643,7 @@ export class InvoicesComponent implements OnInit {
     if (input.files && input.files[0]) {
       const file = input.files[0];
       this.blAttachmentFileName = file.name;
-      
+
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.blAttachmentUrl = e.target.result;
@@ -595,7 +695,8 @@ export class InvoicesComponent implements OnInit {
     if (invoice) {
       this.selectedInvoice = invoice;
       this.showDetailModal = true;
-      setTimeout(() => window.print(), 350);
+      this.cdr.detectChanges();
+      setTimeout(() => window.print(), 600);
     } else {
       window.print();
     }

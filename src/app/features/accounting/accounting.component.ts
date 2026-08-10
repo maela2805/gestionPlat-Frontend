@@ -1,4 +1,6 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { AccountingService } from '../../core/services/accounting.service';
 import { TiersService } from '../../core/services/tiers.service';
 import { BoutiqueService } from '../../core/services/boutique.service';
@@ -38,15 +40,79 @@ export class AccountingComponent implements OnInit, AfterViewInit {
   tiersList: Tiers[] = [];
   boutiquesList: Boutique[] = [];
   walletSummary: BoutiqueWallet | null = null;
+  allBoutiquesWallets: BoutiqueWallet[] = [];
+  isLoadingWallets: boolean = false;
   transfersList: FundTransfer[] = [];
   filteredTransfers: FundTransfer[] = [];
   unpaidInvoices: Invoice[] = [];
+
+  get totalCessionAllBoutiques(): number {
+    return this.allBoutiquesWallets.reduce((sum, w) => sum + (w.totalCessionInvoicesAmount || 0), 0);
+  }
+
+  get totalPaidAllBoutiques(): number {
+    return this.allBoutiquesWallets.reduce((sum, w) => sum + (w.totalPaidAmount || 0), 0);
+  }
+
+  get totalDueAllBoutiques(): number {
+    return this.allBoutiquesWallets.reduce((sum, w) => sum + (w.balanceDue || 0), 0);
+  }
+
+  get totalCashAllBoutiques(): number {
+    return this.allBoutiquesWallets.reduce((sum, w) => sum + (w.availableCashBalance || 0), 0);
+  }
+
+  get totalPendingTransfersAllBoutiques(): number {
+    return this.allBoutiquesWallets.reduce((sum, w) => sum + (w.pendingTransfersAmount || 0), 0);
+  }
 
   loading: boolean = false;
   error: string | null = null;
   successMsg: string | null = null;
 
-  activeTab: 'journal' | 'transfers' = 'journal';
+  activeTab: 'debts' | 'journal' | 'transfers' = 'debts';
+
+  // Pagination Journal
+  journalCurrentPage: number = 1;
+  journalItemsPerPage: number = 5;
+
+  get paginatedEntries(): AccountingEntry[] {
+    const start = (this.journalCurrentPage - 1) * this.journalItemsPerPage;
+    return this.filteredEntries.slice(start, start + this.journalItemsPerPage);
+  }
+
+  get journalTotalPages(): number {
+    return Math.ceil(this.filteredEntries.length / this.journalItemsPerPage) || 1;
+  }
+
+  journalNextPage(): void {
+    if (this.journalCurrentPage < this.journalTotalPages) this.journalCurrentPage++;
+  }
+
+  journalPrevPage(): void {
+    if (this.journalCurrentPage > 1) this.journalCurrentPage--;
+  }
+
+  // Pagination Versements
+  transfersCurrentPage: number = 1;
+  transfersItemsPerPage: number = 5;
+
+  get paginatedTransfers(): FundTransfer[] {
+    const start = (this.transfersCurrentPage - 1) * this.transfersItemsPerPage;
+    return this.filteredTransfers.slice(start, start + this.transfersItemsPerPage);
+  }
+
+  get transfersTotalPages(): number {
+    return Math.ceil(this.filteredTransfers.length / this.transfersItemsPerPage) || 1;
+  }
+
+  transfersNextPage(): void {
+    if (this.transfersCurrentPage < this.transfersTotalPages) this.transfersCurrentPage++;
+  }
+
+  transfersPrevPage(): void {
+    if (this.transfersCurrentPage > 1) this.transfersCurrentPage--;
+  }
 
   selectedBoutiqueId: number | null = null;
   selectedType: string = '';
@@ -106,10 +172,22 @@ export class AccountingComponent implements OnInit, AfterViewInit {
     private fundTransferService: FundTransferService,
     private invoiceService: InvoiceService,
     public authService: AuthService,
-    private uploadService: UploadService
+    private uploadService: UploadService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['tab']) {
+        if (params['tab'] === 'transfers') {
+          this.activeTab = 'transfers';
+        } else if (params['tab'] === 'journal') {
+          this.activeTab = 'journal';
+        } else if (params['tab'] === 'debts') {
+          this.activeTab = 'debts';
+        }
+      }
+    });
     this.loadBoutiques();
     this.loadData();
     this.tiersService.getAllTiers().subscribe(tiers => this.tiersList = tiers);
@@ -146,9 +224,38 @@ export class AccountingComponent implements OnInit, AfterViewInit {
           }
         }
         this.loadWalletAndTransfers();
+        this.loadAllBoutiquesWallets();
       },
       error: (err) => console.error(err)
     });
+  }
+
+  loadAllBoutiquesWallets(): void {
+    if (!this.boutiquesList || this.boutiquesList.length === 0) return;
+    this.isLoadingWallets = true;
+    const requests = this.boutiquesList.map(b => this.fundTransferService.getBoutiqueWallet(b.id));
+    forkJoin(requests).subscribe({
+      next: (wallets) => {
+        this.allBoutiquesWallets = wallets;
+        this.isLoadingWallets = false;
+      },
+      error: (err) => {
+        console.error('Erreur chargement portefeuilles boutiques:', err);
+        this.isLoadingWallets = false;
+      }
+    });
+  }
+
+  selectBoutique(bId: number): void {
+    this.selectedBoutiqueId = bId;
+    this.onBoutiqueChange();
+  }
+
+  openTransferModalForBoutique(bId: number, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.selectedBoutiqueId = bId;
+    this.onBoutiqueChange();
+    this.openTransferModal();
   }
 
   loadData(): void {
@@ -190,6 +297,7 @@ export class AccountingComponent implements OnInit, AfterViewInit {
       next: (transfers) => {
         this.transfersList = transfers;
         this.applyTransferFilter();
+        this.loadAllBoutiquesWallets();
       },
       error: (err) => console.error(err)
     });
@@ -200,6 +308,7 @@ export class AccountingComponent implements OnInit, AfterViewInit {
   }
 
   applyFilter(): void {
+    this.journalCurrentPage = 1;
     this.filteredEntries = this.entries.filter(e => {
       const matchType = !this.selectedType || e.type === this.selectedType;
       const matchCat = !this.selectedCategory || e.category === this.selectedCategory;
@@ -214,6 +323,7 @@ export class AccountingComponent implements OnInit, AfterViewInit {
   }
 
   applyTransferFilter(): void {
+    this.transfersCurrentPage = 1;
     this.filteredTransfers = this.transfersList.filter(t => {
       const matchStatus = !this.selectedTransferStatus || t.status === this.selectedTransferStatus;
       const q = this.searchQuery.toLowerCase().trim();

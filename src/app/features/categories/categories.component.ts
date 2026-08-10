@@ -44,6 +44,26 @@ export class CategoriesComponent implements OnInit {
     return list;
   });
 
+  // --- Pagination ---
+  currentPage = signal<number>(1);
+  itemsPerPage = signal<number>(5);
+
+  paginatedCategories = computed(() => {
+    const list = this.filteredCategories();
+    const start = (this.currentPage() - 1) * this.itemsPerPage();
+    return list.slice(start, start + this.itemsPerPage());
+  });
+
+  totalPages = computed(() => Math.ceil(this.filteredCategories().length / this.itemsPerPage()) || 1);
+
+  nextPage(): void {
+    if (this.currentPage() < this.totalPages()) this.currentPage.update(p => p + 1);
+  }
+
+  prevPage(): void {
+    if (this.currentPage() > 1) this.currentPage.update(p => p - 1);
+  }
+
   constructor(
     private categoryService: CategoryService,
     public authService: AuthService,

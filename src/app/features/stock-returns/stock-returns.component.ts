@@ -52,7 +52,7 @@ export class StockReturnsComponent implements OnInit {
 
   // Pagination
   currentPage = signal<number>(1);
-  itemsPerPage = signal<number>(8);
+  itemsPerPage = signal<number>(5);
 
   // Modals
   showCreateModal = signal<boolean>(false);
@@ -157,6 +157,14 @@ export class StockReturnsComponent implements OnInit {
   pendingCount = computed(() => this.returnsList().filter(r => r.status === 'PENDING').length);
   approvedCount = computed(() => this.returnsList().filter(r => r.status === 'APPROVED').length);
   rejectedCount = computed(() => this.returnsList().filter(r => r.status === 'REJECTED').length);
+
+  nextPage(): void {
+    if (this.currentPage() < this.totalPages()) this.currentPage.update(p => p + 1);
+  }
+
+  prevPage(): void {
+    if (this.currentPage() > 1) this.currentPage.update(p => p - 1);
+  }
 
   totalPages = computed(() => Math.ceil(this.filteredReturns().length / this.itemsPerPage()) || 1);
 
